@@ -4,13 +4,15 @@ declare(strict_types=1);
 
 namespace Asika\UnitConverter;
 
+use Asika\UnitConverter\Concerns\DurationCalendlyTrait;
 use Brick\Math\BigDecimal;
+use Brick\Math\BigInteger;
+use Brick\Math\BigNumber;
 use Brick\Math\Exception\DivisionByZeroException;
 use Brick\Math\Exception\MathException;
 use Brick\Math\Exception\NumberFormatException;
 use Brick\Math\Exception\RoundingNecessaryException;
 use Brick\Math\RoundingMode;
-use Windwalker\Utilities\Arr;
 
 /**
  * The Duration class.
@@ -29,6 +31,8 @@ use Windwalker\Utilities\Arr;
 // phpcs:disable
 class Duration extends AbstractUnitConverter
 {
+    use DurationCalendlyTrait;
+
     public const string UNIT_NANOSECONDS = 'nanoseconds';
 
     public const string UNIT_MICROSECONDS = 'microseconds';
@@ -53,20 +57,30 @@ class Duration extends AbstractUnitConverter
 
     public string $defaultUnit = self::UNIT_SECONDS;
 
-    protected array $unitExchanges = [
-        self::UNIT_NANOSECONDS => 1e-9,
-        self::UNIT_MICROSECONDS => 1e-6,
-        self::UNIT_MILLISECONDS => 1e-3,
-        self::UNIT_SECONDS => 1.0,
-        self::UNIT_MINUTES => 60.0,
-        self::UNIT_HOURS => 3600.0,
-        self::UNIT_DAYS => 86400.0,
-        self::UNIT_WEEKS => 604800.0,
-        self::UNIT_MONTHS => 2629800.0, // Average month in seconds
-        self::UNIT_YEARS => 31557600.0, // Average year in seconds
-    ];
+    protected array $unitExchanges {
+        get => [
+            self::UNIT_NANOSECONDS => 1e-9,
+            self::UNIT_MICROSECONDS => 1e-6,
+            self::UNIT_MILLISECONDS => 1e-3,
+            self::UNIT_SECONDS => 1.0,
+            self::UNIT_MINUTES => 60.0,
+            self::UNIT_HOURS => 3600.0,
+            self::UNIT_DAYS => 86400.0,
+            self::UNIT_WEEKS => 604800.0,
+            self::UNIT_MONTHS => $this->monthSeconds->toFloat(),
+            self::UNIT_YEARS => $this->yearSeconds->toFloat(),
+        ];
+    }
 
-    public ?\Closure $unitNormalizer = null;
+    public protected(set) BigNumber $yearSeconds {
+        set(mixed $value) => $this->yearSeconds = BigNumber::of($value);
+        get => $this->yearSeconds ??= BigNumber::of(self::YEAR_SECONDS_COMMON);
+    }
+
+    public protected(set) BigNumber $monthSeconds {
+        set(mixed $value) => $this->monthSeconds = BigNumber::of($value);
+        get => $this->monthSeconds ??= BigNumber::of(self::MONTH_SECONDS_COMMON);
+    }
 
     // phpcs:enable
 
@@ -99,12 +113,7 @@ class Duration extends AbstractUnitConverter
     ): static {
         $interval = \DateInterval::createFromDateString($value);
 
-        $microseconds = BigDecimal::of($interval->s)
-            ->plus($interval->i * 60)
-            ->plus($interval->h * 3600)
-            ->plus($interval->d * 86400)
-            ->multipliedBy(1e6)
-            ->plus((int) $interval->format('%f'));
+        $microseconds = $this->intervalToMicroseconds($interval);
 
         $instance = $this->with($microseconds, static::UNIT_MICROSECONDS);
 
@@ -116,6 +125,32 @@ class Duration extends AbstractUnitConverter
         }
 
         return $instance;
+    }
+
+    public function intervalToSeconds(\DateInterval $interval): BigDecimal
+    {
+        return ConvertHelper::dateIntervalToSeconds($interval, $this->yearSeconds, $this->monthSeconds);
+    }
+
+    public function intervalToMicroseconds(\DateInterval $interval): BigDecimal
+    {
+        return ConvertHelper::dateIntervalToMicroseconds($interval, $this->yearSeconds, $this->monthSeconds);
+    }
+
+    public function withYearSeconds(BigNumber|string|int|float $yearSeconds): Duration
+    {
+        $new = clone $this;
+        $new->yearSeconds = $yearSeconds;
+
+        return $new;
+    }
+
+    public function withMonthSeconds(BigNumber|string|int|float $monthSeconds): Duration
+    {
+        $new = clone $this;
+        $new->monthSeconds = $monthSeconds;
+
+        return $this;
     }
 
     protected function normalizeBaseUnit(string $unit): string

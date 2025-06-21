@@ -17,9 +17,10 @@ use Brick\Math\RoundingMode;
  *
  * @formatter:on
  */
-abstract class AbstractUnitConverter
+abstract class AbstractUnitConverter implements \Stringable
 {
     public const int KEEP_ZERO = 1 << 0;
+
     public const int WITHOUT_FALLBACK = 1 << 1;
 
     public BigNumber $value {
@@ -40,7 +41,7 @@ abstract class AbstractUnitConverter
         get;
     }
 
-    public ?\Closure $unitNormalizer = null;
+    protected ?\Closure $unitNormalizer = null;
 
     public static function from(mixed $value, ?string $baseUnit = null): static
     {
@@ -275,66 +276,72 @@ abstract class AbstractUnitConverter
     }
 
     /**
-     * @param  HumanizeCallback|array|int|null  $units
-     * @param  string                           $divider
-     * @param  FormatterCallback|string|null    $formatter
+     * @param  \Closure|string|array|null  $formats
+     * @param  string                      $divider
+     * @param  int                         $options
      *
      * @return  string
-     *
-     * @throws RoundingNecessaryException
      */
     public function humanize(
-        \Closure|array|int|null $options = null,
+        \Closure|string|array|null $formats = null,
         string $divider = ' ',
-        \Closure|string|null $formatter = null
+        int $options = 0,
     ): string {
+        return $this->humanizeCallback(
+            function (self $remainder, array $sortedUnits) use ($options, $formats, $divider) {
+                $formatter = null;
+                $units = null;
+
+                if ($formats instanceof \Closure || is_string($formats)) {
+                    $formatter = $formats;
+                } elseif (is_array($formats)) {
+                    $units = $formats;
+                }
+
+                if ($units === null) {
+                    $units = $sortedUnits;
+
+                    $units = array_keys($units);
+                }
+
+                $unitFormatters = [];
+
+                foreach ($units as $i => $unit) {
+                    if (is_numeric($i)) {
+                        $unitFormatters[$unit] = $formatter ?? $unit;
+                    } else {
+                        $unitFormatters[$i] = $formatter ?? $unit;
+                    }
+                }
+
+                $text = [];
+
+                foreach ($unitFormatters as $unit => $suffixFormat) {
+                    $part = $remainder->extract($unit);
+
+                    if (($options & static::KEEP_ZERO) || !$part->isZero()) {
+                        $text[] = $part->format($suffixFormat, $unit);
+                    }
+                }
+
+                $formatted = trim(implode($divider, array_filter($text)));
+
+                if (!$formatted && !($options & static::WITHOUT_FALLBACK)) {
+                    $minSuffix = $unitFormatters[$this->baseUnit];
+                    $formatted = $this->with(0, $this->baseUnit)->format($minSuffix);
+                }
+
+                return $formatted;
+            }
+        );
+    }
+
+    public function humanizeCallback(\Closure $callback): string
+    {
         $atomUnit = $this->atomUnit;
         $remainder = $this->convertTo($atomUnit);
 
-        if ($options instanceof \Closure) {
-            return (string) $options($remainder, $this->getSortedUnits());
-        }
-
-        $units = null;
-
-        if (!is_int($options)) {
-            $units = $options;
-        }
-
-        if ($units === null) {
-            $units = $this->getSortedUnits();
-
-            $units = array_keys($units);
-        }
-
-        $unitFormatters = [];
-
-        foreach ($units as $i => $unit) {
-            if (is_numeric($i)) {
-                $unitFormatters[$unit] = $formatter ?? $unit;
-            } else {
-                $unitFormatters[$i] = $formatter ?? $unit;
-            }
-        }
-
-        $text = [];
-
-        foreach ($unitFormatters as $unit => $suffixFormat) {
-            $part = $remainder->extract($unit);
-
-            if (($options & static::KEEP_ZERO) || !$part->isZero()) {
-                $text[] = $part->format($suffixFormat, $unit);
-            }
-        }
-
-        $formatted = trim(implode($divider, array_filter($text)));
-
-        if (!$formatted && !($options & static::WITHOUT_FALLBACK)) {
-            $minSuffix = $unitFormatters[$this->baseUnit];
-            $formatted = $this->with(0, $this->baseUnit)->format($minSuffix);
-        }
-
-        return $formatted;
+        return (string) $callback($remainder, $this->getSortedUnits());
     }
 
     public function withAddedUnitExchangeRate(
@@ -454,5 +461,18 @@ abstract class AbstractUnitConverter
         );
 
         return $units;
+    }
+
+    public function withUnitNormalizer(?\Closure $unitNormalizer): static
+    {
+        $new = clone $this;
+        $new->unitNormalizer = $unitNormalizer;
+
+        return $new;
+    }
+
+    public function __toString(): string
+    {
+        return (string) $this->value->toBigDecimal()->stripTrailingZeros();
     }
 }
