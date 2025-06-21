@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Asika\UnitConverter\Tests;
 
 use Asika\UnitConverter\Duration;
+use Asika\UnitConverter\FileSize;
 use Brick\Math\BigDecimal;
 use Brick\Math\RoundingMode;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -286,6 +287,21 @@ class AbstractUnitConverterTest extends TestCase
         assertEquals(
             '127750',
             (string) $d->to(Duration::UNIT_DAYS)
+        );
+    }
+
+    #[Test]
+    // nearest
+    public function nearest()
+    {
+        $f = FileSize::from('8500KB');
+        $f = $f->nearest();
+
+        show($f);
+
+        assertEquals(
+            '8.3MB',
+            $f->format()
         );
     }
 }

@@ -11,13 +11,11 @@ use PHPUnit\Framework\TestCase;
 
 class DurationTest extends TestCase
 {
-    protected Duration $instance;
-
     #[DataProvider('secondsToOthersProvider')]
     #[DataProvider('hoursToOthersProvider')]
     #[DataProvider('calendarsProvider')]
     public function testConstructAndConvert(
-        AbstractUnitConverter|\Closure $converter,
+        Duration|\Closure $converter,
         array|\Closure $formatArgs,
         array|\Closure $humanizeArgs,
         string $formatted,
@@ -176,13 +174,22 @@ class DurationTest extends TestCase
                 '31558432.55seconds',
                 '1years',
             ],
-            'Anomalistic' => [
+            'Anomalistic 1month' => [
+                fn() => new Duration()
+                    ->withAnomalisticCalendar()
+                    ->withParse('1month'),
+                [],
+                [],
+                '2380713.12seconds',
+                '1months',
+            ],
+            'Anomalistic more' => [
                 fn() => new Duration()
                     ->withAnomalisticCalendar()
                     ->withParse('1year 1.5month'),
                 [],
                 [],
-                '35129502.23seconds',
+                (Duration::YEAR_SECONDS_ANOMALISTIC + (1.5 * Duration::MONTH_SECONDS_ANOMALISTIC)) . 'seconds',
                 '1years 1months 1weeks 6days 18hours 39minutes 16seconds 560milliseconds',
             ],
             'Gregorian' => [
@@ -195,10 +202,5 @@ class DurationTest extends TestCase
                 '1years 1months 2weeks 1days 5hours 14minutes 33seconds',
             ],
         ];
-    }
-
-    protected function setUp(): void
-    {
-        $this->instance = new Duration();
     }
 }

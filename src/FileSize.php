@@ -7,16 +7,15 @@ namespace Asika\UnitConverter;
 class FileSize extends AbstractUnitConverter
 {
     public const string UNIT_BITS = 'bits';
-    public const string UNIT_BYTES = 'bytes';
-    public const string UNIT_KILOBYTES = 'kilobytes';
-    public const string UNIT_KIBIBYTES = 'kibibytes';
-    public const string UNIT_MEGABYTES = 'megabytes';
-    public const string UNIT_GIGABYTES = 'gigabytes';
-    public const string UNIT_TERABYTES = 'terabytes';
-    public const string UNIT_PETABYTES = 'petabytes';
-    public const string UNIT_EXABYTES = 'exabytes';
-    public const string UNIT_ZETTABYTES = 'zettabytes';
-    public const string UNIT_YOTTABYTES = 'yottabytes';
+    public const string UNIT_BYTES = 'Bytes';
+    public const string UNIT_KILOBYTES = 'KB';
+    public const string UNIT_MEGABYTES = 'MB';
+    public const string UNIT_GIGABYTES = 'GB';
+    public const string UNIT_TERABYTES = 'TB';
+    public const string UNIT_PETABYTES = 'PB';
+    public const string UNIT_EXABYTES = 'EB';
+    public const string UNIT_ZETTABYTES = 'ZB';
+    public const string UNIT_YOTTABYTES = 'YB';
 
     // phpcs:disable
     public string $atomUnit = self::UNIT_BITS;
@@ -27,7 +26,6 @@ class FileSize extends AbstractUnitConverter
         self::UNIT_BITS => 1,
         self::UNIT_BYTES => 8,
         self::UNIT_KILOBYTES => 8_192.0,
-        self::UNIT_KIBIBYTES => 8_192.0,
         self::UNIT_MEGABYTES => 8_388_608.0,
         self::UNIT_GIGABYTES => 8_589_934_592.0,
         self::UNIT_TERABYTES => 8_796_093_022_208.0,
@@ -40,17 +38,23 @@ class FileSize extends AbstractUnitConverter
 
     protected function normalizeBaseUnit(string $unit): string
     {
+        $unit = match ($unit) {
+            'b' => self::UNIT_BITS,
+            'B' => self::UNIT_BYTES,
+            default => $unit,
+        };
+
         return match (strtolower($unit)) {
-            'b', 'bit' => self::UNIT_BITS,
-            'B', 'byte' => self::UNIT_BYTES,
-            'kb', 'kilobyte' => self::UNIT_KILOBYTES,
-            'mb', 'megabyte' => self::UNIT_MEGABYTES,
-            'gb', 'gigabyte' => self::UNIT_GIGABYTES,
-            'tb', 'terabyte' => self::UNIT_TERABYTES,
-            'pb', 'petabyte' => self::UNIT_PETABYTES,
-            'eb', 'exabyte' => self::UNIT_EXABYTES,
-            'zb', 'zettabyte' => self::UNIT_ZETTABYTES,
-            'yb', 'yottabyte' => self::UNIT_YOTTABYTES,
+            'bit', 'bits' => self::UNIT_BITS,
+            'byte', 'bytes' => self::UNIT_BYTES,
+            'kb', 'kilobyte', 'kilobytes' => self::UNIT_KILOBYTES,
+            'mb', 'megabyte', 'megabytes' => self::UNIT_MEGABYTES,
+            'gb', 'gigabyte', 'gigabytes' => self::UNIT_GIGABYTES,
+            'tb', 'terabyte', 'terabytes' => self::UNIT_TERABYTES,
+            'pb', 'petabyte', 'petabytes' => self::UNIT_PETABYTES,
+            'eb', 'exabyte', 'exabytes' => self::UNIT_EXABYTES,
+            'zb', 'zettabyte', 'zettabytes' => self::UNIT_ZETTABYTES,
+            'yb', 'yottabyte', 'yottabytes' => self::UNIT_YOTTABYTES,
             default => $unit,
         };
     }

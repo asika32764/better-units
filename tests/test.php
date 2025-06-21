@@ -6,14 +6,10 @@ use Asika\UnitConverter\Duration;
 
 include __DIR__ . '/../vendor/autoload.php';
 
-show(
-    Duration::intervalToMicroseconds(
-        DateInterval::createFromDateString('1years 10months 1weeks 6days 39minutes 14seconds 400milliseconds')
-    )
-);
-
-$d = new Duration(16384, Duration::UNIT_HOURS)
-    ->convertTo(Duration::UNIT_YEARS, 3)
-    ->convertTo(Duration::UNIT_SECONDS);
-show((string) $d->value);
+echo new Duration()
+    ->withAnomalisticCalendar()
+    ->withParse('1years 1months 1weeks 6days 18hours 39minutes 16seconds')
+    ->convertTo(Duration::UNIT_SECONDS)
+    ->withExtract(Duration::UNIT_YEARS)[1]
+    ->format(unit: Duration::UNIT_MONTHS, scale: 9);
 

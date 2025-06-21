@@ -258,9 +258,9 @@ abstract class AbstractUnitConverter implements \Stringable
      */
     public function withExtract(string $unit): array
     {
-        $new = clone $this;
+        $remainder = clone $this;
 
-        return [$new->extract($unit), $new];
+        return [$remainder->extract($unit), $remainder];
     }
 
     private function extract(string $unit): static
@@ -401,26 +401,48 @@ abstract class AbstractUnitConverter implements \Stringable
         return $new;
     }
 
+    public function nearest(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN): static
+    {
+        $value = $this->value->toBigDecimal();
+        $units = $this->getSortedUnits();
+
+        $bestUnit = $this->baseUnit;
+        $bestValue = $value;
+        $minDiff = null;
+
+        // 8500 / 1024
+
+        foreach ($units as $unit => $rate) {
+            $converted = $this->to($unit, $scale, $roundingMode);
+
+            if ($converted->isZero()) {
+                continue;
+            }
+
+            $abs = $converted->abs();
+
+            $diff = abs($abs->toFloat() - 1);
+
+            if ($minDiff === null || $diff < $minDiff) {
+                $minDiff = $diff;
+                $bestUnit = $unit;
+                $bestValue = $converted;
+            }
+        }
+
+        $new = clone $this;
+        $new->value = $bestValue;
+        $new->baseUnit = $bestUnit;
+
+        return $new;
+    }
+
     public function to(string $unit, ?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN): BigDecimal
     {
         return $this->convertTo($unit, $scale, $roundingMode)
             ->value
             ->toBigDecimal()
             ->stripTrailingZeros();
-    }
-
-    public function __call(string $name, array $args)
-    {
-        if (str_starts_with($name, 'to')) {
-            $unit = strtolower(substr($name, 2));
-            $unit = str_replace('_', '', $unit);
-
-            if (array_key_exists($unit, $this->unitExchanges)) {
-                return $this->to($unit, ...$args);
-            }
-        }
-
-        throw new \BadMethodCallException("Method {$name} does not exist.");
     }
 
     /**
@@ -481,5 +503,19 @@ abstract class AbstractUnitConverter implements \Stringable
     public function __toString(): string
     {
         return (string) $this->value->toBigDecimal()->stripTrailingZeros();
+    }
+
+    public function __call(string $name, array $args)
+    {
+        if (str_starts_with($name, 'to')) {
+            $unit = strtolower(substr($name, 2));
+            $unit = str_replace('_', '', $unit);
+
+            if (array_key_exists($unit, $this->unitExchanges)) {
+                return $this->to($unit, ...$args);
+            }
+        }
+
+        throw new \BadMethodCallException("Method {$name} does not exist.");
     }
 }
