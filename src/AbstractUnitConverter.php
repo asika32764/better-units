@@ -410,8 +410,6 @@ abstract class AbstractUnitConverter implements \Stringable
         $bestValue = $value;
         $minDiff = null;
 
-        // 8500 / 1024
-
         foreach ($units as $unit => $rate) {
             $converted = $this->to($unit, $scale, $roundingMode);
 
@@ -421,9 +419,17 @@ abstract class AbstractUnitConverter implements \Stringable
 
             $abs = $converted->abs();
 
-            $diff = abs($abs->toFloat() - 1);
+            if ($abs->isLessThan(0)) {
+                $distance = BigDecimal::of(1)->dividedBy($abs, $scale, RoundingMode::HALF_UP);
+            } else {
+                $distance = BigDecimal::of(1)->dividedBy($abs, $scale, RoundingMode::HALF_UP);
+            }
 
-            if ($minDiff === null || $diff < $minDiff) {
+            $abs = $converted->abs();
+
+            $diff = $abs->minus(1)->abs();
+
+            if ($minDiff === null || $diff->isLessThan($minDiff)) {
                 $minDiff = $diff;
                 $bestUnit = $unit;
                 $bestValue = $converted;
