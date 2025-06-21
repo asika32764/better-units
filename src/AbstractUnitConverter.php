@@ -19,9 +19,9 @@ use Brick\Math\RoundingMode;
  */
 abstract class AbstractUnitConverter implements \Stringable
 {
-    public const int KEEP_ZERO = 1 << 0;
+    public const int OPTION_KEEP_ZERO = 1 << 0;
 
-    public const int WITHOUT_FALLBACK = 1 << 1;
+    public const int OPTION_NO_FALLBACK = 1 << 1;
 
     public BigNumber $value {
         set(mixed $value) => $this->value = BigDecimal::of($value);
@@ -43,21 +43,21 @@ abstract class AbstractUnitConverter implements \Stringable
 
     protected ?\Closure $unitNormalizer = null;
 
-    public static function from(mixed $value, ?string $baseUnit = null): static
+    public static function from(mixed $value, ?string $asUnit = null): static
     {
         if (is_string($value) && !is_numeric($value)) {
-            return static::parse($value, $baseUnit);
+            return static::parse($value, $asUnit);
         }
 
-        return new static($value, $baseUnit);
+        return new static($value, $asUnit);
     }
 
-    public static function parse(mixed $value, ?string $asUnit = null): static
+    public static function parse(string $value, ?string $asUnit = null): static
     {
         return new static()->withParse($value, $asUnit);
     }
 
-    public static function parseToValue(mixed $value, ?string $asUnit = null): BigDecimal
+    public static function parseToValue(string $value, ?string $asUnit = null): BigDecimal
     {
         return static::parse($value, $asUnit)->value->toBigDecimal();
     }
@@ -319,14 +319,14 @@ abstract class AbstractUnitConverter implements \Stringable
                 foreach ($unitFormatters as $unit => $suffixFormat) {
                     $part = $remainder->extract($unit);
 
-                    if (($options & static::KEEP_ZERO) || !$part->isZero()) {
+                    if (($options & static::OPTION_KEEP_ZERO) || !$part->isZero()) {
                         $text[] = $part->format($suffixFormat, $unit);
                     }
                 }
 
                 $formatted = trim(implode($divider, array_filter($text)));
 
-                if (!$formatted && !($options & static::WITHOUT_FALLBACK)) {
+                if (!$formatted && !($options & static::OPTION_NO_FALLBACK)) {
                     $minSuffix = $unitFormatters[$this->baseUnit];
                     $formatted = $this->with(0, $this->baseUnit)->format($minSuffix);
                 }
@@ -357,7 +357,11 @@ abstract class AbstractUnitConverter implements \Stringable
                 ...$new->unitExchanges,
             ];
         } else {
-            $new->unitExchanges[$unit] = $rate;
+            // If property has get() hook, this way can avoid the indirect modification error.
+            $new->unitExchanges = [
+                ...$new->unitExchanges,
+                $unit => $rate,
+            ];
         }
 
         return $new;
@@ -397,9 +401,12 @@ abstract class AbstractUnitConverter implements \Stringable
         return $new;
     }
 
-    public function to(string $unit, ?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN): BigNumber
+    public function to(string $unit, ?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN): BigDecimal
     {
-        return $this->convertTo($unit, $scale, $roundingMode)->value;
+        return $this->convertTo($unit, $scale, $roundingMode)
+            ->value
+            ->toBigDecimal()
+            ->stripTrailingZeros();
     }
 
     public function __call(string $name, array $args)

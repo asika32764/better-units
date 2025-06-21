@@ -167,6 +167,15 @@ class DurationTest extends TestCase
                 '35480160seconds',
                 '1years 1months 2weeks 1days 5hours 12minutes',
             ],
+            'Anomalistic 1year' => [
+                fn() => new Duration()
+                    ->withAnomalisticCalendar()
+                    ->withParse('1year'),
+                [],
+                [],
+                '31558432.55seconds',
+                '1years',
+            ],
             'Anomalistic' => [
                 fn() => new Duration()
                     ->withAnomalisticCalendar()

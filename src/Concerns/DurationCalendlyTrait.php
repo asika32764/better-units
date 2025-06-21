@@ -113,64 +113,50 @@ trait DurationCalendlyTrait
 
     public function withCommonCalendar(): static
     {
-        $new = clone $this;
-        $new->yearSeconds = static::YEAR_SECONDS_COMMON;
-        $new->monthSeconds = static::MONTH_SECONDS_COMMON;
-    
-        return $new;
+        return $this
+            ->withYearSeconds(static::YEAR_SECONDS_COMMON)
+            ->withMonthSeconds(static::MONTH_SECONDS_COMMON);
     }
-    
+
     public function withGregorianCalendar(): static
     {
-        $new = clone $this;
-        $new->yearSeconds = static::YEAR_SECONDS_GREGORIAN;
-        $new->monthSeconds = static::MONTH_SECONDS_GREGORIAN;
-    
-        return $new;
+        return $this
+            ->withYearSeconds(static::YEAR_SECONDS_GREGORIAN)
+            ->withMonthSeconds(static::MONTH_SECONDS_GREGORIAN);
     }
-    
+
     public function withJulianCalendar(): static
     {
-        $new = clone $this;
-        $new->yearSeconds = static::YEAR_SECONDS_JULIAN;
-        $new->monthSeconds = static::MONTH_SECONDS_JULIAN;
-    
-        return $new;
+        return $this
+            ->withYearSeconds(static::YEAR_SECONDS_JULIAN)
+            ->withMonthSeconds(static::MONTH_SECONDS_JULIAN);
     }
-    
+
     public function withAnomalisticCalendar(): static
     {
-        $new = clone $this;
-        $new->yearSeconds = static::YEAR_SECONDS_ANOMALISTIC;
-        $new->monthSeconds = static::MONTH_SECONDS_ANOMALISTIC;
-    
-        return $new;
+        return $this
+            ->withYearSeconds(static::YEAR_SECONDS_ANOMALISTIC)
+            ->withMonthSeconds(static::MONTH_SECONDS_ANOMALISTIC);
     }
-    
+
     public function withTropicalCalendar(): static
     {
-        $new = clone $this;
-        $new->yearSeconds = static::YEAR_SECONDS_TROPICAL;
-        $new->monthSeconds = static::MONTH_SECONDS_TROPICAL;
-    
-        return $new;
+        return $this
+            ->withYearSeconds(static::YEAR_SECONDS_TROPICAL)
+            ->withMonthSeconds(static::MONTH_SECONDS_TROPICAL);
     }
-    
+
     public function withSiderealCalendar(): static
     {
-        $new = clone $this;
-        $new->yearSeconds = static::YEAR_SECONDS_SIDEREAL;
-        $new->monthSeconds = static::MONTH_SECONDS_SIDEREAL;
-    
-        return $new;
+        return $this
+            ->withYearSeconds(static::YEAR_SECONDS_SIDEREAL)
+            ->withMonthSeconds(static::MONTH_SECONDS_SIDEREAL);
     }
-    
+
     public function withDraconicCalendar(): static
     {
-        $new = clone $this;
-        $new->yearSeconds = static::YEAR_SECONDS_DRACONIC;
-        $new->monthSeconds = static::MONTH_SECONDS_DRACONIC;
-    
-        return $new;
+        return $this
+            ->withYearSeconds(static::YEAR_SECONDS_DRACONIC)
+            ->withMonthSeconds(static::MONTH_SECONDS_DRACONIC);
     }
 }

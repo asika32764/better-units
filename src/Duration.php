@@ -57,20 +57,18 @@ class Duration extends AbstractUnitConverter
 
     public string $defaultUnit = self::UNIT_SECONDS;
 
-    protected array $unitExchanges {
-        get => [
-            self::UNIT_NANOSECONDS => 1e-9,
-            self::UNIT_MICROSECONDS => 1e-6,
-            self::UNIT_MILLISECONDS => 1e-3,
-            self::UNIT_SECONDS => 1.0,
-            self::UNIT_MINUTES => 60.0,
-            self::UNIT_HOURS => 3600.0,
-            self::UNIT_DAYS => 86400.0,
-            self::UNIT_WEEKS => 604800.0,
-            self::UNIT_MONTHS => $this->monthSeconds->toFloat(),
-            self::UNIT_YEARS => $this->yearSeconds->toFloat(),
-        ];
-    }
+    protected array $unitExchanges = [
+        self::UNIT_NANOSECONDS => 1e-9,
+        self::UNIT_MICROSECONDS => 1e-6,
+        self::UNIT_MILLISECONDS => 1e-3,
+        self::UNIT_SECONDS => 1.0,
+        self::UNIT_MINUTES => 60.0,
+        self::UNIT_HOURS => 3600.0,
+        self::UNIT_DAYS => 86400.0,
+        self::UNIT_WEEKS => 604800.0,
+        self::UNIT_MONTHS => self::MONTH_SECONDS_COMMON,
+        self::UNIT_YEARS => self::YEAR_SECONDS_COMMON,
+    ];
 
     public protected(set) BigNumber $yearSeconds {
         set(mixed $value) => $this->yearSeconds = BigNumber::of($value);
@@ -142,7 +140,16 @@ class Duration extends AbstractUnitConverter
         $new = clone $this;
         $new->yearSeconds = $yearSeconds;
 
-        return $new;
+        $sRate = $this->getUnitExchangeRate(Duration::UNIT_SECONDS);
+
+        if (!$sRate) {
+            throw new \RuntimeException('Cannot set yearSeconds without seconds exchange rate.');
+        }
+
+        return $new->withAddedUnitExchangeRate(
+            static::UNIT_YEARS,
+            $sRate->multipliedBy($yearSeconds)
+        );
     }
 
     public function withMonthSeconds(BigNumber|string|int|float $monthSeconds): Duration
@@ -150,18 +157,27 @@ class Duration extends AbstractUnitConverter
         $new = clone $this;
         $new->monthSeconds = $monthSeconds;
 
-        return $this;
+        $sRate = $this->getUnitExchangeRate(static::UNIT_SECONDS);
+
+        if (!$sRate) {
+            throw new \RuntimeException('Cannot set monthSeconds without seconds exchange rate.');
+        }
+
+        return $new->withAddedUnitExchangeRate(
+            static::UNIT_MONTHS,
+            $sRate->multipliedBy($monthSeconds)
+        );
     }
 
     protected function normalizeBaseUnit(string $unit): string
     {
         return match (strtolower($unit)) {
             'ns', 'nanosecond' => self::UNIT_NANOSECONDS,
-            'us', 'microsecond' => self::UNIT_MICROSECONDS,
+            'us', 'μs', 'microsecond' => self::UNIT_MICROSECONDS,
             'ms', 'millisecond' => self::UNIT_MILLISECONDS,
             's', 'second', 'sec' => self::UNIT_SECONDS,
             'm', 'minute', 'min' => self::UNIT_MINUTES,
-            'h', 'hour' => self::UNIT_HOURS,
+            'h', 'hr', 'hour' => self::UNIT_HOURS,
             'd', 'day' => self::UNIT_DAYS,
             'w', 'week' => self::UNIT_WEEKS,
             'mo', 'month' => self::UNIT_MONTHS,
