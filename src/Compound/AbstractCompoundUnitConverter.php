@@ -81,16 +81,20 @@ abstract class AbstractCompoundUnitConverter extends AbstractUnitConverter
     ): static {
         [$measureUnit, $denoUnit] = $this->normalizeAndSplitUnit($toUnit);
 
-        $instance = parent::convertTo($measureUnit, $scale, $roundingMode);
+        $new = $this;
 
-        if ($denoUnit !== $this->deno->baseUnit) {
-            $this->deno = $this->deno->with(1)
-                ->convertTo($denoUnit, $scale, $roundingMode);
-
-            $instance->value = $instance->value->dividedBy($this->deno->value, $scale, $roundingMode);
+        if ($measureUnit) {
+            $new = parent::convertTo($measureUnit, $scale, $roundingMode);
         }
 
-        return $instance;
+        if ($denoUnit && $denoUnit !== $this->deno->baseUnit) {
+            $new->deno = $new->deno->with(1)
+                ->convertTo($denoUnit, $scale, $roundingMode);
+
+            $new->value = $new->value->dividedBy($new->deno->value, $scale, $roundingMode);
+        }
+
+        return $new;
     }
 
     /**

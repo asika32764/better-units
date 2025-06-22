@@ -6,7 +6,6 @@ namespace Asika\UnitConverter;
 
 use Asika\UnitConverter\Concerns\DurationCalendlyTrait;
 use Brick\Math\BigDecimal;
-use Brick\Math\BigInteger;
 use Brick\Math\BigNumber;
 use Brick\Math\Exception\DivisionByZeroException;
 use Brick\Math\Exception\MathException;
@@ -250,16 +249,16 @@ class Duration extends AbstractUnitConverter
     protected function normalizeBaseUnit(string $unit): string
     {
         return match (strtolower($unit)) {
-            'ns', 'nanosecond' => static::UNIT_NANOSECONDS,
-            'us', 'μs', 'microsecond' => static::UNIT_MICROSECONDS,
-            'ms', 'millisecond' => static::UNIT_MILLISECONDS,
-            's', 'second', 'sec' => static::UNIT_SECONDS,
-            'm', 'minute', 'min' => static::UNIT_MINUTES,
-            'h', 'hr', 'hour' => static::UNIT_HOURS,
-            'd', 'day' => static::UNIT_DAYS,
-            'w', 'week' => static::UNIT_WEEKS,
-            'mo', 'month' => static::UNIT_MONTHS,
-            'y', 'year' => static::UNIT_YEARS,
+            'ns', 'nanosecond', 'nanoseconds' => static::UNIT_NANOSECONDS,
+            'us', 'μs', 'microsecond', 'microseconds' => static::UNIT_MICROSECONDS,
+            'ms', 'millisecond', 'milliseconds' => static::UNIT_MILLISECONDS,
+            's', 'second', 'sec', 'seconds' => static::UNIT_SECONDS,
+            'm', 'minute', 'min', 'minutes' => static::UNIT_MINUTES,
+            'h', 'hr', 'hour', 'hours' => static::UNIT_HOURS,
+            'd', 'day', 'days' => static::UNIT_DAYS,
+            'w', 'week', 'weeks' => static::UNIT_WEEKS,
+            'mo', 'month', 'months' => static::UNIT_MONTHS,
+            'y', 'year', 'years' => static::UNIT_YEARS,
             default => $unit,
         };
     }
