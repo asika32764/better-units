@@ -4,6 +4,30 @@ declare(strict_types=1);
 
 namespace Asika\UnitConverter;
 
+use Brick\Math\BigDecimal;
+use Brick\Math\RoundingMode;
+
+/**
+ * @method BigDecimal toFemtometers(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
+ * @method BigDecimal toPicometers(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
+ * @method BigDecimal toNanometers(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
+ * @method BigDecimal toMicrometers(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
+ * @method BigDecimal toMillimeters(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
+ * @method BigDecimal toCentimeters(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
+ * @method BigDecimal toDecimeters(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
+ * @method BigDecimal toMeters(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
+ * @method BigDecimal toKilometers(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
+ * @method BigDecimal toInches(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
+ * @method BigDecimal toFeet(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
+ * @method BigDecimal toYards(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
+ * @method BigDecimal toHands(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
+ * @method BigDecimal toMiles(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
+ * @method BigDecimal toLightYears(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
+ * @method BigDecimal toAstronomicalUnits(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
+ * @method BigDecimal toParsecs(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
+ * @method BigDecimal toFathoms(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
+ * @method BigDecimal toNauticalMiles(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
+ */
 class Length extends AbstractUnitConverter
 {
     public const string UNIT_FEMTOMETERS = 'fm';

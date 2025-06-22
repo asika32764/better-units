@@ -4,6 +4,26 @@ declare(strict_types=1);
 
 namespace Asika\UnitConverter;
 
+use Brick\Math\BigDecimal;
+use Brick\Math\RoundingMode;
+
+/**
+ * @method BigDecimal toSquareFemtometers(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
+ * @method BigDecimal toSquarePicometers(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
+ * @method BigDecimal toSquareNanometers(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
+ * @method BigDecimal toSquareMicrometers(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
+ * @method BigDecimal toSquareMillimeters(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
+ * @method BigDecimal toSquareCentimeters(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
+ * @method BigDecimal toSquareDecimeters(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
+ * @method BigDecimal toSquareMeters(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
+ * @method BigDecimal toSquareKilometers(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
+ * @method BigDecimal toSquareInches(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
+ * @method BigDecimal toSquareFeet(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
+ * @method BigDecimal toSquareYards(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
+ * @method BigDecimal toSquareMiles(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
+ * @method BigDecimal toSquareAcres(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
+ * @method BigDecimal toSquareHectares(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
+ */
 class Area extends AbstractUnitConverter
 {
     public const string UNIT_SQUARE_FEMTOMETERS = 'fm2';
@@ -58,6 +78,11 @@ class Area extends AbstractUnitConverter
 
     protected function normalizeBaseUnit(string $unit): string
     {
+        if (str_starts_with(strtolower($unit), 'square')) {
+            $unit = trim(substr($unit, 6));
+            $unit .= '^2';
+        }
+
         return match (strtolower($unit)) {
             'fm^2', 'fm²', 'femtometers2', 'femtometers^2', 'femtometers²' => self::UNIT_SQUARE_FEMTOMETERS,
             'pm^2', 'pm²', 'picometers2', 'picometers^2', 'picometers²' => self::UNIT_SQUARE_PICOMETERS,

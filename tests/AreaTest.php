@@ -8,7 +8,10 @@ use Asika\UnitConverter\Area;
 use Asika\UnitConverter\Duration;
 use Asika\UnitConverter\Length;
 use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
+
+use function PHPUnit\Framework\assertEquals;
 
 class AreaTest extends TestCase
 {
@@ -106,5 +109,16 @@ class AreaTest extends TestCase
                 '1μm2',
             ],
         ];
+    }
+
+    #[Test]
+    public function to()
+    {
+        $a = Area::from('100 square meters')->toSquareMillimeters();
+
+        assertEquals(
+            '100000000',
+            (string) $a,
+        );
     }
 }

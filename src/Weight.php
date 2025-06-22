@@ -7,6 +7,24 @@ namespace Asika\UnitConverter;
 use Brick\Math\BigDecimal;
 use Brick\Math\RoundingMode;
 
+/**
+ * @method BigDecimal toFemtograms(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
+ * @method BigDecimal toPicograms(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
+ * @method BigDecimal toNanograms(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
+ * @method BigDecimal toMicrograms(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
+ * @method BigDecimal toMilligrams(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
+ * @method BigDecimal toGrams(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
+ * @method BigDecimal toDecigrams(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
+ * @method BigDecimal toCentigrams(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
+ * @method BigDecimal toKilograms(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
+ * @method BigDecimal toMetricTons(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
+ * @method BigDecimal toOunces(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
+ * @method BigDecimal toPounds(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
+ * @method BigDecimal toStones(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
+ * @method BigDecimal toTons(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
+ * @method BigDecimal toCarats(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
+ * @method BigDecimal toNewtons(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
+ */
 class Weight extends AbstractUnitConverter
 {
     public const string UNIT_FEMTOGRAMS = 'fg';

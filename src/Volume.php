@@ -4,6 +4,28 @@ declare(strict_types=1);
 
 namespace Asika\UnitConverter;
 
+use Brick\Math\BigDecimal;
+use Brick\Math\RoundingMode;
+
+/**
+ * @method BigDecimal toCubicFemrometers(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
+ * @method BigDecimal toCubicPicometers(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
+ * @method BigDecimal toCubicNanometers(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
+ * @method BigDecimal toCubicMicrometers(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
+ * @method BigDecimal toCubicMillimeters(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
+ * @method BigDecimal toCubicCentimeters(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
+ * @method BigDecimal toCubicDecimeters(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
+ * @method BigDecimal toCubicMeters(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
+ * @method BigDecimal toCubicKilometers(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
+ * @method BigDecimal toCubicInches(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
+ * @method BigDecimal toCubicFeet(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
+ * @method BigDecimal toCubicYards(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
+ * @method BigDecimal toCubicMiles(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
+ * @method BigDecimal toCubicLiters(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
+ * @method BigDecimal toCubicGallons(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
+ * @method BigDecimal toCubicPints(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
+ * @method BigDecimal toCubicQuarts(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
+ */
 class Volume extends AbstractUnitConverter
 {
     public const string UNIT_CUBIC_FEMTOMETERS = 'fm3';
@@ -61,6 +83,11 @@ class Volume extends AbstractUnitConverter
 
     protected function normalizeBaseUnit(string $unit): string
     {
+        if (str_starts_with(strtolower($unit), 'cubic')) {
+            $unit = trim(substr($unit, 5));
+            $unit .= '^3';
+        }
+
         return match (strtolower($unit)) {
             'fm^3', 'fm³', 'femtometers3', 'femtometers^3', 'femtometers³' => self::UNIT_CUBIC_FEMTOMETERS,
             'pm^3', 'pm³', 'picometers3', 'picometers^3', 'picometers³' => self::UNIT_CUBIC_PICOMETERS,

@@ -4,6 +4,27 @@ declare(strict_types=1);
 
 namespace Asika\UnitConverter;
 
+use Brick\Math\BigDecimal;
+use Brick\Math\RoundingMode;
+
+/**
+ * @method BigDecimal toJoules(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
+ * @method BigDecimal toKilojoules(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
+ * @method BigDecimal toMegajoules(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
+ * @method BigDecimal toGigajoules(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
+ * @method BigDecimal toTerajoules(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
+ * @method BigDecimal toCalories(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
+ * @method BigDecimal toKilocalories(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
+ * @method BigDecimal toNewtonMeters(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
+ * @method BigDecimal toVolts(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
+ * @method BigDecimal toMegavolts(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
+ * @method BigDecimal toFootPounds(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
+ * @method BigDecimal toWattHours(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
+ * @method BigDecimal toKilowattHours(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
+ * @method BigDecimal toMegawattHours(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
+ * @method BigDecimal toGigawattHours(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
+ * @method BigDecimal toTerawattHours(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
+ */
 class Energy extends AbstractUnitConverter
 {
     // The atom energy unit
@@ -50,6 +71,12 @@ class Energy extends AbstractUnitConverter
 
     protected function normalizeBaseUnit(string $unit): string
     {
+        $unit = str_replace(
+            ['electron volt', 'electron volts', 'electronvolt', 'electronvolts'],
+            'ev',
+            $unit
+        );
+
         return match (strtolower($unit)) {
             'joule', 'joules' => self::UNIT_JOULE,
             'kilojoule', 'kilojoules' => self::UNIT_KILOJOULE,

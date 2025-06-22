@@ -8,7 +8,6 @@ use Brick\Math\BigDecimal;
 use Brick\Math\BigNumber;
 use Brick\Math\Exception\RoundingNecessaryException;
 use Brick\Math\RoundingMode;
-use PHPUnit\Event\Runtime\PHPUnit;
 
 /**
  * @formatter:off
@@ -703,7 +702,7 @@ abstract class AbstractUnitConverter implements \Stringable
             $unit = strtolower(substr($name, 2));
             $unit = str_replace('_', '', $unit);
 
-            if (array_key_exists($unit, $this->availableUnitExchanges)) {
+            if ($this->getUnitExchangeRate($unit)) {
                 return $this->to($unit, ...$args);
             }
         }

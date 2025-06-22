@@ -17,16 +17,16 @@ use Brick\Math\RoundingMode;
 /**
  * The Duration class.
  *
- * @method BigDecimal toNanoseconds(int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
- * @method BigDecimal toMicroseconds(int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
- * @method BigDecimal toMilliseconds(int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
- * @method BigDecimal toSeconds(int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
- * @method BigDecimal toMinutes(int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
- * @method BigDecimal toHours(int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
- * @method BigDecimal toDays(int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
- * @method BigDecimal toWeeks(int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
- * @method BigDecimal toMonths(int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
- * @method BigDecimal toYears(int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
+ * @method BigDecimal toNanoseconds(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
+ * @method BigDecimal toMicroseconds(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
+ * @method BigDecimal toMilliseconds(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
+ * @method BigDecimal toSeconds(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
+ * @method BigDecimal toMinutes(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
+ * @method BigDecimal toHours(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
+ * @method BigDecimal toDays(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
+ * @method BigDecimal toWeeks(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
+ * @method BigDecimal toMonths(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
+ * @method BigDecimal toYears(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
  */
 // phpcs:disable
 class Duration extends AbstractUnitConverter
