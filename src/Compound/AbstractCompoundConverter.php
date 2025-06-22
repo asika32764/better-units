@@ -37,6 +37,7 @@ abstract class AbstractCompoundConverter extends AbstractConverter
         get => $this->measure->availableUnitExchanges;
     }
 
+    #[\Override]
     public function withParse(
         string $value,
         ?string $asUnit = null,
@@ -74,6 +75,7 @@ abstract class AbstractCompoundConverter extends AbstractConverter
         return $instance;
     }
 
+    #[\Override]
     public function convertTo(
         string $toUnit,
         ?int $scale = null,
@@ -81,19 +83,36 @@ abstract class AbstractCompoundConverter extends AbstractConverter
     ): static {
         [$measureUnit, $denoUnit] = $this->normalizeAndSplitUnit($toUnit);
 
+        return $this->convertUnitPairTo(
+            $measureUnit,
+            $denoUnit,
+            $scale,
+            $roundingMode
+        );
+    }
+
+    public function convertUnitPairTo(
+        string $measureUnit,
+        string $denoUnit = '',
+        ?int $scale = null,
+        RoundingMode $roundingMode = RoundingMode::DOWN
+    ): static {
         $new = $this;
 
+        // If we have a measure unit, we need to convert the value accordingly.
         if ($measureUnit) {
             $new = parent::convertTo($measureUnit, $scale, $roundingMode);
         }
 
+        // If we have a denominator unit, we need to convert the value accordingly.
         if ($denoUnit && $denoUnit !== $this->deno->baseUnit) {
-            $oldUnit = $new->deno->baseUnit;
-
+            // Make the deno as target unit.
             $new->deno = $new->deno->with(1, $denoUnit);
 
-            $new->value = $new->deno->convertTo($oldUnit, $scale, $roundingMode)
-                ->value->multipliedBy($new->value);
+            // Convert the value to the base unit of the deno.
+            $new->value = $new->deno->withValue($new->value)
+                ->convertTo($this->deno->baseUnit, $scale, $roundingMode)
+                ->value;
         }
 
         return $new;
@@ -113,24 +132,21 @@ abstract class AbstractCompoundConverter extends AbstractConverter
 
     abstract protected function normalizeCompoundUnit(string $unit): string;
 
+    #[\Override]
     protected function normalizeUnit(string $unit): string
     {
         return $this->measure->normalizeUnit($unit);
     }
 
-    public function format(
-        string|\Closure|null $suffix = null,
-        ?string $unit = null,
-        ?int $scale = null,
-        RoundingMode $roundingMode = RoundingMode::DOWN
-    ): string {
-        $unit ??= ($this->baseUnit . '/' . $this->deno->baseUnit);
-        [$measureUnit, $denoUnit] = $this->normalizeAndSplitUnit($unit);
+    #[\Override]
+    protected function formatSuffix(string $suffix, BigDecimal $value, string $unit): string
+    {
+        $suffix = parent::formatSuffix($suffix, $value, $unit);
 
-        $suffix ??= $measureUnit . '/' . $denoUnit;
+        if ($suffix === $this->baseUnit) {
+            $suffix .= '/' . $this->deno->formatSuffix($this->deno->baseUnit, $value, $this->deno->baseUnit);
+        }
 
-        $suffix = $this->formatSuffix($suffix, $this->value, $unit);
-
-        return parent::format($suffix, $measureUnit, $scale, $roundingMode);
+        return $suffix;
     }
 }

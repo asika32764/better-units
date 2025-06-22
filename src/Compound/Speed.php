@@ -42,8 +42,7 @@ class Speed extends AbstractCompoundConverter
     {
         return match (strtolower($unit)) {
             'mps' => 'm/s',
-            'kph' => 'km/s',
-            'mph' => 'km/h',
+            'kph' => 'km/h',
             default => $unit,
         };
     }

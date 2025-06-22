@@ -225,7 +225,7 @@ class Duration extends AbstractBasicConverter
         return $new;
     }
 
-    protected function formatSuffix(string $suffix, BigDecimal $value, string $unit)
+    protected function formatSuffix(string $suffix, BigDecimal $value, string $unit): string
     {
         if ($value->abs()->isEqualTo(1)) {
             $suffix = match (strtolower($suffix)) {

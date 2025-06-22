@@ -277,7 +277,6 @@ abstract class AbstractConverter implements \Stringable
         }
 
         $unit ??= $this->baseUnit;
-
         $suffix ??= $unit;
 
         if ($suffix instanceof \Closure) {
@@ -542,7 +541,7 @@ abstract class AbstractConverter implements \Stringable
         return $new;
     }
 
-    protected function formatSuffix(string $suffix, BigDecimal $value, string $unit)
+    protected function formatSuffix(string $suffix, BigDecimal $value, string $unit): string
     {
         return $this->suffixFormatter
             ? ($this->suffixFormatter)($suffix, $value, $unit, $this)

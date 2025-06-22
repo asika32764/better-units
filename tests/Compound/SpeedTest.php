@@ -40,14 +40,27 @@ class SpeedTest extends TestCase
                 fn () => new Speed(1, 'km/h')
                     ->convertTo('m/s', scale: 10),
                 [],
-                '0.2777777777m/seconds',
+                '0.2777777777m/s',
             ],
             'm/s to km/h' => [
                 fn () => new Speed(1, 'm/s')
                     ->convertTo('km/h', scale: 10),
                 [],
-                '3.6km/hours',
+                '3.6km/h',
             ],
+            'm/s to km/h with format' => [
+                fn () => new Speed(1, 'm/s')
+                    ->convertTo('km/h', scale: 10),
+                fn (Speed $speed) => $speed->format('KMH'),
+                '3.6KMH',
+            ],
+            'mps to mph' => [
+                fn () => new Speed(1, 'mps')
+                    ->convertTo('mph', scale: 10),
+                [],
+                '3.6km/h',
+            ],
+
         ];
     }
 }
