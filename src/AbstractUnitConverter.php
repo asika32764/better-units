@@ -8,6 +8,7 @@ use Brick\Math\BigDecimal;
 use Brick\Math\BigNumber;
 use Brick\Math\Exception\RoundingNecessaryException;
 use Brick\Math\RoundingMode;
+use PHPUnit\Event\Runtime\PHPUnit;
 
 /**
  * @formatter:off
@@ -42,6 +43,21 @@ abstract class AbstractUnitConverter implements \Stringable
         get;
     }
 
+    public array $availableUnitExchanges {
+        get {
+            if ($this->availableUnits) {
+                return array_intersect_key(
+                    $this->unitExchanges,
+                    array_flip($this->availableUnits)
+                );
+            }
+
+            return $this->unitExchanges;
+        }
+    }
+
+    protected ?array $availableUnits = null;
+
     public ?\Closure $unitNormalizer = null;
 
     public ?\Closure $suffixNormalizer = null;
@@ -51,23 +67,35 @@ abstract class AbstractUnitConverter implements \Stringable
         return new static()->withFrom($value, $asUnit);
     }
 
-    public function withFrom(mixed $value, ?string $asUnit = null): static
-    {
+    public function withFrom(
+        mixed $value,
+        ?string $asUnit = null,
+        ?int $scale = null,
+        RoundingMode $roundingMode = RoundingMode::DOWN,
+    ): static {
         if (is_string($value) && !is_numeric($value)) {
-            return $this->withParse($value, $asUnit);
+            return $this->withParse($value, $asUnit, $scale, $roundingMode);
         }
 
         return $this->with($value, $asUnit);
     }
 
-    public static function parse(string $value, ?string $asUnit = null): static
-    {
-        return new static()->withParse($value, $asUnit);
+    public static function parse(
+        string $value,
+        ?string $asUnit = null,
+        ?int $scale = null,
+        RoundingMode $roundingMode = RoundingMode::DOWN
+    ): static {
+        return new static()->withParse($value, $asUnit, $scale, $roundingMode);
     }
 
-    public static function parseToValue(string $value, ?string $asUnit = null): BigDecimal
-    {
-        return static::parse($value, $asUnit)->value->toBigDecimal();
+    public static function parseToValue(
+        string $value,
+        ?string $asUnit = null,
+        ?int $scale = null,
+        RoundingMode $roundingMode = RoundingMode::DOWN
+    ): BigDecimal {
+        return static::parse($value, $asUnit, $scale, $roundingMode)->value->toBigDecimal();
     }
 
     public function withParse(
@@ -105,6 +133,14 @@ abstract class AbstractUnitConverter implements \Stringable
     {
         $this->value = $value;
         $this->baseUnit = $baseUnit ?? $this->defaultUnit;
+    }
+
+    public function withAvailableUnits(?array $units): static
+    {
+        $new = clone $this;
+        $new->availableUnits = $units;
+
+        return $new;
     }
 
     /**
@@ -163,12 +199,50 @@ abstract class AbstractUnitConverter implements \Stringable
             $newValue = BigDecimal::of($this->value)
                 ->multipliedBy($fromUnitRate)
                 ->dividedBy($toUnitRate, $scale, $roundingMode);
+
+            if ($scale === null) {
+                $newValue = $newValue->stripTrailingZeros();
+            }
         }
 
         $new->value = $newValue;
         $new->baseUnit = $toUnit;
 
         return $new;
+    }
+
+    public function convertToAtom(): static
+    {
+        return $this->convertTo($this->atomUnit, 0, RoundingMode::DOWN);
+    }
+
+    public function serialize(?array $units = null): string
+    {
+        return $this->convertToAtom()
+            ->humanizeCallback(
+                function (self $remainder, array $sortedUnits) use ($units) {
+                    if ($units === null) {
+                        $units = array_keys($sortedUnits);
+                    } else {
+                        $units = array_intersect(
+                            array_keys($this->getSortedUnitRates()),
+                            $units
+                        );
+                    }
+
+                    foreach ($units as $unit) {
+                        $part = $remainder->extract($unit);
+
+                        if (!$part->isZero()) {
+                            $text[] = $part->format();
+                        }
+                    }
+
+                    $formatted = trim(implode(' ', array_filter($text)));
+
+                    return $formatted ?: $this->with(0)->format();
+                }
+            );
     }
 
     public function withValue(
@@ -310,19 +384,32 @@ abstract class AbstractUnitConverter implements \Stringable
                     $units = $formats;
                 }
 
-                if ($units === null) {
-                    $units = $sortedUnits;
-
-                    $units = array_keys($units);
-                }
-
                 $unitFormatters = [];
 
-                foreach ($units as $i => $unit) {
-                    if (is_numeric($i)) {
-                        $unitFormatters[$unit] = $formatter ?? $unit;
-                    } else {
-                        $unitFormatters[$i] = $formatter ?? $unit;
+                if ($units !== null) {
+                    foreach ($units as $i => $unit) {
+                        if (is_numeric($i)) {
+                            $unitFormatters[$unit] = $formatter ?? $unit;
+                        } else {
+                            $unitFormatters[$i] = $formatter ?? $unit;
+                        }
+                    }
+
+                    $unitFormatters = array_intersect_key(
+                        $unitFormatters,
+                        $sortedUnits,
+                    );
+
+                    if (empty($unitFormatters)) {
+                        throw new \InvalidArgumentException('No valid units provided for humanization.');
+                    }
+                } else {
+                    foreach (array_keys($sortedUnits) as $i => $unit) {
+                        if (is_numeric($i)) {
+                            $unitFormatters[$unit] = $formatter ?? $unit;
+                        } else {
+                            $unitFormatters[$i] = $formatter ?? $unit;
+                        }
                     }
                 }
 
@@ -391,8 +478,8 @@ abstract class AbstractUnitConverter implements \Stringable
     {
         $unit = $this->normalizeUnit($unit);
 
-        if (isset($this->unitExchanges[$unit])) {
-            return BigDecimal::of($this->unitExchanges[$unit]);
+        if (isset($this->availableUnitExchanges[$unit])) {
+            return BigDecimal::of($this->availableUnitExchanges[$unit]);
         }
 
         return null;
@@ -472,14 +559,68 @@ abstract class AbstractUnitConverter implements \Stringable
      */
     protected static function parseValue(string $value): array
     {
-        preg_match_all('/((?P<value>[\d\.]+)\s*(?P<unit>[a-zA-Z]+))/i', $value, $matches, PREG_SET_ORDER);
+        $matches = [];
+        $currentValue = null;
+        $currentUnit = '';
+
+        $tokens = array_filter(array_map('trim', explode(' ', $value)));
+
+        foreach ($tokens as $token) {
+            // Handle `1243minutes`
+            if (preg_match('/^([\d,.]+)([a-zA-Z][a-zA-Z\d\s\W]*)$/', $token, $match)) {
+                if ($currentValue !== null) {
+                    if (!trim($currentUnit)) {
+                        throw new \InvalidArgumentException("Unexpected numeric token: {$token}");
+                    }
+
+                    $matches[] = ['value' => $currentValue, 'unit' => trim($currentUnit)];
+                }
+
+                $currentValue = $match[1];
+                $currentUnit = $match[2];
+            } elseif (is_numeric($token) || preg_match('/^[\d,\.]+$/', $token)) {
+                if ($currentValue !== null) {
+                    if (!trim($currentUnit)) {
+                        throw new \InvalidArgumentException("Unexpected numeric token: {$token}");
+                    }
+
+                    $matches[] = ['value' => $currentValue, 'unit' => trim($currentUnit)];
+                }
+
+                $currentValue = $token;
+                $currentUnit = '';
+            } elseif (preg_match('/^[a-zA-Z][a-zA-Z\d\s\W]*$/', $token)) {
+                if ($currentValue === null) {
+                    throw new \InvalidArgumentException("Unexpected unit token: {$token}");
+                }
+
+                // If we have a unit, we can finalize the current match
+                $currentUnit .= ' ' . $token;
+            } elseif (empty($token)) {
+                continue; // Skip empty tokens
+            } else {
+                throw new \InvalidArgumentException("Invalid token: {$token}");
+            }
+        }
+
+        if ($currentValue !== null && trim($currentUnit)) {
+            $matches[] = ['value' => $currentValue, 'unit' => trim($currentUnit)];
+        }
 
         if (empty($matches)) {
             throw new \InvalidArgumentException("Invalid format: {$value}");
         }
 
         return array_map(
-            static fn($match) => [$match['value'], $match['unit']],
+            static function ($match) {
+                $value = $match['value'];
+
+                if (str_contains($value, ',')) {
+                    $value = str_replace(',', '', $value);
+                }
+
+                return [$value, trim($match['unit'])];
+            },
             $matches
         );
     }
@@ -502,7 +643,7 @@ abstract class AbstractUnitConverter implements \Stringable
      */
     protected function getSortedUnitRates(): array
     {
-        $units = array_map(BigDecimal::of(...), $this->unitExchanges);
+        $units = array_map(BigDecimal::of(...), $this->availableUnitExchanges);
 
         uasort(
             $units,
@@ -562,7 +703,7 @@ abstract class AbstractUnitConverter implements \Stringable
             $unit = strtolower(substr($name, 2));
             $unit = str_replace('_', '', $unit);
 
-            if (array_key_exists($unit, $this->unitExchanges)) {
+            if (array_key_exists($unit, $this->availableUnitExchanges)) {
                 return $this->to($unit, ...$args);
             }
         }

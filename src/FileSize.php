@@ -164,30 +164,9 @@ class FileSize extends AbstractUnitConverter
         self::UNIT_ZEBIBYTES => 9_444_732_965_739_290_427_392,
         self::UNIT_YOTTABYTES => 8_000_000_000_000_000_000_000_000,
         self::UNIT_YOBIBYTES => 9_671_406_556_917_033_397_649_408,
-    ] {
-        get {
-            if ($this->availableUnits) {
-                return array_intersect_key(
-                    $this->unitExchanges,
-                    array_flip($this->availableUnits)
-                );
-            }
-
-            return $this->unitExchanges;
-        }
-    }
+    ];
 
     // phpcs:enable
-
-    protected ?array $availableUnits = null;
-
-    public function withAvailableUnits(?array $units): static
-    {
-        $new = clone $this;
-        $new->availableUnits = $units;
-
-        return $new;
-    }
 
     public function withOnlyBitsBinary(): static
     {

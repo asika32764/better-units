@@ -157,11 +157,9 @@ class Duration extends AbstractUnitConverter
         return $instance;
     }
 
-    public function toDateInterval(
-        ?int $scale = null,
-        RoundingMode $roundingMode = RoundingMode::HALF_UP,
-    ): \DateInterval {
-        $instance = $this->convertTo(static::UNIT_MICROSECONDS, $scale, $roundingMode);
+    public function toDateInterval(): \DateInterval
+    {
+        $instance = $this->convertTo(static::UNIT_MICROSECONDS, 0, RoundingMode::HALF_UP);
 
         return \DateInterval::createFromDateString($instance->humanize());
     }
@@ -174,6 +172,42 @@ class Duration extends AbstractUnitConverter
     public function intervalToMicroseconds(\DateInterval $interval): BigDecimal
     {
         return ConvertHelper::dateIntervalToMicroseconds($interval, $this->yearSeconds, $this->monthSeconds);
+    }
+
+    /**
+     * @template T of \DateTimeInterface
+     *
+     * @param  T|string  $now
+     *
+     * @return  T
+     *
+     * @throws \DateMalformedStringException
+     */
+    public function toFutureDateTime(\DateTimeInterface|string $now = 'now'): \DateTimeInterface
+    {
+        if (!$now instanceof \DateTimeInterface) {
+            $now = new \DateTimeImmutable($now);
+        }
+
+        return $now->add($this->toDateInterval());
+    }
+
+    /**
+     * @template T of \DateTimeInterface
+     *
+     * @param  T|string  $now
+     *
+     * @return  T
+     *
+     * @throws \DateMalformedStringException
+     */
+    public function toPastDateTime(\DateTimeInterface|string $now = 'now'): \DateTimeInterface
+    {
+        if (!$now instanceof \DateTimeInterface) {
+            $now = new \DateTimeImmutable($now);
+        }
+
+        return $now->sub($this->toDateInterval());
     }
 
     public function withYearSeconds(BigNumber|string|int|float $yearSeconds): Duration

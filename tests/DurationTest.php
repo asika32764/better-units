@@ -237,4 +237,26 @@ class DurationTest extends TestCase
             )
         );
     }
+
+    #[Test]
+    public function toDateTime(): void
+    {
+        $now = '2025-03-02 00:00:00';
+
+        $d = Duration::parse('3days');
+
+        $future = $d->toFutureDateTime($now);
+
+        self::assertEquals(
+            '2025-03-05T00:00:00+00:00',
+            $future->format(\DateTime::ATOM)
+        );
+
+        $future = $d->toPastDateTime($now);
+
+        self::assertEquals(
+            '2025-02-27T00:00:00+00:00',
+            $future->format(\DateTime::ATOM)
+        );
+    }
 }

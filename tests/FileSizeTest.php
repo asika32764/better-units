@@ -72,8 +72,8 @@ class FileSizeTest extends TestCase
                 '10240MiB',
                 '10GiB',
             ],
-            '1525GiB to MiB' => [
-                fn () => static::createBytesBinary('1525GiB')
+            '1,525GiB to MiB' => [
+                fn () => static::createBytesBinary('1,525GiB')
                     ->convertTo(FileSize::UNIT_MEBIBYTES),
                 [],
                 [],

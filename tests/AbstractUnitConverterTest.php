@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace Asika\UnitConverter\Tests;
 
+use Asika\UnitConverter\Area;
 use Asika\UnitConverter\Duration;
+use Asika\UnitConverter\Energy;
 use Asika\UnitConverter\FileSize;
 use Brick\Math\BigDecimal;
 use Brick\Math\RoundingMode;
@@ -15,6 +17,7 @@ use PHPUnit\Framework\TestCase;
 use SebastianBergmann\CodeCoverage\Report\Xml\Unit;
 
 use function PHPUnit\Framework\assertEquals;
+use function PHPUnit\Framework\assertTrue;
 
 class AbstractUnitConverterTest extends TestCase
 {
@@ -69,14 +72,14 @@ class AbstractUnitConverterTest extends TestCase
         $d = Duration::parseToValue('123456min', Duration::UNIT_MINUTES);
 
         self::assertEquals(
-            '123456.0000000000',
+            '123456',
             (string) $d
         );
 
         $d = Duration::parseToValue('123456min', Duration::UNIT_HOURS);
 
         self::assertEquals(
-            '2057.6000000000',
+            '2057.6',
             (string) $d
         );
     }
@@ -141,7 +144,7 @@ class AbstractUnitConverterTest extends TestCase
     #[Test]
     public function format()
     {
-        $d = Duration::parse('3years 2months 17days 10hours 3minutes 45seconds 123milliseconds');
+        $d = Duration::parse('3years 2months 17days 10hours 3minutes 45seconds 123milliseconds', scale: 5);
 
         assertEquals(
             '101371905.123seconds',
@@ -194,7 +197,7 @@ class AbstractUnitConverterTest extends TestCase
 
     #[Test]
     #[DataProvider('humanizeProvider')]
-    public function humanize(array $args, string $expected)
+    public function humanize(array $args, string $expected): void
     {
         $d = Duration::parse('3years 2months 17days 10hours 3minutes 45seconds 123milliseconds');
 
@@ -203,6 +206,42 @@ class AbstractUnitConverterTest extends TestCase
         assertEquals(
             $expected,
             $result
+        );
+    }
+
+    #[Test]
+    public function parse()
+    {
+        // Parse with whitespace
+        $e = Energy::parse('1 gigawatt hour 500j');
+
+        assertEquals(
+            '3600000000500j',
+            $e->format()
+        );
+
+        // Parse if unit contains numbers
+        $e = Area::parse('500m2');
+
+        assertEquals(
+            '0.000500km2',
+            $e->format(unit: Area::UNIT_SQUARE_KILOMETERS, scale: 6)
+        );
+
+        // Parse if unit contains special characters
+        $e = Area::parse('500m^2');
+
+        assertEquals(
+            '0.000500km2',
+            $e->format(unit: Area::UNIT_SQUARE_KILOMETERS, scale: 6)
+        );
+
+        // Parse if number contains separators
+        $e = Area::parse('1,200.05 m^2');
+
+        assertEquals(
+            '0.00120005km2',
+            $e->format(unit: Area::UNIT_SQUARE_KILOMETERS, scale: 8)
         );
     }
 
@@ -271,7 +310,7 @@ class AbstractUnitConverterTest extends TestCase
             'centuries',
             $d->yearSeconds->multipliedBy(100)
         );
-        $d = $d->convertTo('centuries');
+        $d = $d->convertTo('centuries', 1);
 
         assertEquals(
             '3.5centuries',
@@ -377,6 +416,43 @@ class AbstractUnitConverterTest extends TestCase
         assertEquals(
             FileSize::UNIT_MEBIBYTES,
             $f->baseUnit
+        );
+    }
+
+    #[Test]
+    public function serialize(): void
+    {
+        $d = Duration::parse('439567123458345956nanoseconds');
+        $serialized = $d->serialize();
+
+        assertEquals(
+            '13years 11months 1week 19hours 34minutes 43seconds 458milliseconds 345microseconds 956nanoseconds',
+            $serialized,
+        );
+
+        $new = Duration::parse($serialized);
+
+        assertTrue(
+            $new->value->isEqualTo($d->value)
+        );
+
+        $serialized = $d->serialize(
+            [
+                Duration::UNIT_NANOSECONDS,
+                Duration::UNIT_MONTHS,
+                Duration::UNIT_SECONDS,
+            ]
+        );
+
+        assertEquals(
+            '167months 450643seconds 458345956nanoseconds',
+            $serialized,
+        );
+
+        $new = Duration::parse($serialized);
+
+        assertTrue(
+            $new->value->isEqualTo($d->value)
         );
     }
 }
