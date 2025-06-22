@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Asika\UnitConverter\Tests;
 
-use Asika\UnitConverter\AbstractUnitConverter;
+use Asika\UnitConverter\AbstractConverter;
 use Asika\UnitConverter\Duration;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;

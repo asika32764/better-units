@@ -28,7 +28,7 @@ use Brick\Math\RoundingMode;
  * @method BigDecimal toYears(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
  */
 // phpcs:disable
-class Duration extends AbstractUnitConverter
+class Duration extends AbstractBasicConverter
 {
     use DurationCalendlyTrait;
 
@@ -225,7 +225,7 @@ class Duration extends AbstractUnitConverter
         return $new;
     }
 
-    protected function normalizeSuffix(string $suffix, BigDecimal $value, string $unit)
+    protected function formatSuffix(string $suffix, BigDecimal $value, string $unit)
     {
         if ($value->abs()->isEqualTo(1)) {
             $suffix = match (strtolower($suffix)) {
@@ -243,12 +243,12 @@ class Duration extends AbstractUnitConverter
             };
         }
 
-        return parent::normalizeSuffix($suffix, $value, $unit);
+        return parent::formatSuffix($suffix, $value, $unit);
     }
 
-    protected function normalizeBaseUnit(string $unit): string
+    protected function normalizeUnit(string $unit): string
     {
-        return match (strtolower($unit)) {
+        $unit = match (strtolower($unit)) {
             'ns', 'nanosecond', 'nanoseconds' => static::UNIT_NANOSECONDS,
             'us', 'μs', 'microsecond', 'microseconds' => static::UNIT_MICROSECONDS,
             'ms', 'millisecond', 'milliseconds' => static::UNIT_MILLISECONDS,
@@ -261,5 +261,7 @@ class Duration extends AbstractUnitConverter
             'y', 'year', 'years' => static::UNIT_YEARS,
             default => $unit,
         };
+
+        return parent::normalizeUnit($unit);
     }
 }

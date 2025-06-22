@@ -26,7 +26,7 @@ use Brick\Math\RoundingMode;
  * @method BigDecimal toCubicPints(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
  * @method BigDecimal toCubicQuarts(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
  */
-class Volume extends AbstractUnitConverter
+class Volume extends AbstractBasicConverter
 {
     public const string UNIT_CUBIC_FEMTOMETERS = 'fm3';
     public const string UNIT_CUBIC_PICOMETERS = 'pm3';
@@ -81,33 +81,35 @@ class Volume extends AbstractUnitConverter
         self::UNIT_CUBIC_QUARTS => 0.000946352946,
     ];
 
-    protected function normalizeBaseUnit(string $unit): string
+    protected function normalizeUnit(string $unit): string
     {
         if (str_starts_with(strtolower($unit), 'cubic')) {
             $unit = trim(substr($unit, 5));
             $unit .= '^3';
         }
 
-        return match (strtolower($unit)) {
-            'fm^3', 'fm³', 'femtometers3', 'femtometers^3', 'femtometers³' => self::UNIT_CUBIC_FEMTOMETERS,
-            'pm^3', 'pm³', 'picometers3', 'picometers^3', 'picometers³' => self::UNIT_CUBIC_PICOMETERS,
-            'nm^3', 'nm³', 'nanometers3', 'nanometers^3', 'nanometers³' => self::UNIT_CUBIC_NANOMETERS,
-            'μm^3', 'μm³', 'um3', 'um^3', 'um³', 'micrometers3', 'micrometers^3', 'micrometers³' => self::UNIT_CUBIC_MICROMETERS,
-            'mm^3', 'mm³', 'millimeters3', 'millimeters^3', 'millimeters³' => self::UNIT_CUBIC_MILLIMETERS,
-            'cm^3', 'cm³', 'centimeters3', 'centimeters^3', 'centimeters³' => self::UNIT_CUBIC_CENTIMETERS,
-            'dm^3', 'dm³', 'decimeters3', 'decimeters^3', 'decimeters³' => self::UNIT_CUBIC_DECIMETERS,
-            'm^3', 'm³', 'meters3', 'meters^3', 'meters³' => self::UNIT_CUBIC_METERS,
-            'km^3', 'km³', 'kilometers3', 'kilometers^3', 'kilometers³' => self::UNIT_CUBIC_KILOMETERS,
-            'in^3', 'in³', 'inches3', 'inches^3', 'inches³' => self::UNIT_CUBIC_INCHES,
-            'ft^3', 'ft³', 'feet3', 'feet^3', 'feet³' => self::UNIT_CUBIC_FEET,
-            'yd^3', 'yd³', 'yards3', 'yards^3', 'yards³' => self::UNIT_CUBIC_YARDS,
-            'mi^3', 'mi³', 'miles3', 'miles^3', 'miles³' => self::UNIT_CUBIC_MILES,
-            'liters', 'liter' => self::UNIT_CUBIC_LITERS,
-            'gallons', 'gallon' => self::UNIT_CUBIC_GALLONS,
-            'pints', 'pint' => self::UNIT_CUBIC_PINTS,
-            'quarts', 'quart' => self::UNIT_CUBIC_QUARTS,
+        $unit = match (strtolower($unit)) {
+            'fm3', 'fm^3', 'fm³', 'femtometers3', 'femtometers^3', 'femtometers³' => self::UNIT_CUBIC_FEMTOMETERS,
+            'pm3', 'pm^3', 'pm³', 'picometers3', 'picometers^3', 'picometers³' => self::UNIT_CUBIC_PICOMETERS,
+            'nm3', 'nm^3', 'nm³', 'nanometers3', 'nanometers^3', 'nanometers³' => self::UNIT_CUBIC_NANOMETERS,
+            'μm3', 'μm^3', 'μm³', 'um3', 'um^3', 'um³', 'micrometers3', 'micrometers^3', 'micrometers³' => self::UNIT_CUBIC_MICROMETERS,
+            'mm3', 'mm^3', 'mm³', 'millimeters3', 'millimeters^3', 'millimeters³' => self::UNIT_CUBIC_MILLIMETERS,
+            'cm3', 'cm^3', 'cm³', 'centimeters3', 'centimeters^3', 'centimeters³' => self::UNIT_CUBIC_CENTIMETERS,
+            'dm3', 'dm^3', 'dm³', 'decimeters3', 'decimeters^3', 'decimeters³' => self::UNIT_CUBIC_DECIMETERS,
+            'm3', 'm^3', 'm³', 'meters3', 'meters^3', 'meters³' => self::UNIT_CUBIC_METERS,
+            'km3', 'km^3', 'km³', 'kilometers3', 'kilometers^3', 'kilometers³' => self::UNIT_CUBIC_KILOMETERS,
+            'in3', 'in^3', 'in³', 'inches3', 'inches^3', 'inches³' => self::UNIT_CUBIC_INCHES,
+            'ft3', 'ft^3', 'ft³', 'feet3', 'feet^3', 'feet³' => self::UNIT_CUBIC_FEET,
+            'yd3', 'yd^3', 'yd³', 'yards3', 'yards^3', 'yards³' => self::UNIT_CUBIC_YARDS,
+            'mi3', 'mi^3', 'mi³', 'miles3', 'miles^3', 'miles³' => self::UNIT_CUBIC_MILES,
+            'l', 'liters', 'liter' => self::UNIT_CUBIC_LITERS,
+            'gal', 'gallons', 'gallon' => self::UNIT_CUBIC_GALLONS,
+            'pt', 'pints', 'pint' => self::UNIT_CUBIC_PINTS,
+            'qt', 'quarts', 'quart' => self::UNIT_CUBIC_QUARTS,
             default => $unit,
         };
+
+        return parent::normalizeUnit($unit);
     }
 
     public function withOnlyCommonVolumes(): static

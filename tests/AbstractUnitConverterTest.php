@@ -326,7 +326,7 @@ class AbstractUnitConverterTest extends TestCase
                 return $unit;
             }
         )
-            ->withSuffixNormalizer(
+            ->withSuffixFormatter(
                 function (string $suffix, BigDecimal $value) {
                     if ($value->abs()->isEqualTo(1) && $suffix === 'centuries') {
                         $suffix = 'century';

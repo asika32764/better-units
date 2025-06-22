@@ -43,7 +43,7 @@ use Brick\Math\RoundingMode;
  * @method BigDecimal toYottabytes(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
  * @method BigDecimal toYobibytes(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
  */
-class FileSize extends AbstractUnitConverter
+class FileSize extends AbstractBasicConverter
 {
     public const string UNIT_BITS = 'b';
 
@@ -227,7 +227,7 @@ class FileSize extends AbstractUnitConverter
         return $this->withAvailableUnits(self::UNITS_GROUP_BYTES_BASE10);
     }
 
-    protected function normalizeBaseUnit(string $unit): string
+    protected function normalizeUnit(string $unit): string
     {
         $unit = match ($unit) {
             'b' => self::UNIT_BITS,
@@ -268,7 +268,7 @@ class FileSize extends AbstractUnitConverter
         };
 
         // Full name should be case insensitive
-        return match (strtolower($unit)) {
+        $unit = match (strtolower($unit)) {
             // bits
             'bit', 'bits' => self::UNIT_BITS,
             'kilobit', 'kilobits' => self::UNIT_KILOBITS,
@@ -308,5 +308,7 @@ class FileSize extends AbstractUnitConverter
             'yobibyte', 'yobibytes' => self::UNIT_YOBIBYTES,
             default => $unit,
         };
+
+        return parent::normalizeUnit($unit);
     }
 }

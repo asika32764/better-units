@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace Asika\UnitConverter\Compound;
 
-use Asika\UnitConverter\AbstractUnitConverter;
+use Asika\UnitConverter\AbstractConverter;
 use Brick\Math\BigDecimal;
 use Brick\Math\RoundingMode;
 
-abstract class AbstractCompoundUnitConverter extends AbstractUnitConverter
+abstract class AbstractCompoundConverter extends AbstractConverter
 {
-    public AbstractUnitConverter $measure;
-    public AbstractUnitConverter $deno;
+    public AbstractConverter $measure;
+    public AbstractConverter $deno;
 
     public string $atomUnit {
         get => $this->measure->atomUnit;
@@ -52,8 +52,8 @@ abstract class AbstractCompoundUnitConverter extends AbstractUnitConverter
         foreach ($values as [$val, $unit]) {
             [$measure, $deno] = $this->normalizeAndSplitUnit($unit);
 
-            $measure = $this->normalizeBaseUnit($measure);
-            $deno = $this->deno->normalizeBaseUnit($deno);
+            $measure = $this->normalizeUnit($measure);
+            $deno = $this->deno->normalizeUnit($deno);
 
             $this->deno = $this->deno->with(1, $deno);
 
@@ -88,10 +88,12 @@ abstract class AbstractCompoundUnitConverter extends AbstractUnitConverter
         }
 
         if ($denoUnit && $denoUnit !== $this->deno->baseUnit) {
-            $new->deno = $new->deno->with(1)
-                ->convertTo($denoUnit, $scale, $roundingMode);
+            $oldUnit = $new->deno->baseUnit;
 
-            $new->value = $new->value->dividedBy($new->deno->value, $scale, $roundingMode);
+            $new->deno = $new->deno->with(1, $denoUnit);
+
+            $new->value = $new->deno->convertTo($oldUnit, $scale, $roundingMode)
+                ->value->multipliedBy($new->value);
         }
 
         return $new;
@@ -111,9 +113,9 @@ abstract class AbstractCompoundUnitConverter extends AbstractUnitConverter
 
     abstract protected function normalizeCompoundUnit(string $unit): string;
 
-    protected function normalizeBaseUnit(string $unit): string
+    protected function normalizeUnit(string $unit): string
     {
-        return $this->measure->normalizeBaseUnit($unit);
+        return $this->measure->normalizeUnit($unit);
     }
 
     public function format(
@@ -126,6 +128,8 @@ abstract class AbstractCompoundUnitConverter extends AbstractUnitConverter
         [$measureUnit, $denoUnit] = $this->normalizeAndSplitUnit($unit);
 
         $suffix ??= $measureUnit . '/' . $denoUnit;
+
+        $suffix = $this->formatSuffix($suffix, $this->value, $unit);
 
         return parent::format($suffix, $measureUnit, $scale, $roundingMode);
     }

@@ -28,7 +28,7 @@ use Brick\Math\RoundingMode;
  * @method BigDecimal toFathoms(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
  * @method BigDecimal toNauticalMiles(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
  */
-class Length extends AbstractUnitConverter
+class Length extends AbstractBasicConverter
 {
     public const string UNIT_FEMTOMETERS = 'fm';
     public const string UNIT_PICOMETERS = 'pm';
@@ -88,9 +88,9 @@ class Length extends AbstractUnitConverter
         self::UNIT_NAUTICAL_MILES => 1852,
     ];
 
-    protected function normalizeBaseUnit(string $unit): string
+    protected function normalizeUnit(string $unit): string
     {
-        return match (strtolower($unit)) {
+        $unit = match (strtolower($unit)) {
             'femtometer', 'femtometers' => self::UNIT_FEMTOMETERS,
             'picometer', 'picometers' => self::UNIT_PICOMETERS,
             'nanometer', 'nanometers' => self::UNIT_NANOMETERS,
@@ -112,6 +112,8 @@ class Length extends AbstractUnitConverter
             'nautical mile', 'nautical miles' => self::UNIT_NAUTICAL_MILES,
             default => $unit,
         };
+
+        return parent::normalizeUnit($unit);
     }
 
     public function withOnlyCommonLengths(): static

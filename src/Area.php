@@ -24,7 +24,7 @@ use Brick\Math\RoundingMode;
  * @method BigDecimal toSquareAcres(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
  * @method BigDecimal toSquareHectares(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
  */
-class Area extends AbstractUnitConverter
+class Area extends AbstractBasicConverter
 {
     public const string UNIT_SQUARE_FEMTOMETERS = 'fm2';
     public const string UNIT_SQUARE_PICOMETERS = 'pm2';
@@ -76,14 +76,14 @@ class Area extends AbstractUnitConverter
         self::UNIT_SQUARE_HECTARES => 10000.0,
     ];
 
-    protected function normalizeBaseUnit(string $unit): string
+    protected function normalizeUnit(string $unit): string
     {
         if (str_starts_with(strtolower($unit), 'square')) {
             $unit = trim(substr($unit, 6));
             $unit .= '^2';
         }
 
-        return match (strtolower($unit)) {
+        $unit = match (strtolower($unit)) {
             'fm^2', 'fm²', 'femtometers2', 'femtometers^2', 'femtometers²' => self::UNIT_SQUARE_FEMTOMETERS,
             'pm^2', 'pm²', 'picometers2', 'picometers^2', 'picometers²' => self::UNIT_SQUARE_PICOMETERS,
             'nm^2', 'nm²', 'nanometers2', 'nanometers^2', 'nanometers²' => self::UNIT_SQUARE_NANOMETERS,
@@ -101,6 +101,8 @@ class Area extends AbstractUnitConverter
             'ha', 'hectare', 'hectares' => self::UNIT_SQUARE_HECTARES,
             default => $unit,
         };
+
+        return parent::normalizeUnit($unit);
     }
 
     public function withOnlyCommonAreas(): static

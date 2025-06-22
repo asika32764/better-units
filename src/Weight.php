@@ -25,23 +25,38 @@ use Brick\Math\RoundingMode;
  * @method BigDecimal toCarats(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
  * @method BigDecimal toNewtons(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
  */
-class Weight extends AbstractUnitConverter
+class Weight extends AbstractBasicConverter
 {
     public const string UNIT_FEMTOGRAMS = 'fg';
+
     public const string UNIT_PICOGRAMS = 'pg';
+
     public const string UNIT_NANOGRAMS = 'ng';
+
     public const string UNIT_MICROGRAMS = 'μg';
+
     public const string UNIT_MILLIGRAMS = 'mg';
+
     public const string UNIT_GRAMS = 'g';
+
     public const string UNIT_DECIGRAMS = 'dg';
+
     public const string UNIT_CENTIGRAMS = 'cg';
+
     public const string UNIT_KILOGRAMS = 'kg';
+
     public const string UNIT_METRIC_TONS = 't';
+
     public const string UNIT_OUNCES = 'oz';
+
     public const string UNIT_POUNDS = 'lb';
+
     public const string UNIT_STONES = 'st';
+
     public const string UNIT_TONS = 'tn';
+
     public const string UNIT_CARATS = 'ct';
+
     public const string UNIT_NEWTONS = 'N';
 
     public const array UNITS_GROUP_COMMON_WEIGHTS = [
@@ -91,27 +106,29 @@ class Weight extends AbstractUnitConverter
     // Standard gravity in m/s²
     public float $gAcceleration = 9.80665;
 
-    protected function normalizeBaseUnit(string $unit): string
+    protected function normalizeUnit(string $unit): string
     {
-        return match (strtolower($unit)) {
-            'femtograms', 'femtogram' => self::UNIT_FEMTOGRAMS,
-            'picograms', 'picogram' => self::UNIT_PICOGRAMS,
-            'nanograms', 'nanogram' => self::UNIT_NANOGRAMS,
-            'micrograms', 'microgram' => self::UNIT_MICROGRAMS,
-            'milligrams', 'milligram' => self::UNIT_MILLIGRAMS,
-            'grams', 'gram' => self::UNIT_GRAMS,
-            'decigrams', 'decigram' => self::UNIT_DECIGRAMS,
-            'centigrams', 'centigram' => self::UNIT_CENTIGRAMS,
-            'kilograms', 'kilogram' => self::UNIT_KILOGRAMS,
-            'metric tons', 'metric ton', 'metrictons', 'metricton', 'tonnes', 'tonne' => self::UNIT_METRIC_TONS,
-            'ounces', 'ounce' => self::UNIT_OUNCES,
-            'pounds', 'pound' => self::UNIT_POUNDS,
-            'stones', 'stone' => self::UNIT_STONES,
-            'tons', 'ton' => self::UNIT_TONS,
-            'carats', 'carat' => self::UNIT_CARATS,
-            'newtons', 'newton' => self::UNIT_NEWTONS,
+        $unit = match (strtolower($unit)) {
+            'femtograms', 'femtogram', 'fg' => self::UNIT_FEMTOGRAMS,
+            'picograms', 'picogram', 'pg' => self::UNIT_PICOGRAMS,
+            'nanograms', 'nanogram', 'ng' => self::UNIT_NANOGRAMS,
+            'micrograms', 'microgram', 'μg', 'mcg' => self::UNIT_MICROGRAMS,
+            'milligrams', 'milligram', 'mg' => self::UNIT_MILLIGRAMS,
+            'grams', 'gram', 'g' => self::UNIT_GRAMS,
+            'decigrams', 'decigram', 'dg' => self::UNIT_DECIGRAMS,
+            'centigrams', 'centigram', 'cg' => self::UNIT_CENTIGRAMS,
+            'kilograms', 'kilogram', 'kg' => self::UNIT_KILOGRAMS,
+            'metric tons', 'metric ton', 'metrictons', 'metricton', 'tonnes', 'tonne', 't' => self::UNIT_METRIC_TONS,
+            'ounces', 'ounce', 'oz' => self::UNIT_OUNCES,
+            'pounds', 'pound', 'lb' => self::UNIT_POUNDS,
+            'stones', 'stone', 'st' => self::UNIT_STONES,
+            'tons', 'ton', 'tn' => self::UNIT_TONS,
+            'carats', 'carat', 'ct' => self::UNIT_CARATS,
+            'newtons', 'newton', 'n' => self::UNIT_NEWTONS,
             default => $unit,
         };
+
+        return parent::normalizeUnit($unit);
     }
 
     public function withOnlyCommonWeights(): static

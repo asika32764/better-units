@@ -25,7 +25,7 @@ use Brick\Math\RoundingMode;
  * @method BigDecimal toGigawattHours(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
  * @method BigDecimal toTerawattHours(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
  */
-class Energy extends AbstractUnitConverter
+class Energy extends AbstractBasicConverter
 {
     // The atom energy unit
     public const string UNIT_JOULE = 'j';
@@ -69,15 +69,15 @@ class Energy extends AbstractUnitConverter
         self::UNIT_TERAWATT_HOUR => 3.6e15,
     ];
 
-    protected function normalizeBaseUnit(string $unit): string
+    protected function normalizeUnit(string $unit): string
     {
-        $unit = str_replace(
+        $unit = (string) str_replace(
             ['electron volt', 'electron volts', 'electronvolt', 'electronvolts'],
             'ev',
             $unit
         );
 
-        return match (strtolower($unit)) {
+        $unit = match (strtolower($unit)) {
             'joule', 'joules' => self::UNIT_JOULE,
             'kilojoule', 'kilojoules' => self::UNIT_KILOJOULE,
             'megajoule', 'megajoules' => self::UNIT_MEGAJOULE,
@@ -96,5 +96,7 @@ class Energy extends AbstractUnitConverter
             'terawatt hour', 'terawatt hours', 'twhr' => self::UNIT_TERAWATT_HOUR,
             default => $unit
         };
+
+        return parent::normalizeUnit($unit);
     }
 }
