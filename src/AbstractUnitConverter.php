@@ -107,16 +107,16 @@ abstract class AbstractUnitConverter implements \Stringable
 
         $values = static::parseValue($value);
 
-        $nanoSeconds = BigDecimal::zero();
+        $atomValue = BigDecimal::zero();
 
         foreach ($values as [$val, $unit]) {
             $unit = $this->normalizeUnit($unit);
-            $converted = $instance->withValue($val, $unit, $scale, $roundingMode)->value;
+            $converted = $instance->withValue($val, fromUnit: $unit, scale: $scale, roundingMode: $roundingMode);
 
-            $nanoSeconds = $nanoSeconds->plus($converted);
+            $atomValue = $atomValue->plus($converted->value);
         }
 
-        $instance = $instance->withValue($nanoSeconds);
+        $instance = $instance->withValue($atomValue);
 
         $asUnit ??= $this->baseUnit;
 
