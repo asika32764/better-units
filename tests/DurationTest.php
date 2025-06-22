@@ -7,6 +7,7 @@ namespace Asika\UnitConverter\Tests;
 use Asika\UnitConverter\AbstractUnitConverter;
 use Asika\UnitConverter\Duration;
 use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
 class DurationTest extends TestCase
@@ -57,8 +58,8 @@ class DurationTest extends TestCase
                 fn () => new Duration(60)->convertTo(Duration::UNIT_MINUTES),
                 [],
                 [],
-                '1minutes',
-                '1minutes',
+                '1minute',
+                '1minute',
             ],
             '30 seconds to minutes no scale' => [
                 fn () => new Duration(30)->convertTo(Duration::UNIT_MINUTES),
@@ -107,14 +108,14 @@ class DurationTest extends TestCase
                 fn (Duration $c) => $c->format(),
                 [],
                 '28hours',
-                '1days 4hours',
+                '1day 4hours',
             ],
             '102500 seconds to hours scale 3' => [
                 fn () => new Duration(102500)->convertTo(Duration::UNIT_HOURS, 3),
                 fn (Duration $c) => $c->format(scale: 3),
                 [],
                 '28.472hours',
-                '1days 4hours 28minutes 19seconds 200milliseconds',
+                '1day 4hours 28minutes 19seconds 200milliseconds',
             ],
         ];
     }
@@ -127,7 +128,7 @@ class DurationTest extends TestCase
                 [],
                 [],
                 '60minutes',
-                '1hours',
+                '1hour',
             ],
             '3.74 hours to minutes' => [
                 fn () => new Duration(3.74, Duration::UNIT_HOURS)->convertTo(Duration::UNIT_MINUTES),
@@ -141,14 +142,14 @@ class DurationTest extends TestCase
                 [],
                 [],
                 '42days',
-                '1months 1weeks 4days 13hours 36minutes',
+                '1month 1week 4days 13hours 36minutes',
             ],
             '16384 hours to years scale 3' => [
                 fn () => new Duration(16384, Duration::UNIT_HOURS)->convertTo(Duration::UNIT_YEARS, 3),
                 [],
                 [],
                 '1.87years',
-                '1years 10months 1weeks 6days 5hours 12minutes',
+                '1year 10months 1week 6days 5hours 12minutes',
             ],
         ];
     }
@@ -163,7 +164,7 @@ class DurationTest extends TestCase
                 [],
                 [],
                 '35480160seconds',
-                '1years 1months 2weeks 1days 5hours 12minutes',
+                '1year 1month 2weeks 1day 5hours 12minutes',
             ],
             'Anomalistic 1year' => [
                 fn() => new Duration()
@@ -172,7 +173,7 @@ class DurationTest extends TestCase
                 [],
                 [],
                 '31558432.55seconds',
-                '1years',
+                '1year',
             ],
             'Anomalistic 1month' => [
                 fn() => new Duration()
@@ -181,7 +182,7 @@ class DurationTest extends TestCase
                 [],
                 [],
                 '2380713.12seconds',
-                '1months',
+                '1month',
             ],
             'Anomalistic more' => [
                 fn() => new Duration()
@@ -190,7 +191,7 @@ class DurationTest extends TestCase
                 [],
                 [],
                 (Duration::YEAR_SECONDS_ANOMALISTIC + (1.5 * Duration::MONTH_SECONDS_ANOMALISTIC)) . 'seconds',
-                '1years 1months 1weeks 6days 18hours 39minutes 16seconds 560milliseconds',
+                '1year 1month 1week 6days 18hours 39minutes 16seconds 560milliseconds',
             ],
             'Gregorian' => [
                 fn() => new Duration()
@@ -199,8 +200,41 @@ class DurationTest extends TestCase
                 [],
                 [],
                 '35501571seconds',
-                '1years 1months 2weeks 1days 5hours 14minutes 33seconds',
+                '1year 1month 2weeks 1day 5hours 14minutes 33seconds',
             ],
         ];
+    }
+
+    #[Test]
+    public function dateInterval(): void
+    {
+        $d = Duration::parseDateString('3years 2months 17days 10hours 3minutes 45seconds 123milliseconds 456 microseconds');
+
+        self::assertEquals(
+            '3years 2months 2weeks 3days 10hours 3minutes 45seconds 123milliseconds 456microseconds',
+            $d->humanize()
+        );
+
+        self::assertEquals(
+            '101371905123456microseconds',
+            $d->format(unit: Duration::UNIT_MICROSECONDS)
+        );
+
+        $interval = $d->toDateInterval();
+
+        self::assertEquals(
+            '3y 2m 2w 3d 10h 3m 45s.123456',
+            sprintf(
+                '%dy %dm %dw %dd %dh %dm %ds.%d',
+                $interval->y,
+                $interval->m,
+                $interval->d / 7, // Convert days to weeks
+                $interval->d % 7, // Remaining days
+                $interval->h,
+                $interval->i,
+                $interval->s,
+                (int) ($interval->f * 1_000_000) // Convert fractional seconds to microseconds
+            )
+        );
     }
 }

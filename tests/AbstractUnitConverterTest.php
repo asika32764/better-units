@@ -186,7 +186,7 @@ class AbstractUnitConverterTest extends TestCase
         assertEquals(
             '101371.9K Seconds',
             $d->format(
-                fn (BigDecimal $value, Duration $d) =>
+                fn (BigDecimal $value, string $unit, Duration $d) =>
                     $value->dividedBy(1000, 1, RoundingMode::HALF_UP) . 'K Seconds'
             )
         );
@@ -251,10 +251,10 @@ class AbstractUnitConverterTest extends TestCase
             ],
             'format callback' => [
                 [
-                    fn (BigDecimal $v, Duration $d) => sprintf(
+                    fn (BigDecimal $v, string $unit, Duration $d) => sprintf(
                         '%02d %s',
                         (string) $v,
-                        $d->baseUnit
+                        $unit
                     ),
                     ', '
                 ],
@@ -264,7 +264,7 @@ class AbstractUnitConverterTest extends TestCase
     }
 
     #[Test]
-    public function addingUnit(): void
+    public function addingUnitAndNormalizer(): void
     {
         $d = Duration::from('350years');
         $d = $d->withAddedUnitExchangeRate(
@@ -276,6 +276,31 @@ class AbstractUnitConverterTest extends TestCase
         assertEquals(
             '3.5centuries',
             $d->format(),
+        );
+
+        $d = $d->withUnitNormalizer(
+            function (string $unit) {
+                if ($unit === 'century' || $unit === 'c') {
+                    return 'centuries';
+                }
+
+                return $unit;
+            }
+        )
+            ->withSuffixNormalizer(
+                function (string $suffix, BigDecimal $value) {
+                    if ($value->abs()->isEqualTo(1) && $suffix === 'centuries') {
+                        $suffix = 'century';
+                    }
+
+                    return $suffix;
+                }
+            )
+            ->withParse('1c');
+
+        assertEquals(
+            '1century',
+            $d->format()
         );
     }
 
@@ -292,14 +317,66 @@ class AbstractUnitConverterTest extends TestCase
 
     #[Test]
     // nearest
-    public function nearest()
+    public function nearest(): void
     {
-        $f = FileSize::from('8500KB');
+        $f = FileSize::from('8500KiB');
+        $f = $f->nearest(5, units: FileSize::UNITS_GROUP_BYTES_BINARY);
+
+        assertEquals(
+            '8.30078MiB',
+            $f->format()
+        );
+
+        assertEquals(
+            FileSize::UNIT_MEBIBYTES,
+            $f->baseUnit
+        );
+
+        $f = FileSize::from('4360000KiB');
+        $f = $f->nearest(5, units: FileSize::UNITS_GROUP_BYTES_BINARY);
+
+        assertEquals(
+            '4.15802GiB',
+            $f->format()
+        );
+
+        assertEquals(
+            FileSize::UNIT_GIBIBYTES,
+            $f->baseUnit
+        );
+
+        $f = FileSize::from('0.000001245TiB');
+        $f = $f->nearest(5, units: FileSize::UNITS_GROUP_BYTES_BINARY);
+
+        assertEquals(
+            '1.30547MiB',
+            $f->format()
+        );
+
+        assertEquals(
+            FileSize::UNIT_MEBIBYTES,
+            $f->baseUnit
+        );
+    }
+
+    #[Test]
+    // nearest
+    public function nearestWithPresetUnits(): void
+    {
+        $f = new FileSize()
+            ->withOnlyBytesBinary()
+            ->withParse('0.000001245TiB');
+
         $f = $f->nearest(5);
 
         assertEquals(
-            '8.3MB',
+            '1.30547MiB',
             $f->format()
+        );
+
+        assertEquals(
+            FileSize::UNIT_MEBIBYTES,
+            $f->baseUnit
         );
     }
 }

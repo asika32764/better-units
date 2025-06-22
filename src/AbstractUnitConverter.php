@@ -13,7 +13,8 @@ use Brick\Math\RoundingMode;
  * @formatter:off
  *
  * @psalm-type HumanizeCallback = \Closure(AbstractUnitConverter $remainder, array<string, BigDecimal> $sortedUnits): string
- * @psalm-type FormatterCallback = \Closure(BigDecimal $value, AbstractUnitConverter $converter): string
+ * @psalm-type FormatterCallback = \Closure(BigDecimal $value, string $unit, AbstractUnitConverter $converter): string
+ * @psalm-type SuffixNormalizerCallback = \Closure(string $suffix, BigDecimal $value, string $unit,  $converter): string
  *
  * @formatter:on
  */
@@ -23,7 +24,7 @@ abstract class AbstractUnitConverter implements \Stringable
 
     public const int OPTION_NO_FALLBACK = 1 << 1;
 
-    public BigNumber $value {
+    public BigDecimal $value {
         set(mixed $value) => $this->value = BigDecimal::of($value);
     }
 
@@ -41,15 +42,22 @@ abstract class AbstractUnitConverter implements \Stringable
         get;
     }
 
-    protected ?\Closure $unitNormalizer = null;
+    public ?\Closure $unitNormalizer = null;
+
+    public ?\Closure $suffixNormalizer = null;
 
     public static function from(mixed $value, ?string $asUnit = null): static
     {
+        return new static()->withFrom($value, $asUnit);
+    }
+
+    public function withFrom(mixed $value, ?string $asUnit = null): static
+    {
         if (is_string($value) && !is_numeric($value)) {
-            return static::parse($value, $asUnit);
+            return $this->withParse($value, $asUnit);
         }
 
-        return new static($value, $asUnit);
+        return $this->with($value, $asUnit);
     }
 
     public static function parse(string $value, ?string $asUnit = null): static
@@ -95,7 +103,7 @@ abstract class AbstractUnitConverter implements \Stringable
 
     public function __construct(mixed $value = 0, ?string $baseUnit = null)
     {
-        $this->value = BigNumber::of($value);
+        $this->value = $value;
         $this->baseUnit = $baseUnit ?? $this->defaultUnit;
     }
 
@@ -228,15 +236,19 @@ abstract class AbstractUnitConverter implements \Stringable
             $value = $value->stripTrailingZeros();
         }
 
-        $suffix ??= $unit ?? $this->baseUnit;
+        $unit ??= $this->baseUnit;
+
+        $suffix ??= $unit;
 
         if ($suffix instanceof \Closure) {
-            return $suffix($value, $this);
+            return $suffix($value, $unit, $this);
         }
 
         if (is_string($suffix) && str_contains($suffix, '%')) {
             return sprintf($suffix, $value);
         }
+
+        $suffix = $this->normalizeSuffix($suffix, $value, $unit);
 
         return $value . $suffix;
     }
@@ -341,7 +353,7 @@ abstract class AbstractUnitConverter implements \Stringable
         $atomUnit = $this->atomUnit;
         $remainder = $this->convertTo($atomUnit);
 
-        return (string) $callback($remainder, $this->getSortedUnits());
+        return (string) $callback($remainder, $this->getSortedUnitRates());
     }
 
     public function withAddedUnitExchangeRate(
@@ -401,16 +413,22 @@ abstract class AbstractUnitConverter implements \Stringable
         return $new;
     }
 
-    public function nearest(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN): static
-    {
-        $value = $this->value->toBigDecimal();
-        $units = $this->getSortedUnits();
+    public function nearest(
+        ?int $scale = null,
+        RoundingMode $roundingMode = RoundingMode::DOWN,
+        ?array $units = null,
+    ): static {
+        $sortedUnits = $this->getSortedUnitRates();
 
-        $bestUnit = $this->baseUnit;
-        $bestValue = $value;
-        $minDiff = null;
+        if ($units !== null) {
+            $sortedUnits = array_intersect_key($sortedUnits, array_flip($units));
+        }
 
-        foreach ($units as $unit => $rate) {
+        $closestValue = $this->value;
+        $closestUnit = $this->baseUnit;
+        $minDistance = null;
+
+        foreach ($sortedUnits as $unit => $rate) {
             $converted = $this->to($unit, $scale, $roundingMode);
 
             if ($converted->isZero()) {
@@ -419,26 +437,22 @@ abstract class AbstractUnitConverter implements \Stringable
 
             $abs = $converted->abs();
 
-            if ($abs->isLessThan(0)) {
+            if ($abs->isLessThan(1)) {
                 $distance = BigDecimal::of(1)->dividedBy($abs, $scale, RoundingMode::HALF_UP);
             } else {
-                $distance = BigDecimal::of(1)->dividedBy($abs, $scale, RoundingMode::HALF_UP);
+                $distance = $abs->dividedBy(1, $scale, RoundingMode::HALF_UP);
             }
 
-            $abs = $converted->abs();
-
-            $diff = $abs->minus(1)->abs();
-
-            if ($minDiff === null || $diff->isLessThan($minDiff)) {
-                $minDiff = $diff;
-                $bestUnit = $unit;
-                $bestValue = $converted;
+            if ($minDistance === null || $distance->isLessThan($minDistance)) {
+                $minDistance = $distance;
+                $closestUnit = $unit;
+                $closestValue = $converted;
             }
         }
 
         $new = clone $this;
-        $new->value = $bestValue;
-        $new->baseUnit = $bestUnit;
+        $new->value = $closestValue;
+        $new->baseUnit = $closestUnit;
 
         return $new;
     }
@@ -486,7 +500,7 @@ abstract class AbstractUnitConverter implements \Stringable
     /**
      * @return  array<string, BigDecimal>
      */
-    protected function getSortedUnits(): array
+    protected function getSortedUnitRates(): array
     {
         $units = array_map(BigDecimal::of(...), $this->unitExchanges);
 
@@ -504,6 +518,37 @@ abstract class AbstractUnitConverter implements \Stringable
         $new->unitNormalizer = $unitNormalizer;
 
         return $new;
+    }
+
+    public function withSuffixNormalizer(?\Closure $suffixNormalizer): static
+    {
+        $new = clone $this;
+        $new->suffixNormalizer = $suffixNormalizer;
+
+        return $new;
+    }
+
+    protected function normalizeSuffix(string $suffix, BigDecimal $value, string $unit)
+    {
+        return $this->suffixNormalizer
+            ? ($this->suffixNormalizer)($suffix, $value, $unit, $this)
+            : $suffix;
+    }
+
+    public static function unitConstants(): array
+    {
+        $ref = new \ReflectionClass(static::class);
+        $constants = $ref->getConstants(\ReflectionClassConstant::IS_PUBLIC);
+
+        $returnConstants = [];
+
+        foreach ($constants as $name => $value) {
+            if (str_starts_with($name, 'UNIT_')) {
+                $returnConstants[strtolower(substr($name, 5))] = $value;
+            }
+        }
+
+        return $returnConstants;
     }
 
     public function __toString(): string

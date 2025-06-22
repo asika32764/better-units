@@ -68,7 +68,21 @@ class Duration extends AbstractUnitConverter
         self::UNIT_WEEKS => 604800.0,
         self::UNIT_MONTHS => self::MONTH_SECONDS_COMMON,
         self::UNIT_YEARS => self::YEAR_SECONDS_COMMON,
-    ];
+    ] {
+        get {
+            $units = $this->unitExchanges;
+
+            if (isset($units[self::UNIT_MONTHS])) {
+                $units[self::UNIT_MONTHS] = $this->monthSeconds->toFloat();
+            }
+
+            if (isset($units[self::UNIT_YEARS])) {
+                $units[self::UNIT_YEARS] = $this->yearSeconds->toFloat();
+            }
+
+            return $units;
+        }
+    }
 
     public protected(set) BigNumber $yearSeconds {
         set(mixed $value) => $this->yearSeconds = BigNumber::of($value);
@@ -97,6 +111,15 @@ class Duration extends AbstractUnitConverter
         return new static()->withParseDateString($value, $asUnit, $scale, $roundingMode);
     }
 
+    public static function fromDateInterval(
+        \DateInterval $interval,
+        ?string $asUnit = null,
+        ?int $scale = null,
+        RoundingMode $roundingMode = RoundingMode::HALF_UP
+    ): static {
+        return new static()->withFromDateInterval($interval, $asUnit, $scale, $roundingMode);
+    }
+
     /**
      * @throws DivisionByZeroException
      * @throws MathException
@@ -111,6 +134,15 @@ class Duration extends AbstractUnitConverter
     ): static {
         $interval = \DateInterval::createFromDateString($value);
 
+        return $this->withFromDateInterval($interval, $asUnit, $scale, $roundingMode);
+    }
+
+    public function withFromDateInterval(
+        \DateInterval $interval,
+        ?string $asUnit = null,
+        ?int $scale = null,
+        RoundingMode $roundingMode = RoundingMode::HALF_UP
+    ): static {
         $microseconds = $this->intervalToMicroseconds($interval);
 
         $instance = $this->with($microseconds, static::UNIT_MICROSECONDS);
@@ -123,6 +155,15 @@ class Duration extends AbstractUnitConverter
         }
 
         return $instance;
+    }
+
+    public function toDateInterval(
+        ?int $scale = null,
+        RoundingMode $roundingMode = RoundingMode::HALF_UP,
+    ): \DateInterval {
+        $instance = $this->convertTo(static::UNIT_MICROSECONDS, $scale, $roundingMode);
+
+        return \DateInterval::createFromDateString($instance->humanize());
     }
 
     public function intervalToSeconds(\DateInterval $interval): BigDecimal
@@ -140,16 +181,7 @@ class Duration extends AbstractUnitConverter
         $new = clone $this;
         $new->yearSeconds = $yearSeconds;
 
-        $sRate = $this->getUnitExchangeRate(Duration::UNIT_SECONDS);
-
-        if (!$sRate) {
-            throw new \RuntimeException('Cannot set yearSeconds without seconds exchange rate.');
-        }
-
-        return $new->withAddedUnitExchangeRate(
-            static::UNIT_YEARS,
-            $sRate->multipliedBy($yearSeconds)
-        );
+        return $new;
     }
 
     public function withMonthSeconds(BigNumber|string|int|float $monthSeconds): Duration
@@ -157,31 +189,43 @@ class Duration extends AbstractUnitConverter
         $new = clone $this;
         $new->monthSeconds = $monthSeconds;
 
-        $sRate = $this->getUnitExchangeRate(static::UNIT_SECONDS);
+        return $new;
+    }
 
-        if (!$sRate) {
-            throw new \RuntimeException('Cannot set monthSeconds without seconds exchange rate.');
+    protected function normalizeSuffix(string $suffix, BigDecimal $value, string $unit)
+    {
+        if ($value->abs()->isEqualTo(1)) {
+            $suffix = match (strtolower($suffix)) {
+                static::UNIT_NANOSECONDS => 'nanosecond',
+                static::UNIT_MICROSECONDS => 'microsecond',
+                static::UNIT_MILLISECONDS => 'millisecond',
+                static::UNIT_SECONDS => 'second',
+                static::UNIT_MINUTES => 'minute',
+                static::UNIT_HOURS => 'hour',
+                static::UNIT_DAYS => 'day',
+                static::UNIT_WEEKS => 'week',
+                static::UNIT_MONTHS => 'month',
+                static::UNIT_YEARS => 'year',
+                default => $suffix,
+            };
         }
 
-        return $new->withAddedUnitExchangeRate(
-            static::UNIT_MONTHS,
-            $sRate->multipliedBy($monthSeconds)
-        );
+        return parent::normalizeSuffix($suffix, $value, $unit);
     }
 
     protected function normalizeBaseUnit(string $unit): string
     {
         return match (strtolower($unit)) {
-            'ns', 'nanosecond' => self::UNIT_NANOSECONDS,
-            'us', 'μs', 'microsecond' => self::UNIT_MICROSECONDS,
-            'ms', 'millisecond' => self::UNIT_MILLISECONDS,
-            's', 'second', 'sec' => self::UNIT_SECONDS,
-            'm', 'minute', 'min' => self::UNIT_MINUTES,
-            'h', 'hr', 'hour' => self::UNIT_HOURS,
-            'd', 'day' => self::UNIT_DAYS,
-            'w', 'week' => self::UNIT_WEEKS,
-            'mo', 'month' => self::UNIT_MONTHS,
-            'y', 'year' => self::UNIT_YEARS,
+            'ns', 'nanosecond' => static::UNIT_NANOSECONDS,
+            'us', 'μs', 'microsecond' => static::UNIT_MICROSECONDS,
+            'ms', 'millisecond' => static::UNIT_MILLISECONDS,
+            's', 'second', 'sec' => static::UNIT_SECONDS,
+            'm', 'minute', 'min' => static::UNIT_MINUTES,
+            'h', 'hr', 'hour' => static::UNIT_HOURS,
+            'd', 'day' => static::UNIT_DAYS,
+            'w', 'week' => static::UNIT_WEEKS,
+            'mo', 'month' => static::UNIT_MONTHS,
+            'y', 'year' => static::UNIT_YEARS,
             default => $unit,
         };
     }
