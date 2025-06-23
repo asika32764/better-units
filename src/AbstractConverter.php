@@ -99,7 +99,7 @@ abstract class AbstractConverter implements \Stringable
         ?int $scale = null,
         RoundingMode $roundingMode = RoundingMode::DOWN
     ): static {
-        $instance = $this->with(0, $this->atomUnit);
+        $new = $this->with(0, $this->atomUnit);
 
         $values = static::parseValue($value);
 
@@ -107,21 +107,21 @@ abstract class AbstractConverter implements \Stringable
 
         foreach ($values as [$val, $unit]) {
             $unit = $this->normalizeUnit($unit);
-            $converted = $instance->withValue($val, fromUnit: $unit, scale: $scale, roundingMode: $roundingMode);
+            $converted = $new->withValue($val, fromUnit: $unit, scale: $scale, roundingMode: $roundingMode);
 
             $atomValue = $atomValue->plus($converted->value);
         }
 
-        $instance = $instance->withValue($atomValue);
+        $new = $new->withValue($atomValue);
 
         $asUnit ??= $this->baseUnit;
 
-        if ($asUnit && $asUnit !== $instance->baseUnit) {
+        if ($asUnit && $asUnit !== $new->baseUnit) {
             $asUnit = $this->normalizeUnit($asUnit);
-            $instance = $instance->convertTo($asUnit, $scale, $roundingMode);
+            $new = $new->convertTo($asUnit, $scale, $roundingMode);
         }
 
-        return $instance;
+        return $new;
     }
 
     public function __construct(mixed $value = 0, ?string $baseUnit = null)
@@ -182,28 +182,37 @@ abstract class AbstractConverter implements \Stringable
 
         $new = clone $this;
 
-        $newValue = $this->value;
-
-        if (!$newValue->isZero()) {
-            $fromUnitRate = $this->getUnitExchangeRate($this->baseUnit)
-                ?? throw new \InvalidArgumentException("Unknown base unit: {$this->baseUnit}");
-
-            $toUnitRate = $this->getUnitExchangeRate($toUnit)
-                ?? throw new \InvalidArgumentException("Unknown target unit: {$toUnit}");
-
-            $newValue = BigDecimal::of($this->value)
-                ->multipliedBy($fromUnitRate)
-                ->dividedBy($toUnitRate, $scale, $roundingMode);
-
-            if ($scale === null) {
-                $newValue = $newValue->stripTrailingZeros();
-            }
+        if (!$new->value->isZero()) {
+            $new->value = $this->convertValue($new->value, $new->baseUnit, $toUnit, $scale, $roundingMode);
         }
 
-        $new->value = $newValue;
         $new->baseUnit = $toUnit;
 
         return $new;
+    }
+
+    protected function convertValue(
+        BigDecimal $value,
+        string $fromUnit,
+        string $toUnit,
+        ?int $scale,
+        RoundingMode $roundingMode
+    ): BigDecimal {
+        $fromUnitRate = $this->getUnitExchangeRate($fromUnit)
+            ?? throw new \InvalidArgumentException("Unknown base unit: {$fromUnit}");
+
+        $toUnitRate = $this->getUnitExchangeRate($toUnit)
+            ?? throw new \InvalidArgumentException("Unknown target unit: {$toUnit}");
+
+        $newValue = BigDecimal::of($value)
+            ->multipliedBy($fromUnitRate)
+            ->dividedBy($toUnitRate, $scale, $roundingMode);
+
+        if ($scale === null) {
+            $newValue = $newValue->stripTrailingZeros();
+        }
+
+        return $newValue;
     }
 
     public function convertToAtom(): static
@@ -219,7 +228,7 @@ abstract class AbstractConverter implements \Stringable
     ): static {
         $new = clone $this;
         $new->value = $value;
-        $new->baseUnit = $fromUnit ? $this->normalizeUnit($fromUnit) : $this->baseUnit;
+        $new->baseUnit = $fromUnit ? $new->normalizeUnit($fromUnit) : $this->baseUnit;
 
         if ($new->baseUnit !== $this->baseUnit) {
             $new = $new->convertTo($this->baseUnit, $scale, $roundingMode);

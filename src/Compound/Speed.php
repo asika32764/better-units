@@ -13,16 +13,28 @@ class Speed extends AbstractCompoundConverter
     public const string UNIT_MPS = 'mps';
     public const string UNIT_KPH = 'kph';
     public const string UNIT_MPH = 'mph';
-    // public const string UNIT_KNOTS = 'knots';
+    public const string UNIT_KNOTS = 'knots';
+
+    public string $atomUnit = 'm/s';
+
+    public string $defaultUnit = 'm/s';
 
     public AbstractConverter $measure {
         get => $this->measure ??= new Length();
     }
 
+    protected array $unitExchanges = [
+        'm/s' => 1,
+        self::UNIT_MPH => 0.44704,
+        self::UNIT_KNOTS => 0.514444444,
+    ];
+
     public AbstractConverter $deno {
         get => $this->deno ??= new Duration()
             ->withSuffixFormatter(
                 fn(string $unit): string => match (strtolower($unit)) {
+                    Duration::UNIT_FEMTOSECONDS => 'fs',
+                    Duration::UNIT_PICOSECONDS => 'ps',
                     Duration::UNIT_NANOSECONDS => 'ns',
                     Duration::UNIT_MICROSECONDS => 'μs',
                     Duration::UNIT_MILLISECONDS => 'ms',

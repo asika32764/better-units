@@ -13,19 +13,12 @@ abstract class AbstractCompoundConverter extends AbstractConverter
     public AbstractConverter $measure;
     public AbstractConverter $deno;
 
-    public string $atomUnit {
-        get => $this->measure->atomUnit;
-    }
-
-    public string $defaultUnit {
-        get => $this->measure->defaultUnit;
-    }
-
     public string $baseUnit {
         set {
             [$measureUnit, $denoUnit] = $this->normalizeAndSplitUnit($value);
 
-            $this->baseUnit = $measureUnit;
+            $this->baseUnit = $this->normalizeCompoundUnit($value);
+            $this->measure = $this->measure->withBaseUnit($measureUnit);
 
             if ($denoUnit) {
                 $this->deno = $this->deno->withBaseUnit($denoUnit);
@@ -33,9 +26,16 @@ abstract class AbstractCompoundConverter extends AbstractConverter
         }
     }
 
-    protected array $unitExchanges {
-        get => $this->measure->availableUnitExchanges;
-    }
+    protected array $unitExchanges = [];
+
+    /**
+     * Some conversion needs 2-steps to convert the value to the atom unit.
+     * This is the scale used for the intermediate conversion that can prevent
+     * loss of precision.
+     *
+     * @var int
+     */
+    public int $intermediateScale = 20;
 
     #[\Override]
     public function withParse(
@@ -44,35 +44,49 @@ abstract class AbstractCompoundConverter extends AbstractConverter
         ?int $scale = null,
         RoundingMode $roundingMode = RoundingMode::DOWN
     ): static {
-        $instance = $this->with(0, $this->atomUnit);
-
         $values = static::parseValue($value);
 
-        $nanoSeconds = BigDecimal::zero();
+        $atomValue = BigDecimal::zero();
+        $atomUnit = $this->measure->atomUnit . '/' . $this->deno->atomUnit;
+        $new = $this->with(0, $atomUnit);
 
         foreach ($values as [$val, $unit]) {
-            [$measure, $deno] = $this->normalizeAndSplitUnit($unit);
+            [, $denoUnit] = $new->normalizeAndSplitUnit($unit);
+            $unit = $this->normalizeCompoundUnit($unit);
 
-            $measure = $this->normalizeUnit($measure);
-            $deno = $this->deno->normalizeUnit($deno);
+            $new = $this->with($val, $unit);
 
-            $this->deno = $this->deno->with(1, $deno);
+            // Maybe is a single unit name, like `mph` or `knots`.
+            // We must use 2-steps conversion to convert it to the atom unit.
+            // Convert to local atom unit first, local unit should be X/y format.
+            // That can be referenced to child units.
+            if (!$denoUnit) {
+                $new = $new->convertTo(
+                    $this->atomUnit,
+                    $this->intermediateScale,
+                    $roundingMode
+                );
+            }
 
-            $converted = $instance->withValue($val, $measure, $scale, $roundingMode)->value;
+            $converted = $new->convertTo(
+                $atomUnit,
+                $scale,
+                $roundingMode
+            );
 
-            $nanoSeconds = $nanoSeconds->plus($converted);
+            $atomValue = $atomValue->plus($converted->value);
         }
 
-        $instance = $instance->withValue($nanoSeconds);
+        $new = $new->with($atomValue, $atomUnit);
 
         $asUnit ??= $this->baseUnit;
 
-        if ($asUnit && $asUnit !== $instance->baseUnit) {
+        if ($asUnit && $asUnit !== $new->baseUnit) {
             $asUnit = $this->normalizeUnit($asUnit);
-            $instance = $instance->convertTo($asUnit, $scale, $roundingMode);
+            $new = $new->convertTo($asUnit, $scale, $roundingMode);
         }
 
-        return $instance;
+        return $new;
     }
 
     #[\Override]
@@ -81,9 +95,53 @@ abstract class AbstractCompoundConverter extends AbstractConverter
         ?int $scale = null,
         RoundingMode $roundingMode = RoundingMode::DOWN
     ): static {
-        [$measureUnit, $denoUnit] = $this->normalizeAndSplitUnit($toUnit);
+        $toUnit = $this->normalizeCompoundUnit($toUnit);
+        $new = clone $this;
 
-        return $this->convertUnitPairTo(
+        // Direct exchange. For example, k/m to kph.
+        // Directly use the exchange rate if available.
+        if ($toUnit !== $this->atomUnit && $this->getUnitExchangeRate($toUnit) !== null) {
+            $new = $new->convertTo($this->atomUnit, $this->intermediateScale, $roundingMode);
+            $newValue = $new->convertValue(
+                $new->value,
+                $new->atomUnit,
+                $toUnit,
+                $scale,
+                $roundingMode
+            );
+            return $new->with($newValue, $toUnit);
+        }
+
+        $fromUnit = $this->normalizeCompoundUnit($this->baseUnit);
+
+        // Direct exchange. For example, mph to km/s.
+        // Directly use the exchange rate if available.
+        if ($fromUnit !== $this->atomUnit && $this->getUnitExchangeRate($fromUnit) !== null) {
+            // Convert the value to the local compound atom unit first,
+            // because the local atom unit can be referenced to child units.
+            $newValue = $new->convertValue(
+                $new->value,
+                $fromUnit,
+                $new->atomUnit,
+                $this->intermediateScale,
+                $roundingMode
+            );
+            // Now convert the value to the target child unit (X/y).
+            $newValue = $new->convertValue(
+                $newValue,
+                $new->atomUnit,
+                $toUnit,
+                $scale,
+                $roundingMode
+            );
+            return $new->with($newValue, $toUnit);
+        }
+
+        // Compound exchange, for example, m/s to km/h.
+        // Must split the unit into measure and denominator to exchange them.
+        [$measureUnit, $denoUnit] = $new->normalizeAndSplitUnit($toUnit);
+
+        return $new->convertUnitPairTo(
             $measureUnit,
             $denoUnit,
             $scale,
@@ -101,7 +159,11 @@ abstract class AbstractCompoundConverter extends AbstractConverter
 
         // If we have a measure unit, we need to convert the value accordingly.
         if ($measureUnit) {
-            $new = parent::convertTo($measureUnit, $scale, $roundingMode);
+            $this->measure = $this->measure->with($this->value)
+                ->convertTo($measureUnit, $scale, $roundingMode);
+
+            $new = $this->withValue($this->measure->value);
+            $new->baseUnit = $measureUnit;
         }
 
         // If we have a denominator unit, we need to convert the value accordingly.
@@ -113,6 +175,12 @@ abstract class AbstractCompoundConverter extends AbstractConverter
             $new->value = $new->deno->withValue($new->value)
                 ->convertTo($this->deno->baseUnit, $scale, $roundingMode)
                 ->value;
+        }
+
+        if ($scale !== null) {
+            $new->value = $new->value->toScale($scale, $roundingMode);
+        } else {
+            $new->value = $new->value->stripTrailingZeros();
         }
 
         return $new;
@@ -127,7 +195,12 @@ abstract class AbstractCompoundConverter extends AbstractConverter
     {
         $unit = $this->normalizeCompoundUnit($unit);
 
-        return explode('/', $unit, 2) + ['', ''];
+        $units = explode('/', $unit, 2) + ['', ''];
+
+        $units[0] = $this->measure->normalizeUnit($units[0]);
+        $units[1] = $this->deno->normalizeUnit($units[1]);
+
+        return $units;
     }
 
     abstract protected function normalizeCompoundUnit(string $unit): string;
@@ -135,7 +208,9 @@ abstract class AbstractCompoundConverter extends AbstractConverter
     #[\Override]
     protected function normalizeUnit(string $unit): string
     {
-        return $this->measure->normalizeUnit($unit);
+        return $this->normalizeCompoundUnit($unit);
+
+        // return implode('/', array_filter($units));
     }
 
     #[\Override]

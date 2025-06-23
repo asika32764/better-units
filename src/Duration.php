@@ -32,6 +32,10 @@ class Duration extends AbstractBasicConverter
 {
     use DurationCalendlyTrait;
 
+    public const string UNIT_FEMTOSECONDS = 'femtoseconds';
+
+    public const string UNIT_PICOSECONDS = 'picoseconds';
+
     public const string UNIT_NANOSECONDS = 'nanoseconds';
 
     public const string UNIT_MICROSECONDS = 'microseconds';
@@ -52,11 +56,13 @@ class Duration extends AbstractBasicConverter
 
     public const string UNIT_YEARS = 'years';
 
-    public string $atomUnit = self::UNIT_NANOSECONDS;
+    public string $atomUnit = self::UNIT_FEMTOSECONDS;
 
     public string $defaultUnit = self::UNIT_SECONDS;
 
     protected array $unitExchanges = [
+        self::UNIT_FEMTOSECONDS => 1e-15,
+        self::UNIT_PICOSECONDS => 1e-12,
         self::UNIT_NANOSECONDS => 1e-9,
         self::UNIT_MICROSECONDS => 1e-6,
         self::UNIT_MILLISECONDS => 1e-3,

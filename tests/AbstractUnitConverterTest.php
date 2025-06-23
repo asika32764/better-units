@@ -286,7 +286,7 @@ class AbstractUnitConverterTest extends TestCase
                     'divider' => ':',
                     'options' => Duration::OPTION_KEEP_ZERO,
                 ],
-                '03:02:02:03:10:03:45:123:00:00'
+                '03:02:02:03:10:03:45:123:00:00:00:00'
             ],
             'format callback' => [
                 [
