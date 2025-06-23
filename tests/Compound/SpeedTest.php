@@ -54,6 +54,12 @@ class SpeedTest extends TestCase
                 fn (Speed $speed) => $speed->format('KMH'),
                 '3.6KMH',
             ],
+            'm/h to km/h with format' => [
+                fn () => new Speed(3000, 'm/h')
+                    ->convertTo('km/h', scale: 10),
+                [],
+                '3km/h',
+            ],
             'mps to kph' => [
                 fn () => Speed::parse('1mps')
                     ->convertTo('kph', scale: 10),

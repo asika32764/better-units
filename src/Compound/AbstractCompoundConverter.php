@@ -10,8 +10,20 @@ use Brick\Math\RoundingMode;
 
 abstract class AbstractCompoundConverter extends AbstractConverter
 {
-    public AbstractConverter $measure;
-    public AbstractConverter $deno;
+    abstract public AbstractConverter $measure {
+        get;
+    }
+    abstract public AbstractConverter $deno {
+        get;
+    }
+
+    protected array $unitExchanges {
+        get => $this->compoundUnitExchanges;
+    }
+
+    abstract protected array $compoundUnitExchanges {
+        get;
+    }
 
     public string $baseUnit {
         set {
@@ -25,8 +37,6 @@ abstract class AbstractCompoundConverter extends AbstractConverter
             }
         }
     }
-
-    protected array $unitExchanges = [];
 
     /**
      * Some conversion needs 2-steps to convert the value to the atom unit.
@@ -126,15 +136,10 @@ abstract class AbstractCompoundConverter extends AbstractConverter
                 $this->intermediateScale,
                 $roundingMode
             );
+
             // Now convert the value to the target child unit (X/y).
-            $newValue = $new->convertValue(
-                $newValue,
-                $new->atomUnit,
-                $toUnit,
-                $scale,
-                $roundingMode
-            );
-            return $new->with($newValue, $toUnit);
+            return $new->with($newValue, $new->atomUnit)
+                ->convertTo($toUnit, $scale, $roundingMode);
         }
 
         // Compound exchange, for example, m/s to km/h.
@@ -214,14 +219,28 @@ abstract class AbstractCompoundConverter extends AbstractConverter
     }
 
     #[\Override]
-    protected function formatSuffix(string $suffix, BigDecimal $value, string $unit): string
-    {
-        $suffix = parent::formatSuffix($suffix, $value, $unit);
+    public function format(
+        string|\Closure|null $suffix = null,
+        ?string $unit = null,
+        ?int $scale = null,
+        RoundingMode $roundingMode = RoundingMode::DOWN
+    ): string {
+        $addDenoSuffix = $suffix === null;
 
-        if ($suffix === $this->baseUnit) {
-            $suffix .= '/' . $this->deno->formatSuffix($this->deno->baseUnit, $value, $this->deno->baseUnit);
+        if (!$suffix) {
+            $suffix = $unit ?? $this->baseUnit;
+
+            if ($this->measure->getUnitExchangeRate($suffix) !== null) {
+                $suffix .= '/' . $this->deno->formatSuffix($this->deno->baseUnit, $this->value, $this->deno->baseUnit);
+            }
         }
 
-        return $suffix;
+        $text = parent::format($suffix, $unit, $scale, $roundingMode);
+
+        if ($addDenoSuffix && $this->measure->getUnitExchangeRate($suffix) !== null) {
+            $text .= '/' . $this->deno->formatSuffix($this->deno->baseUnit, $this->value, $this->deno->baseUnit);
+        }
+
+        return $text;
     }
 }

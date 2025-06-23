@@ -23,7 +23,7 @@ class Speed extends AbstractCompoundConverter
         get => $this->measure ??= new Length();
     }
 
-    protected array $unitExchanges = [
+    protected array $compoundUnitExchanges = [
         'm/s' => 1,
         self::UNIT_MPH => 0.44704,
         self::UNIT_KNOTS => 0.514444444,
@@ -31,23 +31,7 @@ class Speed extends AbstractCompoundConverter
 
     public AbstractConverter $deno {
         get => $this->deno ??= new Duration()
-            ->withSuffixFormatter(
-                fn(string $unit): string => match (strtolower($unit)) {
-                    Duration::UNIT_FEMTOSECONDS => 'fs',
-                    Duration::UNIT_PICOSECONDS => 'ps',
-                    Duration::UNIT_NANOSECONDS => 'ns',
-                    Duration::UNIT_MICROSECONDS => 'μs',
-                    Duration::UNIT_MILLISECONDS => 'ms',
-                    Duration::UNIT_SECONDS => 's',
-                    Duration::UNIT_MINUTES => 'min',
-                    Duration::UNIT_HOURS => 'h',
-                    Duration::UNIT_DAYS => 'd',
-                    Duration::UNIT_WEEKS => 'w',
-                    Duration::UNIT_MONTHS => 'mo',
-                    Duration::UNIT_YEARS => 'y',
-                    default => $unit,
-                }
-            );
+            ->withShortUnitFormatters();
     }
 
     protected function normalizeCompoundUnit(string $unit): string

@@ -270,4 +270,25 @@ class Duration extends AbstractBasicConverter
 
         return parent::normalizeUnit($unit);
     }
+
+    public function withShortUnitFormatters(): static
+    {
+        return $this->withSuffixFormatter(
+            fn(string $unit): string => match (strtolower($unit)) {
+                Duration::UNIT_FEMTOSECONDS => 'fs',
+                Duration::UNIT_PICOSECONDS => 'ps',
+                Duration::UNIT_NANOSECONDS => 'ns',
+                Duration::UNIT_MICROSECONDS => 'μs',
+                Duration::UNIT_MILLISECONDS => 'ms',
+                Duration::UNIT_SECONDS => 's',
+                Duration::UNIT_MINUTES => 'min',
+                Duration::UNIT_HOURS => 'h',
+                Duration::UNIT_DAYS => 'd',
+                Duration::UNIT_WEEKS => 'w',
+                Duration::UNIT_MONTHS => 'mo',
+                Duration::UNIT_YEARS => 'y',
+                default => $unit,
+            }
+        );
+    }
 }
