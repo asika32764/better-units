@@ -78,8 +78,8 @@ abstract class AbstractBasicConverter extends AbstractConverter
                 $formatted = trim(implode($divider, array_filter($text)));
 
                 if (!$formatted && !($options & static::OPTION_NO_FALLBACK)) {
-                    $minSuffix = $unitFormatters[$this->baseUnit];
-                    $formatted = $this->with(0, $this->baseUnit)->format($minSuffix);
+                    $minSuffix = $unitFormatters[$this->unit];
+                    $formatted = $this->with(0, $this->unit)->format($minSuffix);
                 }
 
                 return $formatted;
@@ -99,7 +99,7 @@ abstract class AbstractBasicConverter extends AbstractConverter
         }
 
         $closestValue = $this->value;
-        $closestUnit = $this->baseUnit;
+        $closestUnit = $this->unit;
         $minDistance = null;
 
         foreach ($sortedUnits as $unit => $rate) {
@@ -126,7 +126,7 @@ abstract class AbstractBasicConverter extends AbstractConverter
 
         $new = clone $this;
         $new->value = $closestValue;
-        $new->baseUnit = $closestUnit;
+        $new->unit = $closestUnit;
 
         return $new;
     }

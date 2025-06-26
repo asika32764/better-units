@@ -1,6 +1,6 @@
 # Better PHP Unit Converter
 
-Better Unit Converter is a modern and intuitive unit conversion tool that allows you to convert between various 
+Better Unit Converter is a modern and intuitive unit conversion tool that allows you to convert between various
 units of measurement. It supports a wide range of categories including length, weight, temperature, volume, and more.
 
 ## Installation
@@ -11,13 +11,14 @@ composer require asika/unit-converter
 
 ## Getting Started
 
-### 建立轉換物件
+### Create a Converter Object
 
-您可以用以下方式建立 Unit 轉換器，每個 Converter 都有自己的預設單位，舉例來說 `Duration` 的預設單位是 `seconds`，
-所以當直接建立 Duration 物件時，輸入的值會儲存成 `seconds` 單位。
+You can create a Unit Converter as follows. Each Converter has its own default unit. For example, the default unit of
+`Duration` is `seconds`, so when you create a `Duration` object directly, the input value will be stored in `seconds`.
 
-您可以即將他轉成其他單位，例如 `minutes` 或 `hours`，Unit Converter 使用 [brick/math](https://github.com/brick/math) 
-套件來處理數學運算， 因此返回的會是 `BigDecimal` 物件。
+You can immediately convert it to other units, such as `minutes` or `hours`. Unit Converter uses
+the [brick/math](https://github.com/brick/math) package for mathematical operations, so the returned value will be a
+`BigDecimal` object.
 
 ```php
 use Asika\UnitConverter\Duration;
@@ -33,7 +34,7 @@ $duration->toMinutes(); // BigDecimal(10)
 (string) $duration->toMinutes()->minus(2); // "8"
 ```
 
-您也可以指定初始單位，例如以下範例。單位的只硬可以使用類別自帶常數，或是英文的 minutes or min 等單位縮寫。（詳細可用單位請見個別轉換器的文件）
+您也可以指定初始單位，例如以下範例。單位的指定可以使用類別自帶常數，或是英文的 minutes or min 等單位縮寫。（詳細可用單位請見個別轉換器的文件）
 
 ```php
 $duration = new Duration(60, Duration::UNIT_MINUTES); // 10 minutes
@@ -47,8 +48,10 @@ $duration->value; // BigDecimal(60)
 $duration->toHours(); // BigDecimal(1)
 ```
 
-要特別注意，當轉出結果包含小數點時，預設的進位規則是"無條件捨去"。所以當您將秒轉成小時或月時，很可能直接得到 `0` 這個結果。
-可以加上精度參數 `scale: int` 來指定小數點後的位數。 另外也可以用 brick/math 的 `roundingMode: enum` 參數來更改進位規則。
+要特別注意，當轉出結果包含小數點時，預設的進位規則是"無條件捨去"。所以當您將較小的單位轉成較大的單位，但數值不足以近位，
+例如將秒轉成小時或月時，很可能直接得到 `0` 這個結果，這是預期內的行為。
+
+您可以加上精度參數 `scale: int` 來指定小數點後的位數。 另外也可以用 brick/math 的 `roundingMode: enum` 參數來更改進位規則。
 
 ```php
 $duration->toHours(); // BigDecimal(0)
@@ -79,7 +82,7 @@ $duration = Duration::parse(
 )->value; // BigDecimal(605.500833335000005)
 
 // Peek the current unit of this converter
-echo $duration->baseUnit; // "minutes"
+echo $duration->unit; // "minutes"
 ```
 
 同樣的，所有包含單位轉換的功能，都可以加上 `scale` 與 `roundingMode` 參數來控制小數點後的位數與進位規則。
@@ -120,8 +123,9 @@ $duration->value; // BigDecimal(600)
 
 ### convertTo() 方法
 
-使用 `convertTo()` 方法可以轉換單位後維持轉換器物件，這樣可以方便的進行連鎖操作，所有針對轉換器進行的內容修改都是 immutable 的，
-請一定要用新的變數接起來。同樣的，轉換時也要考慮到小單位轉成大單位時，會損失精度，請視轉換需求手動設定 scale 與 roundingMode。
+使用 `convertTo()` 方法可以轉換單位後維持轉換器物件，這樣可以方便的進行連鎖操作，所有針對轉換器進行的內容修改都是
+immutable 的，請一定要用新的變數接起來。同樣的，轉換時也要考慮到小單位轉成大單位時，會損失精度，
+請視轉換需求手動設定 scale 與 roundingMode。
 
 ```php
 $seconds = new Duration(600, 's'); // 600 seconds
@@ -132,13 +136,18 @@ $minutes = $seconds->convertTo(Duration::UNIT_MINUTES);
 // $seconds still 600 seconds
 $seconds->value; // BigDecimal(600)
 $minutes->value; // BigDecimal(10)
+
+// Control the precision
+$hours = $seconds->convertTo(Duration::UNIT_HOURS, scale: 2, roundingMode: RoundingMode::HALF_UP);
+
+$hours->value; // BigDecimal(0.17)
 ```
 
 ### 精度控制
 
 出於安全理由，Unit Converter 在轉換單位時，統一採用 brick/math 的 `RoundingMode::DOWN` 作為預設進位規則，會捨棄掉所有小數位數。
-也就是說，即便是 59 秒，轉換成分鐘時，也會變成 0分鐘。假設您是使用 `convertTo()` 方法，則轉換過程所有被捨棄的位數都會移除，造成精度損失。
-下面示範了這種情況：
+也就是說，即便是 59 秒，轉換成分鐘時，也會變成 0 分鐘。假設您是使用 `convertTo()` 方法，則轉換過程所有被捨棄的位數都會移除而無法還原，
+造成精度損失。下面示範了這種情況：
 
 ```php
 $duration = new Duration(59, 's')
@@ -148,15 +157,15 @@ $duration = new Duration(59, 's')
 $duration->value; // BigDecimal(0) - All precision lost
 ```
 
-這是由於轉換過程中，若允許不定長度的小數，則一旦出現無窮位數的小數時，轉換過程會出現未預期的微小精度損失，而工程師可能完全沒有察覺。
-當多次轉換數值時，結果可能出現難以預料的差距。因此本套件要求開發者有意識的手動指定精度與進位規則，確保轉或過程中任何的精度損失都是在預料中與控制下的。
+這是由於轉換過程中，若允許不定長度的小數，則一旦出現無窮位數的小數時，轉換過程會出現未預期的微小精度損失，而工程師或使用者可能完全沒有察覺。
+一旦多次轉換數值時，結果可能出現難以預料的差距。因此本套件要求開發者有意識的手動指定精度與進位規則，確保轉或過程中任何的精度損失都是在預料中與控制下的。
 
 若您希望指定精度與進位規則，可以在轉換時加上 `scale` 與 `roundingMode` 參數，這樣可以手動掌握精度損失範圍。
 
 ```php
 $duration = new Duration(59, 's')
-    ->convertTo(Duration::UNIT_MINUTES, 8) // 0.98333333 minutes
-    ->convertTo(Duration::UNIT_SECONDS, 8); // 58.9999998 seconds
+    ->convertTo(Duration::UNIT_MINUTES, scale: 8) // 0.98333333 minutes
+    ->convertTo(Duration::UNIT_SECONDS, scale: 8); // 58.9999998 seconds
 
 // Back to seconds
 $duration->value; // BigDecimal(58.9999998)
@@ -189,15 +198,24 @@ Unit Converter 可以用常數或是英文單位字串來表達單位，以 `Dur
 - `Duration::UNIT_MONTHS` (mo, month, months)
 - `Duration::UNIT_YEARS` (y, year, years)
 
-任何可以輸入單位進行轉換、或是可以解析字串的部份，都可以使用這些常數或是字串來表示單位。
+任何可以輸入單位進行轉換、或是可以解析字串的部份，都可以使用這些常數或是字串來表示單位，單位與數值之間有無空格都沒問題，
+例如 `2hours`、`2 hours`、`2hr`、`2 hr` 都是可以接受的格式，根據不同的轉換器，單複數如 `year` `years` 通常也通用
+(某些單位因為單複數有特別差異時便無法通用，依照該轉換器為準)。
+
+下面是解析時的輸入範例:
+
+```php
+\Asika\UnitConverter\Duration::parse('10 hours 5 minutes 30 seconds 50ms 100ns 300fs');
+\Asika\UnitConverter\Duration::parse('3y 2mo 1w 2d 3h 4min 5s 6ms 7μs 8ns 9fs');
+```
 
 ## 格式化
 
-轉換器提供幾個函式方便我們顯示格式化字串，這些函式在所有轉換器接可用，我們暫時先用 `Duration` 來示範。
+轉換器提供幾個函式方便我們顯示格式化字串，這些函式在所有轉換器大多可用，我們暫時先用 `Duration` 來示範。
 
 ### `format()`
 
-`format()` 用來根據當下的單位進行格式化。
+`format()` 用來根據當下的單位進行格式化，預設的印出格式會用該單位的原始字串作為後綴並緊貼數值。
 
 ```php
 $duration = new Duration(59, 's');
@@ -207,12 +225,12 @@ $duration->value; // BigDecimal(59)
 $duration->format(); // "59seconds"
 ```
 
-預設的印出格式會用該單位的原始字串作為後綴並緊貼數值，而第一個參數 `suffix` 可以指定輸出格式的後綴，此參數可以是
+而第一個參數 `suffix` 可以指定輸出格式的後綴，此參數可以是:
 
 - 純字串，作為後綴
 - 包含 `%s` 的字串，會作為 `sprintf` 模版
 - `Closure` 會在執行時傳入數值與物件，並返回字串，使合用在整合框架 i18n 等
-   - 格式: `Closure(BigDecimal $value, string $unit, AbstractConverter $converter): string`
+    - 格式: `Closure(BigDecimal $value, string $unit, AbstractConverter $converter): string`
 
 ```php
 $duration->format(); // "59seconds"
@@ -242,6 +260,15 @@ $duration = new Duration(59, 's');
 $duration->format(unit: Duration::UNIT_MINUTES); // 0minutes
 
 $duration->format(unit: Duration::UNIT_MINUTES, scale: 8); // "0.98333333minutes"
+```
+
+如果您在解析數值或使用 `convertTo()` 轉換單位時，已經設定好精度與進位規則，則呼叫 `format()` 時不用加上 scale，
+將會使用當下設定的精度來顯示。
+
+```php
+new Duration(59, 's')
+    ->convertTo(Duration::UNIT_MINUTES, scale: 8) // The scale will save into the converter
+    ->format(); // "0.98333333minutes"
 ```
 
 ### `humanize()`
@@ -325,6 +352,26 @@ echo $duration->humanize(options: Duration::OPTION_KEEP_ZERO);
 // 0microseconds 0nanoseconds 0picoseconds 0femtoseconds
 ```
 
+### 預設格式化處理器
+
+Converter 可以註冊一個預設的格式化處理器，當 `format()` 或 `humanize()` 沒有指定格式化參數時，會使用這個處理器。
+下面示範了一個根據複數與否，改變 suffix 型態的處理器。注意 suffixFormatter 與 format() 處理器參數不同，
+第一個參數是預設採用的 suffix，第二個參數是單位數值，可以用這兩者進行必要的判斷。
+
+```php
+$converter = $converter->withSuffixFormatter(
+    function (string $suffix, BigDecimal $value, string $unit, Duration $converter): string {
+        if ($value->isEqualTo(1)) {
+            $suffix = StrNormalizer::singularize($suffix);
+        } else {
+            $suffix = StrNormalizer::pluralize($suffix);
+        }
+
+        return $value . ' ' . $suffix;
+    }
+);
+```
+
 ### `serialize()`
 
 serialize() 類似 humanize() ，但無法客製化格式字串，他會將轉換器轉成一個可序列化的字串，方便存入 DB 或快取。
@@ -365,5 +412,194 @@ echo $duration->serialize(
 
 ### `serializeCallback()`
 
+`serializeCallback()` 是一個強大的工具，您可以依據您需要的邏輯，自行編寫格式化字串、整合框架翻譯或是配合應用顯示合理數據等等。
+
+這個函式會傳入一個 `Closure`，該 `Closure` 接受2個參數： 
+`Closure(AbstractConverter $remainder, array<string, BigDecimal> $sortedUnits): string` ，第一個參數是已經轉成 atomUnit 
+的轉換器物件，第二個參數是已經根據轉換率排序好的單位與數值陣列。
+
+以下我們同樣用 Duration 來示範:
+
+```php
+$duration = new Duration(1000500, 's');
+echo $duration = $duration->serializeCallback(
+    function (Duration $remainder, array $sortedUnits) {
+        $text = [];
+
+        foreach ($sortedUnits as $unit => $ratio) {
+            [$extracted, $remainder] = $remainder->withExtract($unit);
+
+            if ($extracted->isZero()) {
+                continue;
+            }
+
+            // You don't need to set $scale parameter here, all extracted values are integer.
+            $text[] = $extracted->format();
+            
+            if ($remainder->isZero()) {
+                break; // [Optional] No more remainder, stop here
+            }
+        }
+
+        return implode(' ', $text);
+    }
+); // 1week 4days 13hours 55minutes
+```
+
+`$sortedUnits` 是一個經過排序的陣列，依照單位比例由大到小排列，因此我們可以從最大的單位開始提取，當餘下不足以提取的數值，
+就會交由小一級的單位來提取，一直到最小的原子單位為止。所有提取的數值都會是整數，因為除不盡的數值會被保留下來給下一個單位提取，
+所以您不需要煩惱 format 時的精度問題。
+
+`withExtract()` 方法會從轉換器中提取出指定單位的數值，存成一個 tuple `[extracted, remainder]`，
+假設我們最大的單位是 `year` ，他會嘗試提取整數的 year 出來成為一個獨立的轉換器物件稱為 `extracted`， 剩餘除不盡的數值會是 `remainder`。
+`remainder` 被交給下一個迴圈的 months 繼續提取。直到 `remainder` 為 0 或所有單位跑完之後停止。
+
+由於 `withExtract()` 強大的提取能力，我們完全可以自訂想要序列化的單位清單，不見得要連號 (但要自行控制好單位大小順序)。
+
+```php
+$duration = new Duration(6000500, 's');
+echo $duration = $duration->serializeCallback(
+    function (Duration $remainder) {
+        $text = [];
+
+        $units = [
+            Duration::UNIT_MONTHS,
+            // We ignore weeks and days
+            Duration::UNIT_HOURS,
+            Duration::UNIT_MINUTES,
+            Duration::UNIT_SECONDS,
+        ];
+
+        foreach ($units as $unit) {
+            [$extracted, $remainder] = $remainder->withExtract($unit);
+
+            if ($extracted->isZero()) {
+                continue;
+            }
+
+            $text[] = $extracted->format();
+        }
+
+        return implode(' ', $text);
+    }
+); // 2months 206hours 20seconds
+```
+
+但要注意，如果您的轉換器當下單位小於您序列化的最小單位，則會出現精度損失的情況，因為 `withExtract()` 只會提取整數部分，
+剩餘的小數部分會被捨棄。或者您需要自行將最後一個 remainder 輸出成小數字串。
+
+## 限縮可用單位
+
+有時候，我們不希望轉換器處理所有的單位，舉例來說，您可能希望 `Duration` 忽略 `weeks` 單位，或是希望 `FileSize` 僅使用所有 bytes 為基礎的單位。
+
+您可以使用 `withAvailableUnits()` 方法來限制可用的單位，這樣在轉換與輸出時就只能使用這些單位。
+
+```php
+$duration = $duration->withAvailableUnits(
+    [
+        Duration::UNIT_SECONDS,
+        Duration::UNIT_MINUTES,
+        Duration::UNIT_HOURS,
+        Duration::UNIT_DAYS,
+    ]
+);
+$duration = $duration->withParse('3 days 5 hours 30 minutes');
+
+$duration = $duration->withParse('2 years 3 days'); // Exception: Unknown unit "years"
+```
+
+個別轉換器的常用單位可以參考各自的文件，或是直接查看轉換器類別的常數定義。
+
+## 單位管理
+
+每個轉換器都有一些單位設定，我們做一個簡單介紹:
+
+- `$converter->atomUnit`: 轉換器的最小原子單位，通常是該轉換器最小的不可分割單位，例如 `Duration` 的 `femtoseconds`。
+- `$converter->baseUnit`: 單位交換比率的基準單位，是該轉換器比率為 `1` 的單位，例如 `Duration` 的 `seconds`。
+- `$converter->defaultUnit`: 當建立轉換器時，若沒有指定單位，則會使用這個單位作為預設單位，通常等於 `baseUnit` 但不一定會一樣。例如 `Duration` 的 `seconds`。
+- `$converter->unit`: 當前轉換器的單位，可以在建立時手動指定，或是透過 `convertTo()` 方法來改變。
+
+當使用 `parse()` 方法解析字串時，所有轉換器自動將字串轉換成 `atomUnit` 的數值，然後再轉換成 `defaultUnit` 或指定的單位的數值。
+
+### 自訂或新增單位
+
+轉換器支援自訂或新增單位，您可以透過 `withAddedUnitExchangeRate()` 方法來新增一個新的單位，這個單位會被加入到轉換器的可用單位列表中。
+單位的 rate 是以該轉換器的設定為 `1` 的單位為基準，例如 `Duration` 的 `seconds` 是比率為 `1` 的基準單位。
+我們可以嘗試新增一個 `centuries` 單位，並且將其比率設定為 `3153600000` 秒 (即 100 年的秒數)。
+
+```php
+$duration = new Duration()->withAddedUnitExchangeRate('centuries', 3_153_600_000);
+
+$duration->withParse('350years')
+    ->format(unit: 'centuries', scale: 1); // "3.5centuries"
+```
+
+如果您要動態設定 `centuries` 的秒數，可以用任何您想要的單位來做換算，例如我們以 year 的比率來換算
+
+```php
+$duration = new Duration();
+$yearRate = $duration->getUnitExchangeRate(Duration::UNIT_YEARS);
+$duration = $duration->withAddedUnitExchangeRate(
+    'centuries',
+     $yearRate->multipliedBy(100)
+);
+```
+
+> 注意這個數值是近似值，實際上 1 年的秒數根據曆法可能會有所不同，詳細請見 Duration 的文件。
+
+### 變更換算比率
+
+每個轉換器都有不同的作為 `1` 的基準單位，例如 Duration 的基準單位是 `seconds`，而 FileSize 的基準單位是 `bytes`。
+
+Duration 的 unitExchanges 像這樣:
+
+```php
+    protected array $unitExchanges = [
+        self::UNIT_FEMTOSECONDS => 1e-15,
+        self::UNIT_PICOSECONDS => 1e-12,
+        self::UNIT_NANOSECONDS => 1e-9,
+        self::UNIT_MICROSECONDS => 1e-6,
+        self::UNIT_MILLISECONDS => 1e-3,
+        self::UNIT_SECONDS => 1.0,
+        self::UNIT_MINUTES => 60.0,
+        self::UNIT_HOURS => 3600.0,
+        self::UNIT_DAYS => 86400.0,
+        self::UNIT_WEEKS => 604800.0,
+        self::UNIT_MONTHS => self::MONTH_SECONDS_COMMON,
+        self::UNIT_YEARS => self::YEAR_SECONDS_COMMON,
+    ]
+```
+
+出於某些原因，假設您需要更改基準單位的換算比率，您可以使用 `withUnitExchangeRate()` 方法來設定新的基準單位比率。
+下面是一個示範，將 femtoseconds 的比率設定為 `1`，成為新的基準單位。這個函式會重設所有可用單位，因此同時您也可以增減自己想要的單位，
+
+```php
+$d->withUnitExchanges(
+    [
+        Duration::UNIT_FEMTOSECONDS => 1.0,
+        Duration::UNIT_PICOSECONDS => 1000.0,
+        Duration::UNIT_NANOSECONDS => 1_000_000.0,
+        Duration::UNIT_MICROSECONDS => 1_000_000_000.0,
+        Duration::UNIT_MILLISECONDS => 1_000_000_000_000.0,
+        Duration::UNIT_SECONDS => 1_000_000_000_000_000.0,
+        Duration::UNIT_MINUTES => 60_000_000_000_000_000.0,
+        Duration::UNIT_HOURS => 3_600_000_000_000_000_000.0,
+        Duration::UNIT_DAYS => 86_400_000_000_000_000_000.0,
+        Duration::UNIT_WEEKS => 604_800_000_000_000_000_000.0,
+        Duration::UNIT_MONTHS => 2_592_000_000_000_000_000_000.0, // 30 days
+        Duration::UNIT_YEARS => 31_536_000_000_000_000_000_000.0, // 365 days
+    ],
+    atomUnit: Duration::UNIT_FEMTOSECONDS,
+    defaultUnit: Duration::UNIT_SECONDS
+);
+```
+
+由於後續的比率可能會超過整數上限，建議要轉成字串或浮點數呈現。 unitExchanges 可以接受 int | float | string | BigDecimal 等格式，
+之後會統一轉成 BigDecimal 方便後續計算。
+
+此函式要求強制重新指定 `atomUnit` 與 `defaultUnit`，這是因為轉換器的單位與比率是緊密相關的。
+`defaultUnit` 不一定要與 `baseUnit` 相同，這是用在建立轉換器時若沒有指定單位，預設的基礎單位。
+
+如果您不想更改 `atomUnit` 與 `defaultUnit`，可以使用 `withAddedUnitExchangeRate()` 方法來新增單位，而不會影響到現有的單位。
 
 

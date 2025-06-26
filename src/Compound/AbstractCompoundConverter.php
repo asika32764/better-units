@@ -25,15 +25,15 @@ abstract class AbstractCompoundConverter extends AbstractConverter
         get;
     }
 
-    public string $baseUnit {
+    public string $unit {
         set {
             [$measureUnit, $denoUnit] = $this->normalizeAndSplitUnit($value);
 
-            $this->baseUnit = $this->normalizeCompoundUnit($value);
-            $this->measure = $this->measure->withBaseUnit($measureUnit);
+            $this->unit = $this->normalizeCompoundUnit($value);
+            $this->measure = $this->measure->withUnit($measureUnit);
 
             if ($denoUnit) {
-                $this->deno = $this->deno->withBaseUnit($denoUnit);
+                $this->deno = $this->deno->withUnit($denoUnit);
             }
         }
     }
@@ -89,9 +89,9 @@ abstract class AbstractCompoundConverter extends AbstractConverter
 
         $new = $new->with($atomValue, $atomUnit);
 
-        $asUnit ??= $this->baseUnit;
+        $asUnit ??= $this->unit;
 
-        if ($asUnit && $asUnit !== $new->baseUnit) {
+        if ($asUnit && $asUnit !== $new->unit) {
             $asUnit = $this->normalizeUnit($asUnit);
             $new = $new->convertTo($asUnit, $scale, $roundingMode);
         }
@@ -122,7 +122,7 @@ abstract class AbstractCompoundConverter extends AbstractConverter
             return $new->with($newValue, $toUnit);
         }
 
-        $fromUnit = $this->normalizeCompoundUnit($this->baseUnit);
+        $fromUnit = $this->normalizeCompoundUnit($this->unit);
 
         // Direct exchange. For example, mph to km/s.
         // Directly use the exchange rate if available.
@@ -168,17 +168,17 @@ abstract class AbstractCompoundConverter extends AbstractConverter
                 ->convertTo($measureUnit, $scale, $roundingMode);
 
             $new = $this->withValue($this->measure->value);
-            $new->baseUnit = $measureUnit;
+            $new->unit = $measureUnit;
         }
 
         // If we have a denominator unit, we need to convert the value accordingly.
-        if ($denoUnit && $denoUnit !== $this->deno->baseUnit) {
+        if ($denoUnit && $denoUnit !== $this->deno->unit) {
             // Make the deno as target unit.
             $new->deno = $new->deno->with(1, $denoUnit);
 
             // Convert the value to the base unit of the deno.
             $new->value = $new->deno->withValue($new->value)
-                ->convertTo($this->deno->baseUnit, $scale, $roundingMode)
+                ->convertTo($this->deno->unit, $scale, $roundingMode)
                 ->value;
         }
 
@@ -228,17 +228,17 @@ abstract class AbstractCompoundConverter extends AbstractConverter
         $addDenoSuffix = $suffix === null;
 
         if (!$suffix) {
-            $suffix = $unit ?? $this->baseUnit;
+            $suffix = $unit ?? $this->unit;
 
             if ($this->measure->getUnitExchangeRate($suffix) !== null) {
-                $suffix .= '/' . $this->deno->formatSuffix($this->deno->baseUnit, $this->value, $this->deno->baseUnit);
+                $suffix .= '/' . $this->deno->formatSuffix($this->deno->unit, $this->value, $this->deno->unit);
             }
         }
 
         $text = parent::format($suffix, $unit, $scale, $roundingMode);
 
         if ($addDenoSuffix && $this->measure->getUnitExchangeRate($suffix) !== null) {
-            $text .= '/' . $this->deno->formatSuffix($this->deno->baseUnit, $this->value, $this->deno->baseUnit);
+            $text .= '/' . $this->deno->formatSuffix($this->deno->unit, $this->value, $this->deno->unit);
         }
 
         return $text;

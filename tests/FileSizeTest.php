@@ -83,31 +83,31 @@ class FileSizeTest extends TestCase
         ];
     }
 
-    public static function createBytesBinary(mixed $value = 0, ?string $baseUnit = null): FileSize
+    public static function createBytesBinary(mixed $value = 0, ?string $unit = null): FileSize
     {
         return new FileSize()
             ->withOnlyBytesBinary()
-            ->withFrom($value, $baseUnit);
+            ->withFrom($value, $unit);
     }
 
-    public static function createBitsBinary(mixed $value = 0, ?string $baseUnit = null): FileSize
+    public static function createBitsBinary(mixed $value = 0, ?string $unit = null): FileSize
     {
         return new FileSize()
             ->withOnlyBitsBinary()
-            ->withFrom($value, $baseUnit);
+            ->withFrom($value, $unit);
     }
 
-    public static function createBytesBase10(mixed $value = 0, ?string $baseUnit = null): FileSize
+    public static function createBytesBase10(mixed $value = 0, ?string $unit = null): FileSize
     {
         return new FileSize()
             ->withOnlyBytesBase10()
-            ->withFrom($value, $baseUnit);
+            ->withFrom($value, $unit);
     }
 
-    public static function createBitsBase10(mixed $value = 0, ?string $baseUnit = null): FileSize
+    public static function createBitsBase10(mixed $value = 0, ?string $unit = null): FileSize
     {
         return new FileSize()
             ->withOnlyBitsBase10()
-            ->withFrom($value, $baseUnit);
+            ->withFrom($value, $unit);
     }
 }

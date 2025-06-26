@@ -24,13 +24,13 @@ abstract class AbstractConverter implements \Stringable
         set(mixed $value) => $this->value = BigDecimal::of($value);
     }
 
-    public string $baseUnit;
+    public protected(set) string $unit;
 
-    abstract public string $atomUnit {
+    abstract public protected(set) string $atomUnit {
         get;
     }
 
-    abstract public string $defaultUnit {
+    abstract public protected(set) string $defaultUnit {
         get;
     }
 
@@ -48,6 +48,18 @@ abstract class AbstractConverter implements \Stringable
             }
 
             return $this->unitExchanges;
+        }
+    }
+
+    public string $baseUnit {
+        get {
+            foreach ($this->availableUnitExchanges as $unit => $rate) {
+                if (BigDecimal::of($rate)->isEqualTo(1)) {
+                    return $unit;
+                }
+            }
+
+            throw new \RuntimeException('No base unit found in available unit exchanges.');
         }
     }
 
@@ -114,9 +126,9 @@ abstract class AbstractConverter implements \Stringable
 
         $new = $new->withValue($atomValue);
 
-        $asUnit ??= $this->baseUnit;
+        $asUnit ??= $this->unit;
 
-        if ($asUnit && $asUnit !== $new->baseUnit) {
+        if ($asUnit && $asUnit !== $new->unit) {
             $asUnit = $this->normalizeUnit($asUnit);
             $new = $new->convertTo($asUnit, $scale, $roundingMode);
         }
@@ -124,10 +136,10 @@ abstract class AbstractConverter implements \Stringable
         return $new;
     }
 
-    public function __construct(mixed $value = 0, ?string $baseUnit = null)
+    public function __construct(mixed $value = 0, ?string $unit = null)
     {
         $this->value = $value;
-        $this->baseUnit = $baseUnit ?? $this->defaultUnit;
+        $this->unit = $unit ?? $this->defaultUnit;
     }
 
     public function withAvailableUnits(?array $units): static
@@ -176,17 +188,17 @@ abstract class AbstractConverter implements \Stringable
     ): static {
         $toUnit = $this->normalizeUnit($toUnit);
 
-        if ($toUnit === $this->baseUnit) {
+        if ($toUnit === $this->unit) {
             return $this;
         }
 
         $new = clone $this;
 
         if (!$new->value->isZero()) {
-            $new->value = $this->convertValue($new->value, $new->baseUnit, $toUnit, $scale, $roundingMode);
+            $new->value = $this->convertValue($new->value, $new->unit, $toUnit, $scale, $roundingMode);
         }
 
-        $new->baseUnit = $toUnit;
+        $new->unit = $toUnit;
 
         return $new;
     }
@@ -228,28 +240,28 @@ abstract class AbstractConverter implements \Stringable
     ): static {
         $new = clone $this;
         $new->value = $value;
-        $new->baseUnit = $fromUnit ? $new->normalizeUnit($fromUnit) : $this->baseUnit;
+        $new->unit = $fromUnit ? $new->normalizeUnit($fromUnit) : $this->unit;
 
-        if ($new->baseUnit !== $this->baseUnit) {
-            $new = $new->convertTo($this->baseUnit, $scale, $roundingMode);
+        if ($new->unit !== $this->unit) {
+            $new = $new->convertTo($this->unit, $scale, $roundingMode);
         }
 
         return $new;
     }
 
-    public function withBaseUnit(string $unit): static
+    public function withUnit(string $unit): static
     {
         $new = clone $this;
-        $new->baseUnit = $this->normalizeUnit($unit);
+        $new->unit = $this->normalizeUnit($unit);
 
         return $new;
     }
 
-    public function with(mixed $value, ?string $baseUnit = null): static
+    public function with(mixed $value, ?string $unit = null): static
     {
         $new = clone $this;
         $new->value = $value;
-        $new->baseUnit = $baseUnit ? $this->normalizeUnit($baseUnit) : $this->baseUnit;
+        $new->unit = $unit ? $this->normalizeUnit($unit) : $this->unit;
 
         return $new;
     }
@@ -285,7 +297,7 @@ abstract class AbstractConverter implements \Stringable
             $value = $value->stripTrailingZeros();
         }
 
-        $unit ??= $this->baseUnit;
+        $unit ??= $this->unit;
         $suffix ??= $unit;
 
         if ($suffix instanceof \Closure) {
@@ -314,7 +326,7 @@ abstract class AbstractConverter implements \Stringable
     /**
      * @param  string  $unit
      *
-     * @return  array{ static, static }
+     * @return  array{ static, static }  A tuple with [extracted, remainder]
      */
     public function withExtract(string $unit): array
     {
@@ -325,7 +337,7 @@ abstract class AbstractConverter implements \Stringable
 
     protected function extract(string $unit): static
     {
-        $rate = $this->with(1, $unit)->convertTo($this->baseUnit)->value;
+        $rate = $this->with(1, $unit)->convertTo($this->unit)->value;
 
         /** @var BigDecimal $part */
         $part = $this->value->dividedBy($rate, 0, RoundingMode::DOWN);
@@ -416,14 +428,16 @@ abstract class AbstractConverter implements \Stringable
 
     /**
      * @param  array<BigNumber|float|int>  $units
+     * @param  string                      $atomUnit
      * @param  string                      $defaultUnit
      *
      * @return  $this
      */
-    public function withUnitExchanges(array $units, string $defaultUnit): static
+    public function withUnitExchanges(array $units, string $atomUnit, string $defaultUnit): static
     {
         $new = clone $this;
         $new->unitExchanges = $units;
+        $new->atomUnit = $atomUnit;
         $new->defaultUnit = $defaultUnit;
 
         return $new;
@@ -571,6 +585,22 @@ abstract class AbstractConverter implements \Stringable
         }
 
         return $returnConstants;
+    }
+
+    public function withDefaultUnit(string $defaultUnit): static
+    {
+        $new = clone $this;
+        $new->defaultUnit = $defaultUnit;
+
+        return $new;
+    }
+
+    public function withAtomUnit(string $atomUnit): static
+    {
+        $new = clone $this;
+        $new->atomUnit = $atomUnit;
+
+        return $new;
     }
 
     public function __toString(): string

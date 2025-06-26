@@ -152,9 +152,9 @@ class Duration extends AbstractBasicConverter
 
         $instance = $this->with($microseconds, static::UNIT_MICROSECONDS);
 
-        $asUnit ??= $this->baseUnit;
+        $asUnit ??= $this->unit;
 
-        if ($asUnit && $asUnit !== $instance->baseUnit) {
+        if ($asUnit && $asUnit !== $instance->unit) {
             $asUnit = $this->normalizeUnit($asUnit);
             $instance = $instance->convertTo($asUnit, $scale, $roundingMode);
         }

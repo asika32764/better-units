@@ -105,10 +105,10 @@ class AbstractUnitConverterTest extends TestCase
     }
 
     #[Test]
-    public function withBaseUnit(): void
+    public function withUnit(): void
     {
         $d = Duration::from(500, Duration::UNIT_SECONDS)
-            ->withBaseUnit(Duration::UNIT_DAYS);
+            ->withUnit(Duration::UNIT_DAYS);
 
         self::assertEquals(
             '500days',
@@ -368,7 +368,7 @@ class AbstractUnitConverterTest extends TestCase
 
         assertEquals(
             FileSize::UNIT_MEBIBYTES,
-            $f->baseUnit
+            $f->unit
         );
 
         $f = FileSize::from('4360000KiB');
@@ -381,7 +381,7 @@ class AbstractUnitConverterTest extends TestCase
 
         assertEquals(
             FileSize::UNIT_GIBIBYTES,
-            $f->baseUnit
+            $f->unit
         );
 
         $f = FileSize::from('0.000001245TiB');
@@ -394,7 +394,7 @@ class AbstractUnitConverterTest extends TestCase
 
         assertEquals(
             FileSize::UNIT_MEBIBYTES,
-            $f->baseUnit
+            $f->unit
         );
     }
 
@@ -415,7 +415,7 @@ class AbstractUnitConverterTest extends TestCase
 
         assertEquals(
             FileSize::UNIT_MEBIBYTES,
-            $f->baseUnit
+            $f->unit
         );
     }
 
