@@ -255,6 +255,8 @@ class Duration extends AbstractBasicConverter
     protected function normalizeUnit(string $unit): string
     {
         $unit = match (strtolower($unit)) {
+            'fs', 'femtosecond', 'femtoseconds' => static::UNIT_FEMTOSECONDS,
+            'ps', 'picosecond', 'picoseconds' => static::UNIT_PICOSECONDS,
             'ns', 'nanosecond', 'nanoseconds' => static::UNIT_NANOSECONDS,
             'us', 'μs', 'microsecond', 'microseconds' => static::UNIT_MICROSECONDS,
             'ms', 'millisecond', 'milliseconds' => static::UNIT_MILLISECONDS,

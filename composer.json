@@ -1,9 +1,9 @@
 {
     "name": "asika/unit-converter",
-    "description": "A better unit converter",
+    "description": "A modern PHP unit converter.",
     "type": "library",
     "require": {
-        "php": ">=8.4.7",
+        "php": ">=8.4.1",
         "brick/math": "*"
     },
     "require-dev": {
