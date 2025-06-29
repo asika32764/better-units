@@ -19,8 +19,8 @@ class Speed extends AbstractCompoundMeasurement
 
     public string $defaultUnit = 'm/s';
 
-    public AbstractMeasurement $measure {
-        get => $this->measure ??= new Length();
+    public AbstractMeasurement $num {
+        get => $this->num ??= new Length();
     }
 
     protected array $compoundUnitExchanges = [

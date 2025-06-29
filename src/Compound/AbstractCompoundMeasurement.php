@@ -10,7 +10,7 @@ use Brick\Math\RoundingMode;
 
 abstract class AbstractCompoundMeasurement extends AbstractMeasurement
 {
-    abstract public AbstractMeasurement $measure {
+    abstract public AbstractMeasurement $num {
         get;
     }
     abstract public AbstractMeasurement $deno {
@@ -27,10 +27,10 @@ abstract class AbstractCompoundMeasurement extends AbstractMeasurement
 
     public string $unit {
         set {
-            [$measureUnit, $denoUnit] = $this->normalizeAndSplitUnit($value);
+            [$numUnit, $denoUnit] = $this->normalizeAndSplitUnit($value);
 
             $this->unit = $this->normalizeCompoundUnit($value);
-            $this->measure = $this->measure->withUnit($measureUnit);
+            $this->num = $this->num->withUnit($numUnit);
 
             if ($denoUnit) {
                 $this->deno = $this->deno->withUnit($denoUnit);
@@ -57,7 +57,7 @@ abstract class AbstractCompoundMeasurement extends AbstractMeasurement
         $values = static::parseValue($value);
 
         $atomValue = BigDecimal::zero();
-        $atomUnit = $this->measure->atomUnit . '/' . $this->deno->atomUnit;
+        $atomUnit = $this->num->atomUnit . '/' . $this->deno->atomUnit;
         $new = $this->with(0, $atomUnit);
 
         foreach ($values as [$val, $unit]) {
@@ -143,11 +143,11 @@ abstract class AbstractCompoundMeasurement extends AbstractMeasurement
         }
 
         // Compound exchange, for example, m/s to km/h.
-        // Must split the unit into measure and denominator to exchange them.
-        [$measureUnit, $denoUnit] = $new->normalizeAndSplitUnit($toUnit);
+        // Must split the unit into numerator and denominator to exchange them.
+        [$numUnit, $denoUnit] = $new->normalizeAndSplitUnit($toUnit);
 
         return $new->convertUnitPairTo(
-            $measureUnit,
+            $numUnit,
             $denoUnit,
             $scale,
             $roundingMode
@@ -155,20 +155,20 @@ abstract class AbstractCompoundMeasurement extends AbstractMeasurement
     }
 
     public function convertUnitPairTo(
-        string $measureUnit,
+        string $numUnit,
         string $denoUnit = '',
         ?int $scale = null,
         RoundingMode $roundingMode = RoundingMode::DOWN
     ): static {
         $new = $this;
 
-        // If we have a measure unit, we need to convert the value accordingly.
-        if ($measureUnit) {
-            $this->measure = $this->measure->with($this->value)
-                ->convertTo($measureUnit, $scale, $roundingMode);
+        // If we have a num unit, we need to convert the value accordingly.
+        if ($numUnit) {
+            $this->num = $this->num->with($this->value)
+                ->convertTo($numUnit, $scale, $roundingMode);
 
-            $new = $this->withValue($this->measure->value);
-            $new->unit = $measureUnit;
+            $new = $this->withValue($this->num->value);
+            $new->unit = $numUnit;
         }
 
         // If we have a denominator unit, we need to convert the value accordingly.
@@ -202,7 +202,7 @@ abstract class AbstractCompoundMeasurement extends AbstractMeasurement
 
         $units = explode('/', $unit, 2) + ['', ''];
 
-        $units[0] = $this->measure->normalizeUnit($units[0]);
+        $units[0] = $this->num->normalizeUnit($units[0]);
         $units[1] = $this->deno->normalizeUnit($units[1]);
 
         return $units;
@@ -230,14 +230,14 @@ abstract class AbstractCompoundMeasurement extends AbstractMeasurement
         if (!$suffix) {
             $suffix = $unit ?? $this->unit;
 
-            if ($this->measure->getUnitExchangeRate($suffix) !== null) {
+            if ($this->num->getUnitExchangeRate($suffix) !== null) {
                 $suffix .= '/' . $this->deno->formatSuffix($this->deno->unit, $this->value, $this->deno->unit);
             }
         }
 
         $text = parent::format($suffix, $unit, $scale, $roundingMode);
 
-        if ($addDenoSuffix && $this->measure->getUnitExchangeRate($suffix) !== null) {
+        if ($addDenoSuffix && $this->num->getUnitExchangeRate($suffix) !== null) {
             $text .= '/' . $this->deno->formatSuffix($this->deno->unit, $this->value, $this->deno->unit);
         }
 

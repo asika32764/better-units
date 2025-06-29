@@ -30,8 +30,8 @@ class Bitrate extends AbstractCompoundMeasurement
 
     public const string UNIT_TIBPS = 'Tibps';
 
-    public AbstractMeasurement $measure {
-        get => $this->measure ??= new FileSize();
+    public AbstractMeasurement $num {
+        get => $this->num ??= new FileSize();
     }
 
     public AbstractMeasurement $deno {
