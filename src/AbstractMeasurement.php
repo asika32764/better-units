@@ -31,10 +31,12 @@ abstract class AbstractMeasurement implements \Stringable
 
     abstract public protected(set) string $atomUnit {
         get;
+        set;
     }
 
     abstract public protected(set) string $defaultUnit {
         get;
+        set;
     }
 
     abstract protected array $unitExchanges {
