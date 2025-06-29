@@ -26,7 +26,7 @@ use Brick\Math\RoundingMode;
  * @method BigDecimal toCubicPints(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
  * @method BigDecimal toCubicQuarts(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
  */
-class Volume extends AbstractBasicConverter
+class Volume extends AbstractBasicMeasurement
 {
     public const string UNIT_CUBIC_FEMTOMETERS = 'fm3';
     public const string UNIT_CUBIC_PICOMETERS = 'pm3';

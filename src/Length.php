@@ -28,7 +28,7 @@ use Brick\Math\RoundingMode;
  * @method BigDecimal toFathoms(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
  * @method BigDecimal toNauticalMiles(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
  */
-class Length extends AbstractBasicConverter
+class Length extends AbstractBasicMeasurement
 {
     public const string UNIT_FEMTOMETERS = 'fm';
     public const string UNIT_PICOMETERS = 'pm';

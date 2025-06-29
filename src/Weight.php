@@ -25,7 +25,7 @@ use Brick\Math\RoundingMode;
  * @method BigDecimal toCarats(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
  * @method BigDecimal toNewtons(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
  */
-class Weight extends AbstractBasicConverter
+class Weight extends AbstractBasicMeasurement
 {
     public const string UNIT_FEMTOGRAMS = 'fg';
 

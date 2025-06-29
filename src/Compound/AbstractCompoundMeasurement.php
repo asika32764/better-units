@@ -4,16 +4,16 @@ declare(strict_types=1);
 
 namespace Asika\UnitConverter\Compound;
 
-use Asika\UnitConverter\AbstractConverter;
+use Asika\UnitConverter\AbstractMeasurement;
 use Brick\Math\BigDecimal;
 use Brick\Math\RoundingMode;
 
-abstract class AbstractCompoundConverter extends AbstractConverter
+abstract class AbstractCompoundMeasurement extends AbstractMeasurement
 {
-    abstract public AbstractConverter $measure {
+    abstract public AbstractMeasurement $measure {
         get;
     }
-    abstract public AbstractConverter $deno {
+    abstract public AbstractMeasurement $deno {
         get;
     }
 

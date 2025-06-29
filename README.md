@@ -11,13 +11,47 @@ composer require asika/unit-converter
 
 ## Getting Started
 
-### Create a Converter Object
+### 如何使用這個套件
 
-You can create a Unit Converter as follows. Each Converter has its own default unit. For example, the default unit of
+這個套件提供了一個簡易直覺化的測量值儲存與轉換功能，您可以用它來儲存與轉換各種單位的測量值，例如時間、長度、重量、溫度等等，
+並可以在物件與函式間傳遞。
+
+在以前，當您的物件需要接收一個測量值時，您可能會使用 `int` 或 `float` 來表示這個數值，但這樣會有一些問題：
+- 您無法確保這個數值的單位是正確的，可能會出現單位錯誤的情況。
+- 您無法確保這個數值的精度，可能會出現精度損失的情況。
+- 您無法確保這個數值的範圍，可能會出現數值溢出的情況。
+- 您無法確保這個數值的格式，可能會出現格式錯誤的情況。
+
+舉例來說，以下是一個計算收聽總時長的函式，但開發者在使用時，無法得知 `$duration` 參數的單位是什麼，
+可能是秒、分鐘、甚至小時，這樣會導致計算錯誤。
+
+```php
+function calcListenTime(int $duration): string {
+    return sprintf('%.2f hours', $duration / 3600);
+}
+
+// What unit is this? Could be seconds, minutes, or hours
+calcListenTime(3600);
+```
+
+改用本套件的物件作為參數值後，函式本身不需要關注單位的細節，因為轉換器會自動處理單位轉換與精度問題。開發者只要將測量植物件送數入函式即可
+，函式會自動轉換成必要的單位與格式。
+
+```php
+function calcListenTime(Duration $duration): string {
+    return $duration->toHours(scale: 4)->format(suffix: ' hours');
+}
+
+calcListenTime(4575); // "1.2694 hours"
+```
+
+### How to Create Measurement Object
+
+You can create a Measurement as follows. Each Measurement has its own default unit. For example, the default unit of
 `Duration` is `seconds`, so when you create a `Duration` object directly, the input value will be stored in `seconds`.
 
-You can immediately convert it to other units, such as `minutes` or `hours`. Unit Converter uses
-the [brick/math](https://github.com/brick/math) package for mathematical operations, so the returned value will be a
+You can immediately convert it to other units, such as `minutes` or `hours`. This package uses
+the [brick/math](https://github.com/brick/math) for mathematical operations, so the returned value will be a
 `BigDecimal` object.
 
 ```php
@@ -48,7 +82,7 @@ $duration->value; // BigDecimal(60)
 $duration->toHours(); // BigDecimal(1)
 ```
 
-要特別注意，當轉出結果包含小數點時，預設的進位規則是"無條件捨去"。所以當您將較小的單位轉成較大的單位，但數值不足以近位，
+要特別注意，當轉出結果包含小數點時，預設的進位規則是"無條件捨去"。所以當您將較小的單位轉成較大的單位，但數值不足以進位時，
 例如將秒轉成小時或月時，很可能直接得到 `0` 這個結果，這是預期內的行為。
 
 您可以加上精度參數 `scale: int` 來指定小數點後的位數。 另外也可以用 brick/math 的 `roundingMode: enum` 參數來更改進位規則。
@@ -98,7 +132,7 @@ $duration = Duration::parse(
 
 ## 單位轉換
 
-Unit Converter 有兩種方式可以轉換單位，一種是轉換單位後維持轉換器物件，一種是轉換後輸出數值。
+Unit Converter 有兩種方式可以轉換單位，一種是轉換單位後維持 Measurement 物件，一種是轉換後輸出數值。
 
 ### 輸出數值
 
@@ -123,7 +157,7 @@ $duration->value; // BigDecimal(600)
 
 ### convertTo() 方法
 
-使用 `convertTo()` 方法可以轉換單位後維持轉換器物件，這樣可以方便的進行連鎖操作，所有針對轉換器進行的內容修改都是
+使用 `convertTo()` 方法可以轉換單位後維持 Measurement 物件，這樣可以方便的進行連鎖操作，所有針對 Measurement 進行的內容修改都是
 immutable 的，請一定要用新的變數接起來。同樣的，轉換時也要考慮到小單位轉成大單位時，會損失精度，
 請視轉換需求手動設定 scale 與 roundingMode。
 
@@ -199,8 +233,8 @@ Unit Converter 可以用常數或是英文單位字串來表達單位，以 `Dur
 - `Duration::UNIT_YEARS` (y, year, years)
 
 任何可以輸入單位進行轉換、或是可以解析字串的部份，都可以使用這些常數或是字串來表示單位，單位與數值之間有無空格都沒問題，
-例如 `2hours`、`2 hours`、`2hr`、`2 hr` 都是可以接受的格式，根據不同的轉換器，單複數如 `year` `years` 通常也通用
-(某些單位因為單複數有特別差異時便無法通用，依照該轉換器為準)。
+例如 `2hours`、`2 hours`、`2hr`、`2 hr` 都是可以接受的格式，根據不同的 Measurement，單複數如 `year` `years` 通常也通用
+(某些單位因為單複數有特別差異時便無法通用，依照該 Measurement 為準)。
 
 下面是解析時的輸入範例:
 
@@ -211,7 +245,7 @@ Unit Converter 可以用常數或是英文單位字串來表達單位，以 `Dur
 
 ## 格式化
 
-轉換器提供幾個函式方便我們顯示格式化字串，這些函式在所有轉換器大多可用，我們暫時先用 `Duration` 來示範。
+Measurement 提供幾個函式方便我們顯示格式化字串，這些函式在所有 Measurement 大多可用，我們暫時先用 `Duration` 來示範。
 
 ### `format()`
 
@@ -374,8 +408,8 @@ $converter = $converter->withSuffixFormatter(
 
 ### `serialize()`
 
-serialize() 類似 humanize() ，但無法客製化格式字串，他會將轉換器轉成一個可序列化的字串，方便存入 DB 或快取。
-當取回字串時，可以用 `parse()` 方法將字串轉回轉換器物件。
+serialize() 類似 humanize() ，但無法客製化格式字串，他會將 Measurement 轉成一個可序列化的字串，方便存入 DB 或快取。
+當取回字串時，可以用 `parse()` 方法將字串轉回 Measurement 物件。
 
 ```php
 $duration = new Duration(1000500, 's');
@@ -416,7 +450,7 @@ echo $duration->serialize(
 
 這個函式會傳入一個 `Closure`，該 `Closure` 接受2個參數： 
 `Closure(AbstractConverter $remainder, array<string, BigDecimal> $sortedUnits): string` ，第一個參數是已經轉成 atomUnit 
-的轉換器物件，第二個參數是已經根據轉換率排序好的單位與數值陣列。
+的 Measurement 物件，第二個參數是已經根據轉換率排序好的單位與數值陣列。
 
 以下我們同樣用 Duration 來示範:
 
@@ -450,8 +484,8 @@ echo $duration = $duration->serializeCallback(
 就會交由小一級的單位來提取，一直到最小的原子單位為止。所有提取的數值都會是整數，因為除不盡的數值會被保留下來給下一個單位提取，
 所以您不需要煩惱 format 時的精度問題。
 
-`withExtract()` 方法會從轉換器中提取出指定單位的數值，存成一個 tuple `[extracted, remainder]`，
-假設我們最大的單位是 `year` ，他會嘗試提取整數的 year 出來成為一個獨立的轉換器物件稱為 `extracted`， 剩餘除不盡的數值會是 `remainder`。
+`withExtract()` 方法會從 Measurement 中提取出指定單位的數值，存成一個 tuple `[extracted, remainder]`，
+假設我們最大的單位是 `year` ，他會嘗試提取整數的 year 出來成為一個獨立的 Measurement 物件稱為 `extracted`， 剩餘除不盡的數值會是 `remainder`。
 `remainder` 被交給下一個迴圈的 months 繼續提取。直到 `remainder` 為 0 或所有單位跑完之後停止。
 
 由於 `withExtract()` 強大的提取能力，我們完全可以自訂想要序列化的單位清單，不見得要連號 (但要自行控制好單位大小順序)。
@@ -485,12 +519,12 @@ echo $duration = $duration->serializeCallback(
 ); // 2months 206hours 20seconds
 ```
 
-但要注意，如果您的轉換器當下單位小於您序列化的最小單位，則會出現精度損失的情況，因為 `withExtract()` 只會提取整數部分，
+但要注意，如果您的 Measurement 當下單位小於您序列化的最小單位，則會出現精度損失的情況，因為 `withExtract()` 只會提取整數部分，
 剩餘的小數部分會被捨棄。或者您需要自行將最後一個 remainder 輸出成小數字串。
 
 ## 限縮可用單位
 
-有時候，我們不希望轉換器處理所有的單位，舉例來說，您可能希望 `Duration` 忽略 `weeks` 單位，或是希望 `FileSize` 僅使用所有 bytes 為基礎的單位。
+有時候，我們不希望 Measurement 處理所有的單位，舉例來說，您可能希望 `Duration` 忽略 `weeks` 單位，或是希望 `FileSize` 僅使用所有 bytes 為基礎的單位。
 
 您可以使用 `withAvailableUnits()` 方法來限制可用的單位，這樣在轉換與輸出時就只能使用這些單位。
 
@@ -508,23 +542,23 @@ $duration = $duration->withParse('3 days 5 hours 30 minutes');
 $duration = $duration->withParse('2 years 3 days'); // Exception: Unknown unit "years"
 ```
 
-個別轉換器的常用單位可以參考各自的文件，或是直接查看轉換器類別的常數定義。
+個別 Measurement 的常用單位可以參考各自的文件，或是直接查看 Measurement 類別的常數定義。
 
 ## 單位管理
 
-每個轉換器都有一些單位設定，我們做一個簡單介紹:
+每個 Measurement 都有一些單位設定，我們做一個簡單介紹:
 
-- `$converter->atomUnit`: 轉換器的最小原子單位，通常是該轉換器最小的不可分割單位，例如 `Duration` 的 `femtoseconds`。
-- `$converter->baseUnit`: 單位交換比率的基準單位，是該轉換器比率為 `1` 的單位，例如 `Duration` 的 `seconds`。
-- `$converter->defaultUnit`: 當建立轉換器時，若沒有指定單位，則會使用這個單位作為預設單位，通常等於 `baseUnit` 但不一定會一樣。例如 `Duration` 的 `seconds`。
-- `$converter->unit`: 當前轉換器的單位，可以在建立時手動指定，或是透過 `convertTo()` 方法來改變。
+- `$converter->atomUnit`: Measurement 的最小原子單位，通常是該 Measurement 最小的不可分割單位，例如 `Duration` 的 `femtoseconds`。
+- `$converter->baseUnit`: 單位交換比率的基準單位，是該 Measurement 比率為 `1` 的單位，例如 `Duration` 的 `seconds`。
+- `$converter->defaultUnit`: 當建立 Measurement 時，若沒有指定單位，則會使用這個單位作為預設單位，通常等於 `baseUnit` 但不一定會一樣。例如 `Duration` 的 `seconds`。
+- `$converter->unit`: 當前 Measurement 的單位，可以在建立時手動指定，或是透過 `convertTo()` 方法來改變。
 
-當使用 `parse()` 方法解析字串時，所有轉換器自動將字串轉換成 `atomUnit` 的數值，然後再轉換成 `defaultUnit` 或指定的單位的數值。
+當使用 `parse()` 方法解析字串時，所有 Measurement 自動將字串轉換成 `atomUnit` 的數值，然後再轉換成 `defaultUnit` 或指定的單位的數值。
 
 ### 自訂或新增單位
 
-轉換器支援自訂或新增單位，您可以透過 `withAddedUnitExchangeRate()` 方法來新增一個新的單位，這個單位會被加入到轉換器的可用單位列表中。
-單位的 rate 是以該轉換器的設定為 `1` 的單位為基準，例如 `Duration` 的 `seconds` 是比率為 `1` 的基準單位。
+Measurement 支援自訂或新增單位，您可以透過 `withAddedUnitExchangeRate()` 方法來新增一個新的單位，這個單位會被加入到 Measurement 的可用單位列表中。
+單位的 rate 是以該 Measurement 的設定為 `1` 的單位為基準，例如 `Duration` 的 `seconds` 是比率為 `1` 的基準單位。
 我們可以嘗試新增一個 `centuries` 單位，並且將其比率設定為 `3153600000` 秒 (即 100 年的秒數)。
 
 ```php
@@ -549,7 +583,7 @@ $duration = $duration->withAddedUnitExchangeRate(
 
 ### 變更換算比率
 
-每個轉換器都有不同的作為 `1` 的基準單位，例如 Duration 的基準單位是 `seconds`，而 FileSize 的基準單位是 `bytes`。
+每個 Measurement 都有不同的作為 `1` 的基準單位，例如 Duration 的基準單位是 `seconds`，而 FileSize 的基準單位是 `bytes`。
 
 Duration 的 unitExchanges 像這樣:
 
@@ -597,9 +631,150 @@ $d->withUnitExchanges(
 由於後續的比率可能會超過整數上限，建議要轉成字串或浮點數呈現。 unitExchanges 可以接受 int | float | string | BigDecimal 等格式，
 之後會統一轉成 BigDecimal 方便後續計算。
 
-此函式要求強制重新指定 `atomUnit` 與 `defaultUnit`，這是因為轉換器的單位與比率是緊密相關的。
-`defaultUnit` 不一定要與 `baseUnit` 相同，這是用在建立轉換器時若沒有指定單位，預設的基礎單位。
+此函式要求強制重新指定 `atomUnit` 與 `defaultUnit`，這是因為 Measurement 的單位與比率是緊密相關的。
+`defaultUnit` 不一定要與 `baseUnit` 相同，這是用在建立 Measurement 時若沒有指定單位，預設的基礎單位。
 
-如果您不想更改 `atomUnit` 與 `defaultUnit`，可以使用 `withAddedUnitExchangeRate()` 方法來新增單位，而不會影響到現有的單位。
+您也可以單純用 `withAddedUnitExchangeRate()` 方法來新增單位，或是用 `withoutUnitExchangeRate()` 方法來移除單位，而不會影響到現有的單位。
+
+## 取得最接近 1 的單位
+
+Measurement 提供了 `nearest()` 方法來取得最接近 1 的單位，這個方法會根據當前的數值與單位比率來計算出最接近 1 的單位，
+適合用在提供人類可讀的單位顯示時。
+
+```php
+$fs = \Asika\UnitConverter\FileSize::from('8500KiB');
+$nearest = $fs->nearest(scale: 2, RoundingMode::HALF_UP)->format(); // 8.31MiB
+```
+
+## 變更 Measurement 的內容
+
+Measurement 物件是不可變的，這意味著當您對 Measurement 進行任何操作時，都會返回一個新的 Measurement 物件，而不會修改原有的物件。
+
+我們提供一系列方法來變更 Measurement 的內容，若您要變更 Measurement 的值與單位，可以用 `with()`，
+這會在不進行任何轉換的情況下，變更值與單位。
+
+```php
+$measurement = $measurement->with(100, 'seconds'); // Returns a new Measurement with 100 seconds
+```
+
+如果您送入一個具有 scale 的 BigDecimal ，則 Measurement 物件會保留這個 scale，這樣在後續的轉換與格式化時，可以保留精度。
+
+```php
+$measurement = $measurement->with(\Brick\Math\BigDecimal::of(100.25), 'hours');
+
+$measurement->format(); // "100.25hours"
+```
+
+如果您單純想變更值，保留單位。或者變更單位，保留值，則可以用 `withValue()` 或 `withUnit()` 方法。
+
+```php
+$measurement = \Asika\UnitConverter\Duration::from(100, 'seconds');
+
+$measurement->withValue(300); // Returns a new Duration with 300 seconds
+$measurement->withUnit(Duration::UNIT_HOURS); // Returns a new Duration with 300 hours
+```
+
+### 四則運算
+
+Measurement 本身可以做簡單的加減乘除計算，計算的數值可以是 BigNumber、數字或字串。
+
+```php
+$new = $measurement->plus(100); // Returns a new Measurement with value + 100
+$new = $measurement->minus(50.0); // Returns a new Measurement with value - 50
+$new = $measurement->multipliedBy('2'); // Returns a new Measurement with value * 2
+$new = $measurement->dividedBy(BigNumber::of(2)); // Returns a new Measurement with value / 2
+```
+
+`plus()` 與 `minus()` 可以接受另一個 Measurement 物件來做計算，會自動轉換單位配合原本的 Measurement ，但同樣必須手動指定精度以避免轉換後損失精度。
+
+```php
+$measurement = new Duration(120, 'seconds'); // 120 seconds
+$new = $measurement->plus(new Duration(2, 'minutes'), scale: 2); // Returns a new Duration with 240 seconds
+$new = $measurement->minus(new Duration(2500, 'ms'), scale: 2); // Returns a new Duration with 117.5 seconds
+```
+
+## 建立自己的 Measurement
+
+以下是一個簡易的示範，建立 Measurement 需要繼承自 `AbstractBasicMeasurement` 類別，其中
+必要的繼承屬性有三個，分別是 `$atomUnit` 是最小原子單位，`$defaultUnit` 是預設單位，`$unitExchanges` 是單位換算比率，
+請一定至少要有一個 `1` 的基準單位，否則某些運算會出錯。
+
+另外 `normalizeUnit()` 方法是可選的，用來將輸入的單位字串轉換成支援的單位，這個方法會在解析字串或是轉換單位時被呼叫。
+
+```php
+class ScreenMeasurement extends AbstractBasicMeasurement
+{
+    public const string UNIT_PX = 'px';
+    public const string UNIT_PT = 'pt';
+    public const string UNIT_EM = 'em';
+    public const string UNIT_REM = 'rem';
+
+    public string $atomUnit = self::UNIT_PX;
+
+    public string $defaultUnit = self::UNIT_PX;
+
+    protected array $unitExchanges = [
+        self::UNIT_PX => 1.0,
+        self::UNIT_PT => 1.3333333333, // 1pt = 1/72 inch, 1px = 96/72 inch
+        self::UNIT_EM => 16.0, // Assuming 1em = 16px
+        self::UNIT_REM => 16.0, // Assuming 1rem = 16px
+    ];
+
+    protected function normalizeUnit(string $unit): string
+    {
+        return match (strtolower($unit)) {
+            'px', 'pixel', 'pixels' => self::UNIT_PX,
+            'pt', 'point' => self::UNIT_PT,
+            'em', 'em quad' => self::UNIT_EM,
+            'rem', 'root em' => self::UNIT_REM,
+            default => $unit,
+        };
+    }
+}
+```
+
+## Compound Measurement
+
+有些 Measurement 需要組合多個單位來表示，分別稱作 measure (measurement) 與 deno (denominator)，代表分子與分母的單位。
+
+例如 Speed 需要同時表示距離與時間，因此他是一個 Compound Measurement，由 `Length` (measure) + `Duration` (deno) 組合而成。
+在表達 `Speed` 的單位時，會是 `Length` 的單位除以 `Duration` 的單位，例如 `m/s` 或 `km/h`。
+
+```php
+$speed = Speed::from('100 km/h'); // 100 kilometers per hour
+$speed->convertTo('m/s', scale: 4); // 27.7777m/s
+```
+
+### Predefined Units
+
+每個 Compound Measurement 都有一些預定義的單位，這些單位可能是國際常用標準單位的命名，例如
+
+- `kph` (km/h, kilometers per hour)
+- `mph` (miles per hour)
+- `mps` (m/s, meters per second)
+- `knots` (knots, nautical miles per hour)
+
+這些單位可以直接用在 `from()` 方法或是 `convertTo()` 方法中，這樣可以方便的建立或轉換 Compound Measurement。
+
+```php
+$speed = Speed::from('100 kph'); // 100 kilometers per hour
+$speed->convertTo('mps', scale: 4); // 27.7777m/s
+```
+
+## 可用的單位與其文件
+
+- Basic Measurement
+    - [Area]()
+    - [Duration]()
+    - [Energy]()
+    - [FileSize]()
+    - [Length]()
+    - [Volume]()
+    - [Weight]()
+- Compound Measurement
+    - [Speed]()
+    - [Bitrate]()
+
+
 
 

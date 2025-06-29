@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Asika\UnitConverter\Compound;
 
-use Asika\UnitConverter\AbstractConverter;
+use Asika\UnitConverter\AbstractMeasurement;
 use Asika\UnitConverter\Duration;
 use Asika\UnitConverter\FileSize;
 
-class Bitrate extends AbstractCompoundConverter
+class Bitrate extends AbstractCompoundMeasurement
 {
     public const string UNIT_BITS_PER_SECOND = 'bits/s';
 
@@ -30,11 +30,11 @@ class Bitrate extends AbstractCompoundConverter
 
     public const string UNIT_TIBPS = 'Tibps';
 
-    public AbstractConverter $measure {
+    public AbstractMeasurement $measure {
         get => $this->measure ??= new FileSize();
     }
 
-    public AbstractConverter $deno {
+    public AbstractMeasurement $deno {
         get => $this->deno ??= new Duration()
             ->withShortUnitFormatters();
     }

@@ -19,7 +19,7 @@ use SebastianBergmann\CodeCoverage\Report\Xml\Unit;
 use function PHPUnit\Framework\assertEquals;
 use function PHPUnit\Framework\assertTrue;
 
-class AbstractUnitConverterTest extends TestCase
+class AbstractMeasurementTest extends TestCase
 {
     public function testFrom(): void
     {

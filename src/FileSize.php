@@ -43,7 +43,7 @@ use Brick\Math\RoundingMode;
  * @method BigDecimal toYottabytes(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
  * @method BigDecimal toYobibytes(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
  */
-class FileSize extends AbstractBasicConverter
+class FileSize extends AbstractBasicMeasurement
 {
     public const string UNIT_BITS = 'b';
 

@@ -24,7 +24,7 @@ use Brick\Math\RoundingMode;
  * @method BigDecimal toSquareAcres(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
  * @method BigDecimal toSquareHectares(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
  */
-class Area extends AbstractBasicConverter
+class Area extends AbstractBasicMeasurement
 {
     public const string UNIT_SQUARE_FEMTOMETERS = 'fm2';
     public const string UNIT_SQUARE_PICOMETERS = 'pm2';

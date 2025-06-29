@@ -25,7 +25,7 @@ use Brick\Math\RoundingMode;
  * @method BigDecimal toGigawattHours(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
  * @method BigDecimal toTerawattHours(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
  */
-class Energy extends AbstractBasicConverter
+class Energy extends AbstractBasicMeasurement
 {
     // The atom energy unit
     public const string UNIT_JOULE = 'j';

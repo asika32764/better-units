@@ -7,7 +7,7 @@ namespace Asika\UnitConverter;
 use Brick\Math\BigDecimal;
 use Brick\Math\RoundingMode;
 
-abstract class AbstractBasicConverter extends AbstractConverter
+abstract class AbstractBasicMeasurement extends AbstractMeasurement
 {
     public const int OPTION_KEEP_ZERO = 1 << 0;
 

@@ -28,7 +28,7 @@ use Brick\Math\RoundingMode;
  * @method BigDecimal toYears(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
  */
 // phpcs:disable
-class Duration extends AbstractBasicConverter
+class Duration extends AbstractBasicMeasurement
 {
     use DurationCalendlyTrait;
 

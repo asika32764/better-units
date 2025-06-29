@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Asika\UnitConverter\Compound;
 
-use Asika\UnitConverter\AbstractConverter;
+use Asika\UnitConverter\AbstractMeasurement;
 use Asika\UnitConverter\Duration;
 use Asika\UnitConverter\Length;
 
-class Speed extends AbstractCompoundConverter
+class Speed extends AbstractCompoundMeasurement
 {
     public const string UNIT_MPS = 'mps';
     public const string UNIT_KPH = 'kph';
@@ -19,7 +19,7 @@ class Speed extends AbstractCompoundConverter
 
     public string $defaultUnit = 'm/s';
 
-    public AbstractConverter $measure {
+    public AbstractMeasurement $measure {
         get => $this->measure ??= new Length();
     }
 
@@ -29,7 +29,7 @@ class Speed extends AbstractCompoundConverter
         self::UNIT_KNOTS => 0.514444444,
     ];
 
-    public AbstractConverter $deno {
+    public AbstractMeasurement $deno {
         get => $this->deno ??= new Duration()
             ->withShortUnitFormatters();
     }

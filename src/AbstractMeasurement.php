@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Asika\UnitConverter;
 
+use Asika\UnitConverter\Concerns\CalculationTrait;
 use Brick\Math\BigDecimal;
 use Brick\Math\BigNumber;
 use Brick\Math\Exception\RoundingNecessaryException;
@@ -12,14 +13,16 @@ use Brick\Math\RoundingMode;
 /**
  * @formatter:off
  *
- * @psalm-type SerializeCallback = \Closure(AbstractConverter $remainder, array<string, BigDecimal> $sortedUnits): string
- * @psalm-type FormatterCallback = \Closure(BigDecimal $value, string $unit, AbstractConverter $converter): string
+ * @psalm-type SerializeCallback = \Closure(AbstractMeasurement $remainder, array<string, BigDecimal> $sortedUnits): string
+ * @psalm-type FormatterCallback = \Closure(BigDecimal $value, string $unit, AbstractMeasurement $converter): string
  * @psalm-type SuffixNormalizerCallback = \Closure(string $suffix, BigDecimal $value, string $unit,  $converter): string
  *
  * @formatter:on
  */
-abstract class AbstractConverter implements \Stringable
+abstract class AbstractMeasurement implements \Stringable
 {
+    use CalculationTrait;
+
     public BigDecimal $value {
         set(mixed $value) => $this->value = BigDecimal::of($value);
     }
