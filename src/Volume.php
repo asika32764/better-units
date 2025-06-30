@@ -57,7 +57,7 @@ class Volume extends AbstractBasicMeasurement
         self::UNIT_CUBIC_KILOMETERS,
     ];
 
-    public string $atomUnit = self::UNIT_CUBIC_PICOMETERS;
+    public string $atomUnit = self::UNIT_CUBIC_FEMTOMETERS;
 
     public string $defaultUnit = self::UNIT_CUBIC_METERS;
 

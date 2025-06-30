@@ -96,7 +96,7 @@ class Weight extends AbstractBasicMeasurement
         get {
             $units = $this->unitExchanges;
             $units[self::UNIT_NEWTONS] = BigDecimal::of(1)
-                ->dividedBy($this->gAcceleration, 3, RoundingMode::HALF_UP)
+                ->dividedBy($this->gravityAcceleration, 3, RoundingMode::HALF_UP)
                 ->toFloat();
 
             return $units;
@@ -104,7 +104,9 @@ class Weight extends AbstractBasicMeasurement
     }
 
     // Standard gravity in m/s²
-    public float $gAcceleration = 9.80665;
+    public protected(set) BigDecimal $gravityAcceleration {
+        get => $this->gravityAcceleration ??= BigDecimal::of(9.80665);
+    }
 
     protected function normalizeUnit(string $unit): string
     {
@@ -134,5 +136,12 @@ class Weight extends AbstractBasicMeasurement
     public function withOnlyCommonWeights(): static
     {
         return $this->withAvailableUnits(self::UNITS_GROUP_COMMON_WEIGHTS);
+    }
+
+    public function withGravityAcceleration(BigDecimal|float|int|string $gAcceleration): Weight
+    {
+        $this->gravityAcceleration = BigDecimal::of($gAcceleration);
+
+        return $this;
     }
 }
