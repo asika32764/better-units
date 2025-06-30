@@ -6,10 +6,6 @@ use Asika\UnitConverter\Duration;
 
 include __DIR__ . '/../vendor/autoload.php';
 
-$duration = Duration::from('300seconds');
-$duration = $duration->withUnitNormalizer(
-    function () {
-        //
-    }
-);
-echo serialize($duration);
+$area = \Asika\UnitConverter\Area::from(401074580, 'm2')
+    ->withOnlyCommonAreas();
+echo $area->humanize(); // 401km2 74580m2

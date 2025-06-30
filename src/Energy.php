@@ -27,24 +27,53 @@ use Brick\Math\RoundingMode;
  */
 class Energy extends AbstractBasicMeasurement
 {
-    // The atom energy unit
     public const string UNIT_JOULE = 'j';
+
     public const string UNIT_KILOJOULE = 'kj';
-    // mj
+
     public const string UNIT_MEGAJOULE = 'mj';
+
     public const string UNIT_GIGAJOULE = 'gj';
+
     public const string UNIT_TERAJOULE = 'tj';
+
     public const string UNIT_CALORIE = 'cal';
+
     public const string UNIT_KILOCALORIE = 'kcal';
+
     public const string UNIT_NEWTON_METER = 'nm';
+
     public const string UNIT_VOLT = 'ev';
+
     public const string UNIT_MEGAVOLT = 'mev';
+
     public const string UNIT_FOOT_POUND = 'ftlb';
+
     public const string UNIT_WATT_HOUR = 'wh';
+
     public const string UNIT_KILOWATT_HOUR = 'kwh';
+
     public const string UNIT_MEGAWATT_HOUR = 'mwh';
+
     public const string UNIT_GIGAWATT_HOUR = 'gwh';
+
     public const string UNIT_TERAWATT_HOUR = 'twh';
+
+    public const array UNITS_GROUP_JOULES = [
+        self::UNIT_JOULE,
+        self::UNIT_KILOJOULE,
+        self::UNIT_MEGAJOULE,
+        self::UNIT_GIGAJOULE,
+        self::UNIT_TERAJOULE,
+    ];
+
+    public const array UNITS_GROUP_WATT_HOURS = [
+        self::UNIT_WATT_HOUR,
+        self::UNIT_KILOWATT_HOUR,
+        self::UNIT_MEGAWATT_HOUR,
+        self::UNIT_GIGAWATT_HOUR,
+        self::UNIT_TERAWATT_HOUR,
+    ];
 
     public string $atomUnit = self::UNIT_JOULE;
 
@@ -78,25 +107,34 @@ class Energy extends AbstractBasicMeasurement
         );
 
         $unit = match (strtolower($unit)) {
-            'joule', 'joules' => self::UNIT_JOULE,
-            'kilojoule', 'kilojoules' => self::UNIT_KILOJOULE,
-            'megajoule', 'megajoules' => self::UNIT_MEGAJOULE,
-            'gigajoule', 'gigajoules' => self::UNIT_GIGAJOULE,
-            'terajoule', 'terajoules' => self::UNIT_TERAJOULE,
-            'calorie', 'calories' => self::UNIT_CALORIE,
-            'kilocalorie', 'kilocalories' => self::UNIT_KILOCALORIE,
-            'newton meter', 'newton meters', 'nm' => self::UNIT_NEWTON_METER,
-            'volt', 'volts', 'ev' => self::UNIT_VOLT,
-            'megavolt', 'megavolts', 'mev' => self::UNIT_MEGAVOLT,
-            'foot pound', 'foot pounds', 'ftlb' => self::UNIT_FOOT_POUND,
-            'watt hour', 'watt hours', 'wh' => self::UNIT_WATT_HOUR,
-            'kilowatt hour', 'kilowatt hours', 'kwhr' => self::UNIT_KILOWATT_HOUR,
-            'megawatt hour', 'megawatt hours', 'mwhr' => self::UNIT_MEGAWATT_HOUR,
-            'gigawatt hour', 'gigawatt hours', 'gwhr' => self::UNIT_GIGAWATT_HOUR,
-            'terawatt hour', 'terawatt hours', 'twhr' => self::UNIT_TERAWATT_HOUR,
+            'j', 'joule', 'joules' => self::UNIT_JOULE,
+            'kj', 'kilojoule', 'kilojoules' => self::UNIT_KILOJOULE,
+            'mj', 'megajoule', 'megajoules' => self::UNIT_MEGAJOULE,
+            'gj', 'gigajoule', 'gigajoules' => self::UNIT_GIGAJOULE,
+            'tj', 'terajoule', 'terajoules' => self::UNIT_TERAJOULE,
+            'cal', 'calorie', 'calories' => self::UNIT_CALORIE,
+            'kcal', 'kilocalorie', 'kilocalories' => self::UNIT_KILOCALORIE,
+            'nm', 'newton meter', 'newton meters' => self::UNIT_NEWTON_METER,
+            'ev', 'volt', 'volts' => self::UNIT_VOLT,
+            'mev', 'megavolt', 'megavolts' => self::UNIT_MEGAVOLT,
+            'ftlb', 'foot pound', 'foot pounds' => self::UNIT_FOOT_POUND,
+            'wh', 'watt hour', 'watt hours' => self::UNIT_WATT_HOUR,
+            'kwh', 'kilowatt hour', 'kilowatt hours', 'kwhr' => self::UNIT_KILOWATT_HOUR,
+            'mwh', 'megawatt hour', 'megawatt hours', 'mwhr' => self::UNIT_MEGAWATT_HOUR,
+            'gwh', 'gigawatt hour', 'gigawatt hours', 'gwhr' => self::UNIT_GIGAWATT_HOUR,
+            'twh', 'terawatt hour', 'terawatt hours', 'twhr' => self::UNIT_TERAWATT_HOUR,
             default => $unit
         };
 
         return parent::normalizeUnit($unit);
+    }
+
+    public function withOnlyJouleUnits(): static
+    {
+        $new = $this->withAvailableUnits(static::UNITS_GROUP_JOULES);
+        $new->atomUnit = self::UNIT_JOULE;
+        $new->defaultUnit = self::UNIT_JOULE;
+
+        return $new;
     }
 }

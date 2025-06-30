@@ -19,7 +19,7 @@ use Brick\Math\RoundingMode;
  *
  * @formatter:on
  */
-abstract class AbstractMeasurement implements MeasurementInterface, \Stringable
+abstract class AbstractMeasurement implements SerializableMeasurementInterface, \Stringable
 {
     use CalculationTrait;
 
@@ -187,6 +187,7 @@ abstract class AbstractMeasurement implements MeasurementInterface, \Stringable
             )->value;
     }
 
+    #[\NoDiscard]
     public function convertTo(
         string $toUnit,
         ?int $scale = null,
@@ -233,9 +234,19 @@ abstract class AbstractMeasurement implements MeasurementInterface, \Stringable
         return $newValue;
     }
 
-    public function convertToAtom(): static
+    public function convertToAtomUnit(): static
     {
         return $this->convertTo($this->atomUnit, 0, RoundingMode::DOWN);
+    }
+
+    public function convertToBaseUnit(?int $scale, RoundingMode $roundingMode = RoundingMode::DOWN): static
+    {
+        return $this->convertTo($this->baseUnit, $scale, $roundingMode);
+    }
+
+    public function convertToDefaultUnit(?int $scale, RoundingMode $roundingMode = RoundingMode::DOWN): static
+    {
+        return $this->convertTo($this->defaultUnit, $scale, $roundingMode);
     }
 
     public function withValue(
@@ -358,7 +369,7 @@ abstract class AbstractMeasurement implements MeasurementInterface, \Stringable
 
     public function serialize(?array $units = null): string
     {
-        return $this->convertToAtom()
+        return $this->convertToAtomUnit()
             ->serializeCallback(
                 function (self $remainder, array $sortedUnits) use ($units) {
                     if ($units === null) {

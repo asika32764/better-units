@@ -31,23 +31,41 @@ use Brick\Math\RoundingMode;
 class Length extends AbstractBasicMeasurement
 {
     public const string UNIT_FEMTOMETERS = 'fm';
+
     public const string UNIT_PICOMETERS = 'pm';
+
     public const string UNIT_NANOMETERS = 'nm';
+
     public const string UNIT_MICROMETERS = 'μm';
+
     public const string UNIT_MILLIMETERS = 'mm';
+
     public const string UNIT_CENTIMETERS = 'cm';
+
     public const string UNIT_DECIMETERS = 'dm';
+
     public const string UNIT_METERS = 'm';
+
     public const string UNIT_KILOMETERS = 'km';
+
     public const string UNIT_INCHES = 'in';
+
     public const string UNIT_FEET = 'ft';
+
     public const string UNIT_YARDS = 'yd';
+
     public const string UNIT_HANDS = 'h';
+
     public const string UNIT_MILES = 'mi';
+
     public const string UNIT_LIGHT_YEARS = 'ly';
+
     public const string UNIT_ASTRONOMICAL_UNITS = 'au';
+
     public const string UNIT_PARSEC = 'pc';
+
     public const string UNIT_FATHOMS = 'fth';
+
     public const string UNIT_NAUTICAL_MILES = 'nmi';
 
     public const array UNITS_GROUP_COMMON_LENGTHS = [
@@ -62,7 +80,7 @@ class Length extends AbstractBasicMeasurement
         self::UNIT_KILOMETERS,
     ];
 
-    public string $atomUnit = self::UNIT_PICOMETERS;
+    public string $atomUnit = self::UNIT_FEMTOMETERS;
 
     public string $defaultUnit = self::UNIT_METERS;
 
@@ -91,25 +109,25 @@ class Length extends AbstractBasicMeasurement
     protected function normalizeUnit(string $unit): string
     {
         $unit = match (strtolower($unit)) {
-            'femtometer', 'femtometers' => self::UNIT_FEMTOMETERS,
-            'picometer', 'picometers' => self::UNIT_PICOMETERS,
-            'nanometer', 'nanometers' => self::UNIT_NANOMETERS,
-            'micrometer', 'micrometers', 'um' => self::UNIT_MICROMETERS,
-            'millimeter', 'millimeters' => self::UNIT_MILLIMETERS,
-            'centimeter', 'centimeters' => self::UNIT_CENTIMETERS,
-            'decimeter', 'decimeters' => self::UNIT_DECIMETERS,
-            'meter', 'meters' => self::UNIT_METERS,
-            'kilometer', 'kilometers' => self::UNIT_KILOMETERS,
-            'inch', 'inches' => self::UNIT_INCHES,
-            'foot', 'feet' => self::UNIT_FEET,
-            'yard', 'yards' => self::UNIT_YARDS,
-            'hand', 'hands' => self::UNIT_HANDS,
-            'mile', 'miles' => self::UNIT_MILES,
-            'light year', 'light years' => self::UNIT_LIGHT_YEARS,
-            'astronomical unit', 'astronomical units' => self::UNIT_ASTRONOMICAL_UNITS,
-            'parsec', 'parsecs' => self::UNIT_PARSEC,
-            'fathom', 'fathoms' => self::UNIT_FATHOMS,
-            'nautical mile', 'nautical miles' => self::UNIT_NAUTICAL_MILES,
+            'fm', 'femtometer', 'femtometers' => self::UNIT_FEMTOMETERS,
+            'pm', 'picometer', 'picometers' => self::UNIT_PICOMETERS,
+            'nm', 'nanometer', 'nanometers' => self::UNIT_NANOMETERS,
+            'μm', 'micrometer', 'micrometers', 'um' => self::UNIT_MICROMETERS,
+            'mm', 'millimeter', 'millimeters' => self::UNIT_MILLIMETERS,
+            'cm', 'centimeter', 'centimeters' => self::UNIT_CENTIMETERS,
+            'dm', 'decimeter', 'decimeters' => self::UNIT_DECIMETERS,
+            'm', 'meter', 'meters' => self::UNIT_METERS,
+            'km', 'kilometer', 'kilometers' => self::UNIT_KILOMETERS,
+            'in', 'inch', 'inches' => self::UNIT_INCHES,
+            'ft', 'foot', 'feet' => self::UNIT_FEET,
+            'yd', 'yard', 'yards' => self::UNIT_YARDS,
+            'h', 'hand', 'hands' => self::UNIT_HANDS,
+            'mi', 'mile', 'miles' => self::UNIT_MILES,
+            'ly', 'light year', 'light years' => self::UNIT_LIGHT_YEARS,
+            'au', 'astronomical unit', 'astronomical units' => self::UNIT_ASTRONOMICAL_UNITS,
+            'pc', 'parsec', 'parsecs' => self::UNIT_PARSEC,
+            'fth', 'fathom', 'fathoms' => self::UNIT_FATHOMS,
+            'nmi', 'nautical mile', 'nautical miles' => self::UNIT_NAUTICAL_MILES,
             default => $unit,
         };
 

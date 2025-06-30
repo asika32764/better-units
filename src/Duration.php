@@ -16,6 +16,8 @@ use Brick\Math\RoundingMode;
 /**
  * The Duration class.
  *
+ * @method BigDecimal toFemtoseconds(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
+ * @method BigDecimal toPicoseconds(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
  * @method BigDecimal toNanoseconds(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
  * @method BigDecimal toMicroseconds(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
  * @method BigDecimal toMilliseconds(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
@@ -162,9 +164,9 @@ class Duration extends AbstractBasicMeasurement
         return $instance;
     }
 
-    public function toDateInterval(): \DateInterval
+    public function toDateInterval(RoundingMode $roundingMode = RoundingMode::HALF_UP): \DateInterval
     {
-        $instance = $this->convertTo(static::UNIT_MICROSECONDS, 0, RoundingMode::HALF_UP);
+        $instance = $this->convertTo(static::UNIT_MICROSECONDS, 0, $roundingMode);
 
         return \DateInterval::createFromDateString($instance->humanize());
     }

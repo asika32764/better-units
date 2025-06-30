@@ -54,7 +54,7 @@ class Area extends AbstractBasicMeasurement
         self::UNIT_SQUARE_KILOMETERS,
     ];
 
-    public string $atomUnit = self::UNIT_SQUARE_PICOMETERS;
+    public string $atomUnit = self::UNIT_SQUARE_FEMTOMETERS;
 
     public string $defaultUnit = self::UNIT_SQUARE_METERS;
 
@@ -84,19 +84,19 @@ class Area extends AbstractBasicMeasurement
         }
 
         $unit = match (strtolower($unit)) {
-            'fm^2', 'fm²', 'femtometers2', 'femtometers^2', 'femtometers²' => self::UNIT_SQUARE_FEMTOMETERS,
-            'pm^2', 'pm²', 'picometers2', 'picometers^2', 'picometers²' => self::UNIT_SQUARE_PICOMETERS,
-            'nm^2', 'nm²', 'nanometers2', 'nanometers^2', 'nanometers²' => self::UNIT_SQUARE_NANOMETERS,
-            'μm^2', 'μm²', 'um2', 'um^2', 'um²','micrometers2', 'micrometers^2', 'micrometers²' => self::UNIT_SQUARE_MICROMETERS,
-            'mm^2', 'mm²', 'millimeters2', 'millimeters^2', 'millimeters²' => self::UNIT_SQUARE_MILLIMETERS,
-            'cm^2', 'cm²', 'centimeters2', 'centimeters^2', 'centimeters²' => self::UNIT_SQUARE_CENTIMETERS,
-            'dm^2', 'dm²', 'decimeters2', 'decimeters^2', 'decimeters²' => self::UNIT_SQUARE_DECIMETERS,
-            'm^2', 'm²', 'meters2', 'meters^2', 'meters²' => self::UNIT_SQUARE_METERS,
-            'km^2', 'km²', 'kilometers2', 'kilometers^2', 'kilometers²' => self::UNIT_SQUARE_KILOMETERS,
-            'in^2', 'in²', 'inches2', 'inches^2', 'inches²' => self::UNIT_SQUARE_INCHES,
-            'ft^2', 'ft²', 'feet2', 'feet^2', 'feet²' => self::UNIT_SQUARE_FEET,
-            'yd^2', 'yd²', 'yards2', 'yards^2', 'yards²' => self::UNIT_SQUARE_YARDS,
-            'mi^2', 'mi²', 'miles2', 'miles^2', 'miles²' => self::UNIT_SQUARE_MILES,
+            'fm2', 'fm^2', 'fm²', 'femtometers2', 'femtometers^2', 'femtometers²' => self::UNIT_SQUARE_FEMTOMETERS,
+            'pm2', 'pm^2', 'pm²', 'picometers2', 'picometers^2', 'picometers²' => self::UNIT_SQUARE_PICOMETERS,
+            'nm2', 'nm^2', 'nm²', 'nanometers2', 'nanometers^2', 'nanometers²' => self::UNIT_SQUARE_NANOMETERS,
+            'μm2', 'μm^2', 'μm²', 'um2', 'um^2', 'um²','micrometers2', 'micrometers^2', 'micrometers²' => self::UNIT_SQUARE_MICROMETERS,
+            'mm2', 'mm^2', 'mm²', 'millimeters2', 'millimeters^2', 'millimeters²' => self::UNIT_SQUARE_MILLIMETERS,
+            'cm2', 'cm^2', 'cm²', 'centimeters2', 'centimeters^2', 'centimeters²' => self::UNIT_SQUARE_CENTIMETERS,
+            'dm2', 'dm^2', 'dm²', 'decimeters2', 'decimeters^2', 'decimeters²' => self::UNIT_SQUARE_DECIMETERS,
+            'm2', 'm^2', 'm²', 'meters2', 'meters^2', 'meters²' => self::UNIT_SQUARE_METERS,
+            'km2', 'km^2', 'km²', 'kilometers2', 'kilometers^2', 'kilometers²' => self::UNIT_SQUARE_KILOMETERS,
+            'in2', 'in^2', 'in²', 'inches2', 'inches^2', 'inches²' => self::UNIT_SQUARE_INCHES,
+            'ft2', 'ft^2', 'ft²', 'feet2', 'feet^2', 'feet²' => self::UNIT_SQUARE_FEET,
+            'yd2', 'yd^2', 'yd²', 'yards2', 'yards^2', 'yards²' => self::UNIT_SQUARE_YARDS,
+            'mi2', 'mi^2', 'mi²', 'miles2', 'miles^2', 'miles²' => self::UNIT_SQUARE_MILES,
             'ac', 'acre', 'acres' => self::UNIT_SQUARE_ACRES,
             'ha', 'hectare', 'hectares' => self::UNIT_SQUARE_HECTARES,
             default => $unit,
