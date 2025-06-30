@@ -3,6 +3,39 @@
 Better Unit Converter is a modern and intuitive unit conversion tool that allows you to convert between various
 units of measurement. It supports a wide range of categories including length, weight, temperature, volume, and more.
 
+<!-- TOC -->
+* [Better PHP Unit Converter](#better-php-unit-converter)
+  * [Installation](#installation)
+  * [Getting Started](#getting-started)
+    * [如何使用這個套件](#如何使用這個套件)
+    * [How to Create Measurement Object](#how-to-create-measurement-object)
+    * [用字串建立](#用字串建立)
+  * [單位轉換](#單位轉換)
+    * [輸出數值](#輸出數值)
+    * [convertTo() 方法](#convertto-方法)
+    * [精度控制](#精度控制)
+  * [單位](#單位)
+  * [格式化](#格式化)
+    * [`format()`](#format)
+    * [`humanize()`](#humanize)
+    * [預設格式化處理器](#預設格式化處理器)
+    * [`serialize()`](#serialize)
+    * [`serializeCallback()`](#serializecallback)
+  * [單位管理](#單位管理)
+    * [限縮可用單位](#限縮可用單位)
+    * [自訂或新增單位](#自訂或新增單位)
+    * [變更換算比率](#變更換算比率)
+    * [其他可能的單位調整](#其他可能的單位調整)
+  * [取得最接近 1 的單位](#取得最接近-1-的單位)
+  * [變更 Measurement 的內容](#變更-measurement-的內容)
+    * [運算](#運算)
+  * [Compound Measurement](#compound-measurement)
+    * [Predefined Units](#predefined-units)
+  * [建立自己的 Measurement](#建立自己的-measurement)
+    * [動態 Measurement](#動態-measurement)
+  * [可用的單位與其文件](#可用的單位與其文件)
+<!-- TOC -->
+
 ## Installation
 
 ```bash
@@ -128,6 +161,15 @@ $duration = Duration::parse(
     scale: 3,
     roundingMode: \Brick\Math\RoundingMode::HALF_UP
 )->value; // BigDecimal(605.501)
+```
+
+`from()` 則是較為泛用的功能，如果送入字串作為參數，就會進行字串解析，如果送入數字，就會直接作為測量值建立物件：
+
+```php
+$duration = Duration::from('100seconds');
+$duration = Duration::from('3 years 50days 5hours 30minutes', scale: 4, roundingMode: RoundingMode::HALF_UP);
+$duration = Duration::from(1200); // 1200 seconds
+$duration = Duration::from(500, Duration::UNIT_MINUTES);
 ```
 
 ## 單位轉換
@@ -522,7 +564,18 @@ echo $duration = $duration->serializeCallback(
 但要注意，如果您的 Measurement 當下單位小於您序列化的最小單位，則會出現精度損失的情況，因為 `withExtract()` 只會提取整數部分，
 剩餘的小數部分會被捨棄。或者您需要自行將最後一個 remainder 輸出成小數字串。
 
-## 限縮可用單位
+## 單位管理
+
+每個 Measurement 都有一些單位設定，我們做一個簡單介紹:
+
+- `$converter->atomUnit`: Measurement 的最小原子單位，通常是該 Measurement 最小的不可分割單位，例如 `Duration` 的 `femtoseconds`。
+- `$converter->baseUnit`: 單位交換比率的基準單位，是該 Measurement 比率為 `1` 的單位，例如 `Duration` 的 `seconds`。
+- `$converter->defaultUnit`: 當建立 Measurement 時，若沒有指定單位，則會使用這個單位作為預設單位，通常等於 `baseUnit` 但不一定會一樣。例如 `Duration` 的 `seconds`。
+- `$converter->unit`: 當前 Measurement 的單位，可以在建立時手動指定，或是透過 `convertTo()` 方法來改變。
+
+當使用 `parse()` 方法解析字串時，所有 Measurement 自動將字串轉換成 `atomUnit` 的數值，然後再轉換成 `defaultUnit` 或指定的單位的數值。
+
+### 限縮可用單位
 
 有時候，我們不希望 Measurement 處理所有的單位，舉例來說，您可能希望 `Duration` 忽略 `weeks` 單位，或是希望 `FileSize` 僅使用所有 bytes 為基礎的單位。
 
@@ -544,17 +597,6 @@ $duration = $duration->withParse('2 years 3 days'); // Exception: Unknown unit "
 
 個別 Measurement 的常用單位可以參考各自的文件，或是直接查看 Measurement 類別的常數定義。
 
-## 單位管理
-
-每個 Measurement 都有一些單位設定，我們做一個簡單介紹:
-
-- `$converter->atomUnit`: Measurement 的最小原子單位，通常是該 Measurement 最小的不可分割單位，例如 `Duration` 的 `femtoseconds`。
-- `$converter->baseUnit`: 單位交換比率的基準單位，是該 Measurement 比率為 `1` 的單位，例如 `Duration` 的 `seconds`。
-- `$converter->defaultUnit`: 當建立 Measurement 時，若沒有指定單位，則會使用這個單位作為預設單位，通常等於 `baseUnit` 但不一定會一樣。例如 `Duration` 的 `seconds`。
-- `$converter->unit`: 當前 Measurement 的單位，可以在建立時手動指定，或是透過 `convertTo()` 方法來改變。
-
-當使用 `parse()` 方法解析字串時，所有 Measurement 自動將字串轉換成 `atomUnit` 的數值，然後再轉換成 `defaultUnit` 或指定的單位的數值。
-
 ### 自訂或新增單位
 
 Measurement 支援自訂或新增單位，您可以透過 `withAddedUnitExchangeRate()` 方法來新增一個新的單位，這個單位會被加入到 Measurement 的可用單位列表中。
@@ -566,6 +608,29 @@ $duration = new Duration()->withAddedUnitExchangeRate('centuries', 3_153_600_000
 
 $duration->withParse('350years')
     ->format(unit: 'centuries', scale: 1); // "3.5centuries"
+```
+
+為了讓 `centuries` 單位能夠認得各種簡寫，我們可以加上 `withUnitNormalizer()` 方法來設定單位的正規化器，這樣可以讓 `centuries` 
+支援 `century`、`c` 等簡寫。這個正規化器是額外附加的，不會覆蓋內建單位的行為。
+
+```php
+$duration = $duration->withUnitNormalizer(
+    function (string $unit): string {
+        return match ($unit) {
+            'centuries', 'century', 'cent', 'cents', 'c' => 'centuries',
+            default => $unit,
+        };
+    }
+);
+```
+
+如果您希望 Measurement 可以被序列化，您可以使用 callable 指向靜態函式作為 normalizer，這樣可以避免 Closure 無法被序列化的問題 
+(或者您也可以考慮使用 [laravel/serializable-closure](https://github.com/laravel/serializable-closure))。
+
+```php
+$duration = $duration->withUnitNormalizer(
+    [MyCenturiesHelper::class, 'normalizeUnit'] // 靜態函式 normalizeUnit
+);
 ```
 
 如果您要動態設定 `centuries` 的秒數，可以用任何您想要的單位來做換算，例如我們以 year 的比率來換算
@@ -636,10 +701,35 @@ $d->withUnitExchanges(
 
 您也可以單純用 `withAddedUnitExchangeRate()` 方法來新增單位，或是用 `withoutUnitExchangeRate()` 方法來移除單位，而不會影響到現有的單位。
 
+### 其他可能的單位調整
+
+每種不同的測量值單位，都有屬於他們的設定，這些設定可以用來調整單位的行為或計算邏輯。
+舉例來說， `Duration` 可設定曆法規則，用於計算每年與每月的秒數。
+
+```php
+$duration = new \Asika\UnitConverter\Duration();
+$duration = $duration->withAnomalisticCalendar(); // Use Anomalistic Calendar for year/month calculations
+
+// you must parse values after setting calendar
+$duration->withParse('1 year')->toSeconds(); // 31556952 seconds (Anomalistic year)
+```
+
+或者 `FileSize` 因為支援 IS 與 IEC 的單位標準，因此可以設定使用哪一種標準來計算單位。
+
+```php
+$fs = new \Asika\UnitConverter\FileSize();
+$fs = $fs->withOnlyBytesBinary(); // Use only binary bytes (IEC) for calculations (KiB, MiB, GiB, etc.)
+
+$fs->withParse('100KiB'); // OK
+$fs->withParse('100KB'); // ERROR: Unknown base unit: KB
+```
+
+更多詳細設定方式，請參見每個測量單位各自的文件。
+
 ## 取得最接近 1 的單位
 
 Measurement 提供了 `nearest()` 方法來取得最接近 1 的單位，這個方法會根據當前的數值與單位比率來計算出最接近 1 的單位，
-適合用在提供人類可讀的單位顯示時。
+適合用在提供人類易讀的單位顯示時。
 
 ```php
 $fs = \Asika\UnitConverter\FileSize::from('8500KiB');
@@ -660,21 +750,21 @@ $measurement = $measurement->with(100, 'seconds'); // Returns a new Measurement 
 如果您送入一個具有 scale 的 BigDecimal ，則 Measurement 物件會保留這個 scale，這樣在後續的轉換與格式化時，可以保留精度。
 
 ```php
-$measurement = $measurement->with(\Brick\Math\BigDecimal::of(100.25), 'hours');
+$measurement = $measurement->with(BigDecimal::of(100.25), 'hours');
 
 $measurement->format(); // "100.25hours"
 ```
 
-如果您單純想變更值，保留單位。或者變更單位，保留值，則可以用 `withValue()` 或 `withUnit()` 方法。
+如果您單純想變更值、保留單位；或者變更單位、保留值，則可以用 `withValue()` 或 `withUnit()` 方法。
 
 ```php
 $measurement = \Asika\UnitConverter\Duration::from(100, 'seconds');
 
-$measurement->withValue(300); // Returns a new Duration with 300 seconds
-$measurement->withUnit(Duration::UNIT_HOURS); // Returns a new Duration with 300 hours
+$measurement->withValue(300); // Returns a new Duration with 300 seconds, keep unit as seconds
+$measurement->withUnit(Duration::UNIT_HOURS); // Returns a new Duration with unit hours, keep value as 300
 ```
 
-### 四則運算
+### 運算
 
 Measurement 本身可以做簡單的加減乘除計算，計算的數值可以是 BigNumber、數字或字串。
 
@@ -685,12 +775,56 @@ $new = $measurement->multipliedBy('2'); // Returns a new Measurement with value 
 $new = $measurement->dividedBy(BigNumber::of(2)); // Returns a new Measurement with value / 2
 ```
 
-`plus()` 與 `minus()` 可以接受另一個 Measurement 物件來做計算，會自動轉換單位配合原本的 Measurement ，但同樣必須手動指定精度以避免轉換後損失精度。
+`plus()` 與 `minus()` 可以接受另一個 Measurement 物件來做計算，會自動轉換單位配合原本的 Measurement ，但同樣必須手動指定精度以避免轉換後損失精度，
+而加減時預設的 roundingMode 是 `UNNECESSARY`，所以需要盡可能顯式指定 RoundingMode 以避免錯誤發生。
 
 ```php
 $measurement = new Duration(120, 'seconds'); // 120 seconds
-$new = $measurement->plus(new Duration(2, 'minutes'), scale: 2); // Returns a new Duration with 240 seconds
-$new = $measurement->minus(new Duration(2500, 'ms'), scale: 2); // Returns a new Duration with 117.5 seconds
+$new = $measurement->plus(new Duration(2, 'minutes'), scale: 2, RoundingMode::HALF_UP); // Returns a new Duration with 240 seconds
+$new = $measurement->minus(new Duration(2500, 'ms'), scale: 2, RoundingMode::HALF_UP); // Returns a new Duration with 117.5 seconds
+```
+
+如果您要使用更複雜的計算，可以直接取用 `value` 屬性，這是一個 `BigDecimal` 物件，您可以使用 `BigDecimal` 的方法來進行計算。
+然後以 `with()` 或 `withValue()` 方法來建立新的 Measurement 物件。這兩個方法也接受 `Closure` 作為參數，這樣可以更靈活地處理計算。
+
+```php
+// Returns a new Measurement with value / 2
+$measurement = $measurement->with(
+    $measurement->value->dividedBy(2, scale: 2, RoundingMode::UP)
+);
+
+// Calculate by a Closure
+$measurement = $measurement->with(
+    fn (BigDecimal $value, string $unit, $measurementObject) => $measurement->value->power()
+);
+```
+
+## Compound Measurement
+
+有些 Measurement 需要組合多個單位來表示，分別稱作 num (numerator) 與 deno (denominator)，代表分子與分母的單位。
+
+例如 Speed 需要同時表示距離與時間，因此他是一個 Compound Measurement，由 `Length` (measure) + `Duration` (deno) 組合而成。
+在表達 `Speed` 的單位時，會是 `Length` 的單位除以 `Duration` 的單位，例如 `m/s` 或 `km/h`。
+
+```php
+$speed = Speed::from('100 km/h'); // 100 kilometers per hour
+$speed->convertTo('m/s', scale: 4); // 27.7777m/s
+```
+
+### Predefined Units
+
+每個 Compound Measurement 都有一些預定義的單位，這些單位可能是國際常用標準單位的命名，例如
+
+- `kph` (km/h, kilometers per hour)
+- `mph` (miles per hour)
+- `mps` (m/s, meters per second)
+- `knots` (knots, nautical miles per hour)
+
+這些單位可以直接用在 `from()` 方法或是 `convertTo()` 方法中，這樣可以方便的建立或轉換 Compound Measurement。
+
+```php
+$speed = Speed::from('100 kph'); // 100 kilometers per hour
+$speed->convertTo('mps', scale: 4); // 27.7777m/s
 ```
 
 ## 建立自己的 Measurement
@@ -733,32 +867,44 @@ class ScreenMeasurement extends AbstractBasicMeasurement
 }
 ```
 
-## Compound Measurement
+### 動態 Measurement
 
-有些 Measurement 需要組合多個單位來表示，分別稱作 measure (measurement) 與 deno (denominator)，代表分子與分母的單位。
+您也可以使用 `DynamicMeasurement` 來建立一個動態的 Measurement，這個 Measurement 可以在運行時動態設定單位與比率。
 
-例如 Speed 需要同時表示距離與時間，因此他是一個 Compound Measurement，由 `Length` (measure) + `Duration` (deno) 組合而成。
-在表達 `Speed` 的單位時，會是 `Length` 的單位除以 `Duration` 的單位，例如 `m/s` 或 `km/h`。
-
-```php
-$speed = Speed::from('100 km/h'); // 100 kilometers per hour
-$speed->convertTo('m/s', scale: 4); // 27.7777m/s
-```
-
-### Predefined Units
-
-每個 Compound Measurement 都有一些預定義的單位，這些單位可能是國際常用標準單位的命名，例如
-
-- `kph` (km/h, kilometers per hour)
-- `mph` (miles per hour)
-- `mps` (m/s, meters per second)
-- `knots` (knots, nautical miles per hour)
-
-這些單位可以直接用在 `from()` 方法或是 `convertTo()` 方法中，這樣可以方便的建立或轉換 Compound Measurement。
+下面示範一個動態貨幣轉換的 Measurement，您可以在運行時設定不同的貨幣與匯率，適合用在電子商務系統。
 
 ```php
-$speed = Speed::from('100 kph'); // 100 kilometers per hour
-$speed->convertTo('mps', scale: 4); // 27.7777m/s
+use Asika\UnitConverter\DynamicMeasurement;
+
+$currency = new DynamicMeasurement(
+    atomUnit: 'USD',
+    defaultUnit: 'USD',
+    // Example exchange rate
+    unitExchanges: [
+        'TWD' => $dailyExchangeRate->getRate('TWD'), // 0.33
+        'CNY' => $dailyExchangeRate->getRate('CNY'), // 0.15
+        'JPY' => $dailyExchangeRate->getRate('JPY'), // 0.007
+        'USD' => 1.0,
+        'EUR' => $dailyExchangeRate->getRate('EUR'), // 1.1
+        'GBP' => $dailyExchangeRate->getRate('GBP'), // 1.3
+    ]
+);
+$currency = $currency->withUnitNormalizer(
+    fn(string $unit): string => match (strtolower($unit)) {
+        'usd' => 'USD',
+        'eur' => 'EUR',
+        'gbp' => 'GBP',
+        'cny' => 'CNY',
+        'twd' => 'TWD',
+        'jpy' => 'JPY',
+        default => $unit,
+    }
+);
+
+$currency = $currency->withParse('100USD')
+    ->convertTo('EUR', scale: 2);
+
+echo $currency->format(); // 90.9EUR
 ```
 
 ## 可用的單位與其文件

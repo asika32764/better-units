@@ -19,12 +19,13 @@ use Brick\Math\RoundingMode;
  *
  * @formatter:on
  */
-abstract class AbstractMeasurement implements \Stringable
+abstract class AbstractMeasurement implements MeasurementInterface, \Stringable
 {
     use CalculationTrait;
 
-    public BigDecimal $value {
-        set(mixed $value) => $this->value = BigDecimal::of($value);
+    public protected(set) BigDecimal $value {
+        get => $this->value;
+        set(BigNumber|int|float|string $value) => $this->value = BigDecimal::of($value);
     }
 
     public protected(set) string $unit;
@@ -70,9 +71,9 @@ abstract class AbstractMeasurement implements \Stringable
 
     protected ?array $availableUnits = null;
 
-    public ?\Closure $unitNormalizer = null;
+    public mixed $unitNormalizer = null;
 
-    public ?\Closure $suffixFormatter = null;
+    public mixed $suffixFormatter = null;
 
     public static function from(mixed $value, ?string $asUnit = null): static
     {
@@ -238,14 +239,12 @@ abstract class AbstractMeasurement implements \Stringable
     }
 
     public function withValue(
-        mixed $value,
+        \Closure|BigNumber|int|float|string $value,
         ?string $fromUnit = null,
         ?int $scale = null,
         RoundingMode $roundingMode = RoundingMode::DOWN
     ): static {
-        $new = clone $this;
-        $new->value = $value;
-        $new->unit = $fromUnit ? $new->normalizeUnit($fromUnit) : $this->unit;
+        $new = $this->with($value, $fromUnit);
 
         if ($new->unit !== $this->unit) {
             $new = $new->convertTo($this->unit, $scale, $roundingMode);
@@ -262,11 +261,16 @@ abstract class AbstractMeasurement implements \Stringable
         return $new;
     }
 
-    public function with(mixed $value, ?string $unit = null): static
+    public function with(\Closure|BigNumber|int|float|string $value, ?string $unit = null): static
     {
         $new = clone $this;
-        $new->value = $value;
         $new->unit = $unit ? $this->normalizeUnit($unit) : $this->unit;
+
+        if ($value instanceof \Closure) {
+            $value = $value($this->value, $new->unit, $new);
+        }
+
+        $new->value = $value;
 
         return $new;
     }
@@ -553,7 +557,7 @@ abstract class AbstractMeasurement implements \Stringable
         return $units;
     }
 
-    public function withUnitNormalizer(?\Closure $unitNormalizer): static
+    public function withUnitNormalizer(?callable $unitNormalizer): static
     {
         $new = clone $this;
         $new->unitNormalizer = $unitNormalizer;
@@ -561,7 +565,7 @@ abstract class AbstractMeasurement implements \Stringable
         return $new;
     }
 
-    public function withSuffixFormatter(?\Closure $suffixNormalizer): static
+    public function withSuffixFormatter(?callable $suffixNormalizer): static
     {
         $new = clone $this;
         $new->suffixFormatter = $suffixNormalizer;
