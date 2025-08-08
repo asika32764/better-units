@@ -1,24 +1,24 @@
 # Duration Measurement
 
-Duration 是一個計算時間長度單位的工具，通常用於測量事件或操作的持續時間。
+Duration is an object for calculating time length units, usually used to measure the duration of events or operations.
 
 <!-- TOC -->
 * [Duration Measurement](#duration-measurement)
-  * [建立](#建立)
-  * [可用單位](#可用單位)
-  * [轉換](#轉換)
-  * [格式化](#格式化)
-  * [曆法](#曆法)
-    * [可用曆法常數](#可用曆法常數)
-    * [快速設定](#快速設定)
-  * [PHP DateTime 轉換](#php-datetime-轉換)
+  * [Create](#create)
+  * [Available Units](#available-units)
+  * [Conversion](#conversion)
+  * [Formatting](#formatting)
+  * [Calendar](#calendar)
+    * [Available Calendar Constants](#available-calendar-constants)
+    * [Quick Setting](#quick-setting)
+  * [PHP DateTime Conversion](#php-datetime-conversion)
     * [DateInterval](#dateinterval)
-    * [轉換成 DateTime](#轉換成-datetime)
+    * [Convert to DateTime](#convert-to-datetime)
 <!-- TOC -->
 
-## 建立
+## Create
 
-要建立一個 Duration 實例，可以使用以下方法：
+To create a Duration instance, you can use the following methods:
 
 ```php
 use Asika\BetterUnits\Duration;
@@ -32,37 +32,37 @@ $duration = Duration::from(300, 'days');
 $duration = Duration::from('300 days');
 ```
 
-## 可用單位
+## Available Units
 
 - Atom Unit: `femtoseconds`
 - Default Unit: `seconds`
 - Base Unit: `seconds`
 
-| 單位             | 常數                  | 別名                                        | 比率（相對秒）             | 說明     |
-|----------------|---------------------|-------------------------------------------|---------------------|--------|
-| `femtoseconds` | `UNIT_FEMTOSECONDS` | `fs`, `femtosecond`, `femtoseconds`       | `0.000000000000001` | 飛秒     |
-| `picoseconds`  | `UNIT_PICOSECONDS`  | `ps`, `picosecond`, `picoseconds`         | `0.000000000001`    | 皮秒     |
-| `nanoseconds`  | `UNIT_NANOSECONDS`  | `ns`, `nanosecond`, `nanoseconds`         | `0.000000001`       | 奈秒     |
-| `microseconds` | `UNIT_MICROSECONDS` | `μs`, `us`, `microsecond`, `microseconds` | `0.000001`          | 微秒     |
-| `milliseconds` | `UNIT_MILLISECONDS` | `ms`, `millisecond`, `milliseconds`       | `0.001`             | 毫秒     |
-| `seconds`      | `UNIT_SECONDS`      | `s`, `sec`, `second`, `seconds`           | `1`                 | 秒      |
-| `minutes`      | `UNIT_MINUTES`      | `m`, `min`, `minute`, `minutes`           | `60`                | 分鐘     |
-| `hours`        | `UNIT_HOURS`        | `h`, `hr`, `hour`, `hours`                | `3600`              | 小時     |
-| `days`         | `UNIT_DAYS`         | `d`, `day`, `days`                        | `86400`             | 天      |
-| `weeks`        | `UNIT_WEEKS`        | `w`, `week`, `weeks`                      | `604800`            | 週      |
-| `months`       | `UNIT_MONTHS`       | `mo`, `month`, `months`                   | `2629440`           | 月（可變動） |
-| `years`        | `UNIT_YEARS`        | `y`, `year`, `years`                      | `31536000`          | 年（可變動） |
+| Unit           | Constant            | Aliases                                   | Ratio (to seconds)  | Description      |
+|----------------|---------------------|-------------------------------------------|---------------------|------------------|
+| `femtoseconds` | `UNIT_FEMTOSECONDS` | `fs`, `femtosecond`, `femtoseconds`       | `0.000000000000001` | Femtosecond      |
+| `picoseconds`  | `UNIT_PICOSECONDS`  | `ps`, `picosecond`, `picoseconds`         | `0.000000000001`    | Picosecond       |
+| `nanoseconds`  | `UNIT_NANOSECONDS`  | `ns`, `nanosecond`, `nanoseconds`         | `0.000000001`       | Nanosecond       |
+| `microseconds` | `UNIT_MICROSECONDS` | `μs`, `us`, `microsecond`, `microseconds` | `0.000001`          | Microsecond      |
+| `milliseconds` | `UNIT_MILLISECONDS` | `ms`, `millisecond`, `milliseconds`       | `0.001`             | Millisecond      |
+| `seconds`      | `UNIT_SECONDS`      | `s`, `sec`, `second`, `seconds`           | `1`                 | Second           |
+| `minutes`      | `UNIT_MINUTES`      | `m`, `min`, `minute`, `minutes`           | `60`                | Minute           |
+| `hours`        | `UNIT_HOURS`        | `h`, `hr`, `hour`, `hours`                | `3600`              | Hour             |
+| `days`         | `UNIT_DAYS`         | `d`, `day`, `days`                        | `86400`             | Day              |
+| `weeks`        | `UNIT_WEEKS`        | `w`, `week`, `weeks`                      | `604800`            | Week             |
+| `months`       | `UNIT_MONTHS`       | `mo`, `month`, `months`                   | `2629440`           | Month (variable) |
+| `years`        | `UNIT_YEARS`        | `y`, `year`, `years`                      | `31536000`          | Year (variable)  |
 
-## 轉換
+## Conversion
 
-可使用 `to()` 或 `toXxx()` 方法將 Duration 轉換成其他單位的值：
+You can use the `to()` or `toXxx()` methods to convert Duration to other unit values:
 
 ```php
 $duration->toSeconds();
 $duration->toMinutes(scale: 2, RoundingMode::HALF_UP);
 ```
 
-支援的函式
+Supported functions
 
 - `toFemtoseconds()`
 - `toPicoseconds()`
@@ -77,9 +77,10 @@ $duration->toMinutes(scale: 2, RoundingMode::HALF_UP);
 - `toMonths()`
 - `toYears()`
 
-## 格式化
+## Formatting
 
-Duration 適合用在顯示經歷時長、收聽時間等，如果您將使用者的收聽時間轉成秒數儲存，以下示範了如何轉成人類可讀的顯示方式
+Duration is suitable for displaying elapsed time, listening time, etc. If you store the user's listening time as
+seconds, the following demonstrates how to convert it to a human-readable display:
 
 ```php
 $seconds = 465718;
@@ -87,7 +88,8 @@ $totalPlaySeconds = Duration::from($seconds, 's');
 echo $totalPlaySeconds->humanize(); // 5days 9hours 21minutes 58seconds
 ```
 
-由於收聽時間我們期望最大單位為小時，我們可以在 `humanize()` 方法中指定印出的單位：
+Since we expect the maximum unit for listening time to be hours, we can specify the output units in the `humanize()`
+method:
 
 ```php
 echo $totalPlaySeconds->humanize(
@@ -101,7 +103,7 @@ echo $totalPlaySeconds->humanize(
 // 129hours, 21minutes, 58seconds
 ```
 
-如果要顯示成 `24:59:33` 這樣的播放器格式，可以如下設定
+To display in a player format like `24:59:33`, you can set it up as follows:
 
 ```php
 $format = fn(BigDecimal $value) => sprintf('%02d', (string) $value);
@@ -117,17 +119,22 @@ echo $totalPlaySeconds->humanize(
 // 129:21:58
 ```
 
-自行客製化顯示方式，請見 [serializeCallback()](../README.md#serializecallback)
+For custom display methods, see [serializeCallback()](../README.md#serializecallback)
 
-## 曆法
+## Calendar
 
-由於人類時間的計算中，年與月並沒有標準長度，而是依照所用的曆法不同而會改變，因此要精確的計算年月時長，必須要指定使用的曆法，才能相對準確。
+Due to the fact that the calculation of years and months does not have a standard length, but changes
+according to the calendar used, to accurately calculate the duration in years and months, it is necessary to specify the
+calendar you want to use.
 
-`Duration` 預設使用 common 曆法，年是用 365 天計算 (`31536000` 秒)，月是用 30 天計算 (`2629440` 秒)。
-這適合用在對長時間不敏感的軟體中，例如每月份計算是用量的系統。但對於需要跨越份與年份統計時長的系統來說，就顯得不夠準確。
+`Duration` uses the common calendar by default, with a year calculated as 365 days (`31536000` seconds) and a month as
+30 days (`2629440` seconds).
+This is suitable for software that is not sensitive to long periods, such as systems that calculate monthly usage.  
+However, for systems that require cross-month and cross-year duration statistics, it is not accurate enough.
 
-`Duration` 提供一系列曆法單位與其對應的秒數，可以透過 `withYearSeconds()` 與 `withMonthSeconds()` 方法來設定，
-下面示範了設定 Anomalistic 曆法的方式：
+`Duration` provides a series of calendar units and their corresponding seconds. You can set them using the
+`withYearSeconds()` and `withMonthSeconds()` methods.  
+The following demonstrates how to set the [Anomalistic](https://en.wikipedia.org/wiki/Anomalistic_year) calendar:
 
 ```php
 $duration = new Duration()
@@ -138,37 +145,39 @@ $duration->withParse('1year 2months')
     ->toSeconds(); // BigDecimal(7142139.36)
 ```
 
-### 可用曆法常數
+### Available Calendar Constants
 
-注意除了 common 以外，所有的年、月秒數都是平均值，非固定值，隨著地球運行，每年都會改變。本套件僅能用平均秒數做計算，
-如果要依照年份計算時長，請改用合適的曆法套件做計算。
+Note that except for the common calendar, the number of seconds is an average value, not fixed. It changes as the Earth
+moves, and the value may vary each year. This package can only calculate using average seconds. If you need to calculate
+durations based on specific years, please use a suitable calendar library.
 
-| 常數                          | 曆法                                                              | 秒數            | 備註          |
-|-----------------------------|-----------------------------------------------------------------|---------------|-------------|
-| `YEAR_SECONDS_COMMON`       | [Common](https://en.wikipedia.org/wiki/Common_year)             | `31536000`    | 365 天       |
-| `YEAR_SECONDS_LEAP`         | [Leap](https://en.wikipedia.org/wiki/Leap_year)                 | `31622400`    | 366 天       |
-| `YEAR_SECONDS_GREGORIAN`    | [Gregorian](https://en.wikipedia.org/wiki/Gregorian_calendar)   | `31556952`    | 平均年長，曆法混合   |
-| `YEAR_SECONDS_JULIAN`       | [Julian](https://en.wikipedia.org/wiki/Julian_year_(astronomy)) | `31557600`    | 365.25 天    |
-| `YEAR_SECONDS_TROPICAL`     | [Tropical](https://en.wikipedia.org/wiki/Tropical_year)         | `31556925.97` | 回歸年         |
-| `YEAR_SECONDS_SIDEREAL`     | [Sidereal](https://en.wikipedia.org/wiki/Sidereal_year)         | `31558149.76` | 恆星年         |
-| `YEAR_SECONDS_ANOMALISTIC`  | [Anomalistic](https://en.wikipedia.org/wiki/Anomalistic_year)   | `31558432.55` | 近日點年        |
-| `YEAR_SECONDS_DRACONIC`     | [Draconic](https://en.wikipedia.org/wiki/Draconic_year)         | `29947971`    | 交點年         |
-| `YEAR_SECONDS_GAUSSIAN`     | [Gaussian](https://en.wikipedia.org/wiki/Gaussian_year)         | `31558196.01` | 高斯年         |
-| `MONTH_SECONDS_COMMON`      | [Common](https://en.wikipedia.org/wiki/Common_year)             | `2629440`     | 30.44 天     |
-| `MONTH_SECONDS_GREGORIAN`   | [Gregorian](https://en.wikipedia.org/wiki/Gregorian_calendar)   | `2629746`     | 30.436875 天 |
-| `MONTH_SECONDS_JULIAN`      | [Julian](https://en.wikipedia.org/wiki/Julian_year_(astronomy)) | `2629800`     | 30.4375 天   |
-| `MONTH_SECONDS_TROPICAL`    | [Tropical](https://en.wikipedia.org/wiki/Tropical_month)        | `2360584.51`  | 27.32158 天  |
-| `MONTH_SECONDS_SIDEREAL`    | [Sidereal](https://en.wikipedia.org/wiki/Sidereal_month)        | `2360591.5`   | 27.321661 天 |
-| `MONTH_SECONDS_ANOMALISTIC` | [Anomalistic](https://en.wikipedia.org/wiki/Anomalistic_month)  | `2380713.12`  | 27.55455 天  |
-| `MONTH_SECONDS_DRACONIC`    | [Draconic](https://en.wikipedia.org/wiki/Draconic_month)        | `2351135.81`  | 27.21222 天  |
-| `MONTH_SECONDS_28DAYS`      | 固定 28 天                                                         | `2419200`     | 固定 28 天     |
-| `MONTH_SECONDS_29DAYS`      | 固定 29 天                                                         | `2505600`     | 固定 29 天     |
-| `MONTH_SECONDS_30DAYS`      | 固定 30 天                                                         | `2592000`     | 固定 30 天     |
-| `MONTH_SECONDS_31DAYS`      | 固定 31 天                                                         | `2678400`     | 固定 31 天     |
+| Constant                    | Calendar                                                        | Seconds       | Notes                               |
+|-----------------------------|-----------------------------------------------------------------|---------------|-------------------------------------|
+| `YEAR_SECONDS_COMMON`       | [Common](https://en.wikipedia.org/wiki/Common_year)             | `31536000`    | 365 days                            |
+| `YEAR_SECONDS_LEAP`         | [Leap](https://en.wikipedia.org/wiki/Leap_year)                 | `31622400`    | 366 days                            |
+| `YEAR_SECONDS_GREGORIAN`    | [Gregorian](https://en.wikipedia.org/wiki/Gregorian_calendar)   | `31556952`    | Average year length, mixed calendar |
+| `YEAR_SECONDS_JULIAN`       | [Julian](https://en.wikipedia.org/wiki/Julian_year_(astronomy)) | `31557600`    | 365.25 days                         |
+| `YEAR_SECONDS_TROPICAL`     | [Tropical](https://en.wikipedia.org/wiki/Tropical_year)         | `31556925.97` | Sidereal year                       |
+| `YEAR_SECONDS_SIDEREAL`     | [Sidereal](https://en.wikipedia.org/wiki/Sidereal_year)         | `31558149.76` | Sidereal year                       |
+| `YEAR_SECONDS_ANOMALISTIC`  | [Anomalistic](https://en.wikipedia.org/wiki/Anomalistic_year)   | `31558432.55` | Perihelion year                     |
+| `YEAR_SECONDS_DRACONIC`     | [Draconic](https://en.wikipedia.org/wiki/Draconic_year)         | `29947971`    | Nodal year                          |
+| `YEAR_SECONDS_GAUSSIAN`     | [Gaussian](https://en.wikipedia.org/wiki/Gaussian_year)         | `31558196.01` | Gaussian year                       |
+| `MONTH_SECONDS_COMMON`      | [Common](https://en.wikipedia.org/wiki/Common_year)             | `2629440`     | 30.44 days                          |
+| `MONTH_SECONDS_GREGORIAN`   | [Gregorian](https://en.wikipedia.org/wiki/Gregorian_calendar)   | `2629746`     | 30.436875 days                      |
+| `MONTH_SECONDS_JULIAN`      | [Julian](https://en.wikipedia.org/wiki/Julian_year_(astronomy)) | `2629800`     | 30.4375 days                        |
+| `MONTH_SECONDS_TROPICAL`    | [Tropical](https://en.wikipedia.org/wiki/Tropical_month)        | `2360584.51`  | 27.32158 days                       |
+| `MONTH_SECONDS_SIDEREAL`    | [Sidereal](https://en.wikipedia.org/wiki/Sidereal_month)        | `2360591.5`   | 27.321661 days                      |
+| `MONTH_SECONDS_ANOMALISTIC` | [Anomalistic](https://en.wikipedia.org/wiki/Anomalistic_month)  | `2380713.12`  | 27.55455 days                       |
+| `MONTH_SECONDS_DRACONIC`    | [Draconic](https://en.wikipedia.org/wiki/Draconic_month)        | `2351135.81`  | 27.21222 days                       |
+| `MONTH_SECONDS_28DAYS`      | Fixed 28 days                                                   | `2419200`     | Fixed 28 days                       |
+| `MONTH_SECONDS_29DAYS`      | Fixed 29 days                                                   | `2505600`     | Fixed 29 days                       |
+| `MONTH_SECONDS_30DAYS`      | Fixed 30 days                                                   | `2592000`     | Fixed 30 days                       |
+| `MONTH_SECONDS_31DAYS`      | Fixed 31 days                                                   | `2678400`     | Fixed 31 days                       |
 
-### 快速設定
+### Quick Setting
 
-Duration 提供了快速設定曆法的方法，可以直接使用以下方法來設定，無需分別設定年與月。
+Duration provides quick setting methods for calendars, you can directly use the following methods to set, without
+separately setting years and months.
 
 ```php
 $duration = $duration->withCommonCalendar();
@@ -180,18 +189,19 @@ $duration = $duration->withTropicalCalendar();
 $duration = $duration->withDraconicCalendar();
 ```
 
-## PHP DateTime 轉換
+## PHP DateTime Conversion
 
-`Duration` 可以與 PHP 的 `DateTime` 互相轉換，這對於需要處理時間戳記或日期時間的應用程式非常有用。
+`Duration` can be converted to and from PHP's `DateTime`, which is very useful for applications that need to handle
+timestamps or date and time.
 
 ### DateInterval
 
-可以從 DateInterval 轉換成 Duration，或是解析 DateInterval 字串。
+You can convert from DateInterval to Duration, or parse DateInterval strings.
 
 ```php
 $duration = Duration::fromDateInterval($interval);
 
-// Same aAS
+// Same AS
 
 $duration = $duration->withFromDateInterval($interval);
 
@@ -200,27 +210,33 @@ $duration = $duration->withFromDateInterval($interval);
 $duration = Duration::parseDateString('1year 2month 10hours 30minutes 45seconds');
 
 // Same AS
+
 $duration = $duration->withParseDateString('1year 2month 10hours 30minutes 45seconds');
 ```
 
-注意 `parseDateString()`
-用的是 `DateInterval::createFromDateString()`，所以可以使用 `10hours 30minutes` 這樣的字串，但不能使用 `P12DT3H` 這樣的字串。
-`Duration::parseDateString()` 雖然與 `Duration::parse()` 相似，但它專門用於解析 DateInterval 字串，只支援 PHP 內建的時間日期格式，
-不像 `Duration` 可以支援到最低 `fetmoseconds` 的單位等。
+Note that `parseDateString()`
+uses `DateInterval::createFromDateString()`, so you can use strings like `10hours 30minutes`, but not strings like
+`P12DT3H`.
+`Duration::parseDateString()` is similar to `Duration::parse()`, but it is specifically for parsing DateInterval
+strings, and only supports PHP's built-in date and time formats,
+unlike `Duration`, which can support units down to `femtoseconds`, etc.
 
-您也可以將 `Duration` 轉換成 `DateInterval`，要注意的是，由於 PHP 的 `DateInterval` 只支援到 microseconds 的精度，
-所以如果您使用了更小的單位（如奈秒、飛秒等），這些單位將會被四捨五入到 microseconds （進位規則可以自訂）。
+You can also convert `Duration` to `DateInterval`, but note that PHP's `DateInterval` only supports up to microseconds
+precision,
+so if you use smaller units (like nanoseconds, femtoseconds, etc.), these units will be rounded to microseconds (the
+rounding rule can be customized).
 
 ```php
 $duration = Duration::parse('350 seconds 300 milliseconds 500 nanoseconds');
-$interval = $duration->toDateInterval([roundingMode => HALF_UP]);
+$interval = $duration->toDateInterval([$roundingMode = HALF_UP]);
 
 echo $duration->intervalToMicroseconds($interval); // 350300001
 ```
 
-### 轉換成 DateTime
+### Convert to DateTime
 
-`Duration` 可以將持續時間轉換成未來或過去的 `DateTime`，這對於需要計算某個事件發生後或之前的時間非常有用。
+`Duration` can convert a duration to a future or past `DateTime`, which is very useful for calculating the time after or
+before an event occurs.
 
 ```php
 // Current date is 2023-10-01 00:00:00
@@ -234,7 +250,7 @@ echo $duration->toFutureDateTime()->format(DateTime::ATOM);
 echo $duration->toPastDateTime()->format(DateTime::ATOM);
 ```
 
-也可以指定起始日期
+You can also specify the starting date
 
 ```php
 $now = new DateTimeImmutable('2023-10-01T00:00:00');

@@ -4,37 +4,39 @@ BetterUnits is a modern and intuitive unit conversion tool that allows you to co
 units of measurement. It supports a wide range of categories including length, weight, temperature, volume, and more.
 
 <!-- TOC -->
+
 * [BetterUnits - PHP Measurement Converter](#betterunits---php-measurement-converter)
-  * [Installation](#installation)
-  * [Getting Started](#getting-started)
-    * [How to Use This Package](#how-to-use-this-package)
-    * [How to Create Measurement Object](#how-to-create-measurement-object)
-    * [Rounding Mode [!important]](#rounding-mode-important)
-    * [Create By Strings](#create-by-strings)
-  * [Unit Conversion](#unit-conversion)
-    * [Output Values](#output-values)
-    * [convertTo() Method](#convertto-method)
-    * [Precision Control](#precision-control)
-  * [Units](#units)
-  * [Formatting](#formatting)
-    * [`format()`](#format)
-    * [`humanize()`](#humanize)
-    * [Default Formatting Handler](#default-formatting-handler)
-    * [`serialize()`](#serialize)
-    * [`serializeCallback()`](#serializecallback)
-  * [Unit Management](#unit-management)
-    * [Restrict Available Units](#restrict-available-units)
-    * [Customizing or Adding Units](#customizing-or-adding-units)
-    * [Changing Conversion Rates](#changing-conversion-rates)
-    * [Other Unit Adjustments](#other-unit-adjustments)
-  * [Get the Unit Closest to 1](#get-the-unit-closest-to-1)
-  * [Modifying the Content of a Measurement](#modifying-the-content-of-a-measurement)
-    * [Operations](#operations)
-  * [Compound Measurement](#compound-measurement)
-    * [Predefined Units](#predefined-units)
-  * [Creating Your Own Measurement](#creating-your-own-measurement)
-    * [Dynamic Measurement](#dynamic-measurement)
-  * [Available Units And Documentations](#available-units-and-documentations)
+    * [Installation](#installation)
+    * [Getting Started](#getting-started)
+        * [How to Use This Package](#how-to-use-this-package)
+        * [How to Create Measurement Object](#how-to-create-measurement-object)
+        * [Rounding Mode [!important]](#rounding-mode-important)
+        * [Create By Strings](#create-by-strings)
+    * [Unit Conversion](#unit-conversion)
+        * [Output Values](#output-values)
+        * [convertTo() Method](#convertto-method)
+        * [Precision Control](#precision-control)
+    * [Units](#units)
+    * [Formatting](#formatting)
+        * [`format()`](#format)
+        * [`humanize()`](#humanize)
+        * [Default Formatting Handler](#default-formatting-handler)
+        * [`serialize()`](#serialize)
+        * [`serializeCallback()`](#serializecallback)
+    * [Unit Management](#unit-management)
+        * [Restrict Available Units](#restrict-available-units)
+        * [Customizing or Adding Units](#customizing-or-adding-units)
+        * [Changing Conversion Rates](#changing-conversion-rates)
+        * [Other Unit Adjustments](#other-unit-adjustments)
+    * [Get the Unit Closest to 1](#get-the-unit-closest-to-1)
+    * [Modifying the Content of a Measurement](#modifying-the-content-of-a-measurement)
+        * [Operations](#operations)
+    * [Compound Measurement](#compound-measurement)
+        * [Predefined Units](#predefined-units)
+    * [Creating Your Own Measurement](#creating-your-own-measurement)
+        * [Dynamic Measurement](#dynamic-measurement)
+    * [Available Units And Documentations](#available-units-and-documentations)
+
 <!-- TOC -->
 
 ## Installation
@@ -878,7 +880,9 @@ $new = $measurement->plus(new Duration(2, 'minutes'), scale: 2, RoundingMode::HA
 $new = $measurement->minus(new Duration(2500, 'ms'), scale: 2, RoundingMode::HALF_UP); // Returns a new Duration with 117.5 seconds
 ```
 
-If you need to perform more complex calculations, you can directly access the `value` property, which is a `BigDecimal` object. You can use `BigDecimal` methods for calculations and then create a new Measurement object using the `with()` or `withValue()` methods. These methods also accept a `Closure` as a parameter, allowing for more flexible calculations.
+If you need to perform more complex calculations, you can directly access the `value` property, which is a `BigDecimal`
+object. You can use `BigDecimal` methods for calculations and then create a new Measurement object using the `with()` or
+`withValue()` methods. These methods also accept a `Closure` as a parameter, allowing for more flexible calculations.
 
 ```php
 // Returns a new Measurement with value / 2
@@ -894,9 +898,12 @@ $measurement = $measurement->with(
 
 ## Compound Measurement
 
-Some Measurements require combining multiple units, referred to as `num` (numerator) and `deno` (denominator), representing the units in the numerator and denominator.
+Some Measurements require combining multiple units, referred to as `num` (numerator) and `deno` (denominator),
+representing the units in the numerator and denominator.
 
-For example, Speed requires both distance and time, making it a Compound Measurement composed of `Length` (numerator) and `Duration` (denominator). When expressing the unit of Speed, it will be the unit of `Length` divided by the unit of `Duration`, such as `m/s` or `km/h`.
+For example, Speed requires both distance and time, making it a Compound Measurement composed of `Length` (numerator)
+and `Duration` (denominator). When expressing the unit of Speed, it will be the unit of `Length` divided by the unit of
+`Duration`, such as `m/s` or `km/h`.
 
 ```php
 $speed = Speed::from('100 km/h'); // 100 kilometers per hour
@@ -912,7 +919,8 @@ Each Compound Measurement has some predefined units, which are commonly used int
 - `mps` (m/s, meters per second)
 - `knots` (knots, nautical miles per hour)
 
-These units can be directly used in the `from()` or `convertTo()` methods, making it convenient to create or convert Compound Measurements.
+These units can be directly used in the `from()` or `convertTo()` methods, making it convenient to create or convert
+Compound Measurements.
 
 ```php
 $speed = Speed::from('100 kph'); // 100 kilometers per hour
@@ -925,11 +933,12 @@ Here is a simple example. To create a custom Measurement, you need to extend the
 There are three required properties to implement:  
 `$atomUnit` represents the smallest indivisible unit,  
 `$defaultUnit` is the default unit,  
-and `$unitExchanges` defines the conversion rates between units.  
+and `$unitExchanges` defines the conversion rates between units.
 
 Make sure to include at least one base unit with a rate of `1`, as some calculations may fail without it.
 
-The `normalizeUnit()` method is optional. It is used to convert input unit strings into supported units and is called during string parsing or unit conversion.
+The `normalizeUnit()` method is optional. It is used to convert input unit strings into supported units and is called
+during string parsing or unit conversion.
 
 ```php
 class ScreenMeasurement extends AbstractBasicMeasurement
@@ -965,9 +974,11 @@ class ScreenMeasurement extends AbstractBasicMeasurement
 
 ### Dynamic Measurement
 
-You can use `DynamicMeasurement` to create a dynamic Measurement that allows you to set units and exchange rates at runtime.
+You can use `DynamicMeasurement` to create a dynamic Measurement that allows you to set units and exchange rates at
+runtime.
 
-Below is an example of a dynamic currency conversion Measurement. This is useful for e-commerce systems where exchange rates and currencies can be configured dynamically.
+Below is an example of a dynamic currency conversion Measurement. This is useful for e-commerce systems where exchange
+rates and currencies can be configured dynamically.
 
 ```php
 use Asika\BetterUnits\DynamicMeasurement;

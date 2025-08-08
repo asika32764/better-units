@@ -1,5 +1,5 @@
 {
-    "name": "asika/unit-converter",
+    "name": "asika/better-units",
     "description": "A modern PHP unit converter.",
     "type": "library",
     "require": {
