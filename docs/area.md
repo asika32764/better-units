@@ -16,7 +16,7 @@ Area 是一個用於計算面積的單位轉換工具，適合用於各種面積
 要建立一個 Area 實例，可以使用以下方法：
 
 ```php
-use Asika\UnitConverter\Area;
+use Asika\BetterUnits\Area;
 
 $area = new Area(100); // 100 平方公尺
 $area = new Area(2, Area::UNIT_SQUARE_KILOMETERS); // 2 平方公里
@@ -94,7 +94,7 @@ $area->to('ft2');
 可以將面積數值格式化成人類可讀的方式：
 
 ```php
-$area = \Asika\UnitConverter\Area::from(401074580, 'm2')
+$area = \Asika\BetterUnits\Area::from(401074580, 'm2')
     ->withOnlyCommonAreas();
 echo $area->humanize(divider: ' and '); // 401km2 and 74580m2
 ```

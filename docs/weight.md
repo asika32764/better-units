@@ -9,6 +9,7 @@ Weight 是一個用於計算重量的單位轉換工具，適合用於各種重�
     * [限縮單位](#限縮單位)
   * [轉換](#轉換)
   * [格式化](#格式化)
+  * [重力加速度](#重力加速度)
 <!-- TOC -->
 
 ## 建立
@@ -16,7 +17,7 @@ Weight 是一個用於計算重量的單位轉換工具，適合用於各種重�
 要建立一個 Weight 實例，可以使用以下方法：
 
 ```php
-use Asika\UnitConverter\Weight;
+use Asika\BetterUnits\Weight;
 
 $weight = new Weight(100); // 100 公克
 $weight = new Weight(2, Weight::UNIT_KILOGRAMS); // 2 公斤
@@ -96,7 +97,7 @@ $weight->to('lb');
 可以將重量數值格式化成人類可讀的方式：
 
 ```php
-$weight = \Asika\UnitConverter\Weight::from(12345, 'g')
+$weight = \Asika\BetterUnits\Weight::from(12345, 'g')
     ->withOnlyCommonWeights();
 echo $weight->humanize(divider: ' and '); // 12kg and 345g
 ```
@@ -106,7 +107,7 @@ echo $weight->humanize(divider: ' and '); // 12kg and 345g
 由於牛頓 (`N`) 的數值建立在重力加速度上，我們可以替 Weight 實例設定重力加速度的值：
 
 ```php
-$weight = new \Asika\UnitConverter\Weight(100, 'N');
+$weight = new \Asika\BetterUnits\Weight(100, 'N');
 
 echo $weight->format(unit: 'kg', scale: 4); // 0.0102kg
 

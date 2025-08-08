@@ -16,7 +16,7 @@ Length 是一個用於計算長度的單位轉換工具，適合用於各種長�
 要建立一個 Length 實例，可以使用以下方法：
 
 ```php
-use Asika\UnitConverter\Length;
+use Asika\BetterUnits\Length;
 
 $length = new Length(100); // 100 公尺
 $length = new Length(2, Length::UNIT_KILOMETERS); // 2 公里
@@ -102,7 +102,7 @@ $length->to('nmi');
 可以將長度數值格式化成人類可讀的方式：
 
 ```php
-$length = \Asika\UnitConverter\Length::from(12345, 'm')
+$length = \Asika\BetterUnits\Length::from(12345, 'm')
     ->withOnlyCommonLengths();
 echo $length->humanize(divider: ' and '); // 12km and 345m
 ```

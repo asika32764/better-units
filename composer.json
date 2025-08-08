@@ -13,12 +13,12 @@
     "license": "MIT",
     "autoload": {
         "psr-4": {
-            "Asika\\UnitConverter\\": "src/"
+            "Asika\\BetterUnits\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Asika\\UnitConverter\\Tests\\": "tests/"
+            "Asika\\BetterUnits\\Tests\\": "tests/"
         }
     },
     "authors": [

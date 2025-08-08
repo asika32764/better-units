@@ -16,7 +16,7 @@ Volume 是一個用於計算體積的單位轉換工具，適合用於各種體�
 要建立一個 Volume 實例，可以使用以下方法：
 
 ```php
-use Asika\UnitConverter\Volume;
+use Asika\BetterUnits\Volume;
 
 $volume = new Volume(100); // 100 立方公尺
 $volume = new Volume(2, Volume::UNIT_CUBIC_KILOMETERS); // 2 立方公里
@@ -98,7 +98,7 @@ $volume->to('ft3');
 可以將體積數值格式化成人類可讀的方式：
 
 ```php
-$volume = \Asika\UnitConverter\Volume::from(401074580, 'm3')
+$volume = \Asika\BetterUnits\Volume::from(401074580, 'm3')
     ->withOnlyCommonVolumes();
 echo $volume->humanize(divider: ' and '); // 401km3 and 74580m3
 ```

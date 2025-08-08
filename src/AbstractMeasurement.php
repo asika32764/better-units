@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Asika\UnitConverter;
+namespace Asika\BetterUnits;
 
-use Asika\UnitConverter\Concerns\CalculationTrait;
+use Asika\BetterUnits\Concerns\CalculationTrait;
 use Brick\Math\BigDecimal;
 use Brick\Math\BigNumber;
 use Brick\Math\Exception\RoundingNecessaryException;

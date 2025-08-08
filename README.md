@@ -88,7 +88,7 @@ the [brick/math](https://github.com/brick/math) for mathematical operations, so 
 `BigDecimal` object.
 
 ```php
-use Asika\UnitConverter\Duration;
+use Asika\BetterUnits\Duration;
 
 $duration = new Duration(600); // 600 seconds
 
@@ -135,7 +135,7 @@ Unit Convert 也支援用字串建立轉換物件，這樣可以更方便的處�
 這樣可以原封不動的保留完整數值，後續會在說明如何進行數值的轉換與正規化。
 
 ```php
-$duration = \Asika\UnitConverter\Duration::parse('10hours 5minutes 30seconds 50ms 100ns 300fs');
+$duration = \Asika\BetterUnits\Duration::parse('10hours 5minutes 30seconds 50ms 100ns 300fs');
 
 $duration->value; // BigDecimal(36330.0500001000003)
 ```
@@ -281,8 +281,8 @@ Unit Converter 可以用常數或是英文單位字串來表達單位，以 `Dur
 下面是解析時的輸入範例:
 
 ```php
-\Asika\UnitConverter\Duration::parse('10 hours 5 minutes 30 seconds 50ms 100ns 300fs');
-\Asika\UnitConverter\Duration::parse('3y 2mo 1w 2d 3h 4min 5s 6ms 7μs 8ns 9fs');
+\Asika\BetterUnits\Duration::parse('10 hours 5 minutes 30 seconds 50ms 100ns 300fs');
+\Asika\BetterUnits\Duration::parse('3y 2mo 1w 2d 3h 4min 5s 6ms 7μs 8ns 9fs');
 ```
 
 ## 格式化
@@ -707,7 +707,7 @@ $d->withUnitExchanges(
 舉例來說， `Duration` 可設定曆法規則，用於計算每年與每月的秒數。
 
 ```php
-$duration = new \Asika\UnitConverter\Duration();
+$duration = new \Asika\BetterUnits\Duration();
 $duration = $duration->withAnomalisticCalendar(); // Use Anomalistic Calendar for year/month calculations
 
 // you must parse values after setting calendar
@@ -717,7 +717,7 @@ $duration->withParse('1 year')->toSeconds(); // 31556952 seconds (Anomalistic ye
 或者 `FileSize` 因為支援 IS 與 IEC 的單位標準，因此可以設定使用哪一種標準來計算單位。
 
 ```php
-$fs = new \Asika\UnitConverter\FileSize();
+$fs = new \Asika\BetterUnits\FileSize();
 $fs = $fs->withOnlyBytesBinary(); // Use only binary bytes (IEC) for calculations (KiB, MiB, GiB, etc.)
 
 $fs->withParse('100KiB'); // OK
@@ -732,7 +732,7 @@ Measurement 提供了 `nearest()` 方法來取得最接近 1 的單位，這個�
 適合用在提供人類易讀的單位顯示時。
 
 ```php
-$fs = \Asika\UnitConverter\FileSize::from('8500KiB');
+$fs = \Asika\BetterUnits\FileSize::from('8500KiB');
 $nearest = $fs->nearest(scale: 2, RoundingMode::HALF_UP)->format(); // 8.31MiB
 ```
 
@@ -758,7 +758,7 @@ $measurement->format(); // "100.25hours"
 如果您單純想變更值、保留單位；或者變更單位、保留值，則可以用 `withValue()` 或 `withUnit()` 方法。
 
 ```php
-$measurement = \Asika\UnitConverter\Duration::from(100, 'seconds');
+$measurement = \Asika\BetterUnits\Duration::from(100, 'seconds');
 
 $measurement->withValue(300); // Returns a new Duration with 300 seconds, keep unit as seconds
 $measurement->withUnit(Duration::UNIT_HOURS); // Returns a new Duration with unit hours, keep value as 300
@@ -874,7 +874,7 @@ class ScreenMeasurement extends AbstractBasicMeasurement
 下面示範一個動態貨幣轉換的 Measurement，您可以在運行時設定不同的貨幣與匯率，適合用在電子商務系統。
 
 ```php
-use Asika\UnitConverter\DynamicMeasurement;
+use Asika\BetterUnits\DynamicMeasurement;
 
 $currency = new DynamicMeasurement(
     atomUnit: 'USD',

@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Asika\UnitConverter\Tests\Stub;
+namespace Asika\BetterUnits\Tests\Stub;
 
-use Asika\UnitConverter\AbstractBasicMeasurement;
+use Asika\BetterUnits\AbstractBasicMeasurement;
 
 class TestMeasurement extends AbstractBasicMeasurement
 {

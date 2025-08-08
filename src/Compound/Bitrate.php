@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Asika\UnitConverter\Compound;
+namespace Asika\BetterUnits\Compound;
 
-use Asika\UnitConverter\AbstractMeasurement;
-use Asika\UnitConverter\Duration;
-use Asika\UnitConverter\FileSize;
+use Asika\BetterUnits\AbstractMeasurement;
+use Asika\BetterUnits\Duration;
+use Asika\BetterUnits\FileSize;
 
 class Bitrate extends AbstractCompoundMeasurement
 {

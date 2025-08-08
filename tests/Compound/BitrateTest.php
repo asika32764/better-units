@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Asika\UnitConverter\Tests\Compound;
+namespace Asika\BetterUnits\Tests\Compound;
 
-use Asika\UnitConverter\Compound\Bitrate;
-use Asika\UnitConverter\Compound\Speed;
-use Asika\UnitConverter\Duration;
+use Asika\BetterUnits\Compound\Bitrate;
+use Asika\BetterUnits\Compound\Speed;
+use Asika\BetterUnits\Duration;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 

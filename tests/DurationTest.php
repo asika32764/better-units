@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Asika\UnitConverter\Tests;
+namespace Asika\BetterUnits\Tests;
 
-use Asika\UnitConverter\AbstractMeasurement;
-use Asika\UnitConverter\Duration;
+use Asika\BetterUnits\AbstractMeasurement;
+use Asika\BetterUnits\Duration;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;

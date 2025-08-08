@@ -16,7 +16,7 @@ Energy 是一個用於計算能量的單位轉換工具，適合用於各種電�
 要建立一個 Energy 實例，可以使用以下方法：
 
 ```php
-use Asika\UnitConverter\Energy;
+use Asika\BetterUnits\Energy;
 
 $energy = new Energy(100); // 100 焦耳
 $energy = new Energy(2, Energy::UNIT_KILOJOULE); // 2 千焦耳
@@ -104,7 +104,7 @@ $energy->to('kcal');
 可以將能量數值格式化成人類可讀的方式：
 
 ```php
-$energy = \Asika\UnitConverter\Energy::from(12345, 'j')
+$energy = \Asika\BetterUnits\Energy::from(12345, 'j')
     ->withOnlyJouleUnits();
 echo $energy->humanize(divider: ' and '); // 12kj and 345j
 ```

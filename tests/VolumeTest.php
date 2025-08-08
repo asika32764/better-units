@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Asika\UnitConverter\Tests;
+namespace Asika\BetterUnits\Tests;
 
-use Asika\UnitConverter\Area;
-use Asika\UnitConverter\Duration;
-use Asika\UnitConverter\Volume;
+use Asika\BetterUnits\Area;
+use Asika\BetterUnits\Duration;
+use Asika\BetterUnits\Volume;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 

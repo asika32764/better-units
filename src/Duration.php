@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Asika\UnitConverter;
+namespace Asika\BetterUnits;
 
-use Asika\UnitConverter\Concerns\DurationCalendlyTrait;
+use Asika\BetterUnits\Concerns\DurationCalendlyTrait;
 use Brick\Math\BigDecimal;
 use Brick\Math\BigNumber;
 use Brick\Math\Exception\DivisionByZeroException;

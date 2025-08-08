@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Asika\UnitConverter\Tests;
+namespace Asika\BetterUnits\Tests;
 
-use Asika\UnitConverter\Duration;
-use Asika\UnitConverter\FileSize;
-use Asika\UnitConverter\Length;
+use Asika\BetterUnits\Duration;
+use Asika\BetterUnits\FileSize;
+use Asika\BetterUnits\Length;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 

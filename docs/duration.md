@@ -21,7 +21,7 @@ Duration 是一個計算時間長度單位的工具，通常用於測量事件�
 要建立一個 Duration 實例，可以使用以下方法：
 
 ```php
-use Asika\UnitConverter\Duration;
+use Asika\BetterUnits\Duration;
 
 $duration = new Duration(3600); // 3600 seconds
 $duration = new Duration(100, Duration::UNIT_MINUTES); // 100 minutes

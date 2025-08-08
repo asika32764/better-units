@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Asika\UnitConverter\Compound;
+namespace Asika\BetterUnits\Compound;
 
-use Asika\UnitConverter\AbstractMeasurement;
+use Asika\BetterUnits\AbstractMeasurement;
 use Brick\Math\BigDecimal;
 use Brick\Math\RoundingMode;
 

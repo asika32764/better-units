@@ -32,7 +32,7 @@ FileSize 是一個用於計算與轉換檔案大小單位的工具，適合用�
 要建立一個 FileSize 實例，可以使用以下方法：
 
 ```php
-use Asika\UnitConverter\FileSize;
+use Asika\BetterUnits\FileSize;
 
 $size = new FileSize(1024); // 1024 bits (預設單位)
 $size = new FileSize(100, FileSize::UNIT_BYTES); // 100 bytes

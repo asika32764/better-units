@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Asika\UnitConverter\Concerns;
+namespace Asika\BetterUnits\Concerns;
 
 use Brick\Math\BigDecimal;
 use Brick\Math\BigNumber;
