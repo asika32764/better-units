@@ -11,6 +11,7 @@ units of measurement. It supports a wide range of categories including length, w
 <!-- TOC -->
 * [BetterUnits - A Better PHP Measurement Converter](#betterunits---a-better-php-measurement-converter)
   * [Installation](#installation)
+  * [Available Measurements](#available-measurements)
   * [Getting Started](#getting-started)
     * [How to Use This Package](#how-to-use-this-package)
     * [How to Create Measurement Object](#how-to-create-measurement-object)
@@ -41,7 +42,6 @@ units of measurement. It supports a wide range of categories including length, w
     * [Predefined Units](#predefined-units)
   * [Creating Your Own Measurement](#creating-your-own-measurement)
     * [Dynamic Measurement](#dynamic-measurement)
-  * [Available Units And Documentations](#available-units-and-documentations)
   * [Contribution](#contribution)
 <!-- TOC -->
 
@@ -52,6 +52,21 @@ This package requires PHP `8.4.1` up.
 ```bash
 composer require asika/better-units
 ```
+
+## Available Measurements
+
+- [Measurements List](./docs)
+    - Basic Measurement
+        - [Area](./docs/area.md)
+        - [Duration](./docs/duration.md)
+        - [Energy](./docs/energy.md)
+        - [FileSize](./docs/filesize.md)
+        - [Length](./docs/length.md)
+        - [Volume](./docs/volume.md)
+        - [Weight](./docs/weight.md)
+    - Compound Measurement
+        - [Speed](./docs/speed.md)
+        - [Bitrate](./docs/bitrate.md)
 
 ## Getting Started
 
@@ -1086,21 +1101,6 @@ $currency = $currency->withParse('100USD')
 
 echo $currency->format(); // 90.9EUR
 ```
-
-## Available Units And Documentations
-
-- [Measurements List](./docs)
-    - Basic Measurement
-        - [Area](./docs/area.md)
-        - [Duration](./docs/duration.md)
-        - [Energy](./docs/energy.md)
-        - [FileSize](./docs/filesize.md)
-        - [Length](./docs/length.md)
-        - [Volume](./docs/volume.md)
-        - [Weight](./docs/weight.md)
-    - Compound Measurement
-        - [Speed](./docs/speed.md)
-        - [Bitrate](./docs/bitrate.md)
 
 ## Contribution
 
