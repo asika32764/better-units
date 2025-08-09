@@ -8,7 +8,8 @@
     },
     "require-dev": {
         "phpunit/phpunit": "^12.2",
-        "windwalker/utilities": "^4.1"
+        "windwalker/utilities": "^4.1",
+        "asika/simple-console": "^2.0"
     },
     "license": "MIT",
     "autoload": {
