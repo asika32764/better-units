@@ -851,6 +851,8 @@ human-readable unit based on the current value and unit ratio.
 
 ```php
 $fs = \Asika\BetterUnits\FileSize::from('8500KiB');
+$fs = $fs->withOnlyBytesBinary(); // Use only binary bytes (IEC) for calculations
+
 $nearest = $fs->nearest(scale: 2, RoundingMode::HALF_UP)->format(); // 8.31MiB
 ```
 
