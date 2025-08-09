@@ -1,6 +1,6 @@
 {
     "name": "asika/better-units",
-    "description": "A modern PHP unit converter.",
+    "description": "A modern and intuitive unit conversion tool that allows you to convert units of measurement.",
     "type": "library",
     "require": {
         "php": ">=8.4.1",
