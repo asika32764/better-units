@@ -3,6 +3,10 @@
 `Bitrate` is an object for converting and calculating bitrate units. It is suitable for converting between various
 bitrate units, such as bits per second, bytes per second, and their multiples.
 
+> [!note]
+> `Bitrate` is a compound measurement, you can see the [Compound Units](../README.md#compound-measurement) documentation
+> to know more about how to use or configure the compound measurement.
+
 <!-- TOC -->
 * [Bitrate Measurement](#bitrate-measurement)
   * [Creation](#creation)
@@ -48,7 +52,7 @@ $bitrate = Bitrate::from('300 Kbps');
 | `Tibps`   | `UNIT_TIBPS`            | `tebibits per second`     | `1099511627776`            | Tebibits per second |
 
 > [!note]
-> `Speed` is a compound measurement, you can also mix up the units from [FileSize](./filesize.md)
+> `Bitrate` is a compound measurement, you can also mix up the units from [FileSize](./filesize.md)
 > and [Duration](./duration.md) to create speed units, for example: `bits/s`, `bytes/s`, `Kbps`, `Mbps`, `Gbps`, 
 > `Tbps`, `Kibps`, `Mibps`, `Gibps`, `Tibps`, etc.
 > About Compound Units, please refer to the [Compound Units](../README.md#compound-measurement) documentation.

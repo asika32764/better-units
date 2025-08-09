@@ -3,16 +3,19 @@
 `Speed` is an object for converting and calculating speed units. It is suitable for converting between various speed
 units.
 
+> [!note]
+> `Speed` is a compound measurement, you can see the [Compound Units](../README.md#compound-measurement) documentation
+> to know more about how to use or configure the compound measurement.
+
 <!-- TOC -->
-
 * [Speed Measurement](#speed-measurement)
-    * [Creation](#creation)
-    * [Available Units](#available-units)
-        * [Restrict Units](#restrict-units)
-    * [Conversion](#conversion)
-        * [Dynamic Conversion Methods](#dynamic-conversion-methods)
-    * [Formatting](#formatting)
-
+  * [Creation](#creation)
+  * [Available Units](#available-units)
+    * [Restrict Units](#restrict-units)
+  * [Conversion](#conversion)
+    * [Dynamic Conversion Methods](#dynamic-conversion-methods)
+  * [Indeterminate Scales](#indeterminate-scales)
+  * [Formatting](#formatting)
 <!-- TOC -->
 
 ## Creation
