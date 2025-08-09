@@ -200,6 +200,25 @@ $duration = Duration::from(1200); // 1200 seconds
 $duration = Duration::from(500, Duration::UNIT_MINUTES);
 ```
 
+### Set or Parse Values deferred
+
+Sometimes, you may want to configure the Measurement object first and then parse the value later. 
+You can create an empty Measurement object and set value or parse value later, all Measurement objects
+are **immutable**, so you must assign the result to a new variable.
+
+```php
+use Asika\BetterUnits\Duration;
+
+$duration = new Duration()
+    ->withTropicalCalendar();
+
+$duration = $duration->with(123, 'hours'); // Set value and units
+// OR
+$duration = $duration->withParse('123hours'/*, $scale, $roundingMode*/);
+// OR
+$duration = $duration->withFrom('123hours'/*, $scale, $roundingMode*/);
+```
+
 ## Unit Conversion
 
 BetterUnits provides two ways to convert units: one retains the `Measurement` object after conversion, and the other
