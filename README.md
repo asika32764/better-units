@@ -13,6 +13,7 @@ units of measurement. It supports a wide range of categories including length, w
     * [How to Create Measurement Object](#how-to-create-measurement-object)
     * [Rounding Mode [!important]](#rounding-mode-important)
     * [Create By Strings](#create-by-strings)
+    * [Set or Parse Values deferred](#set-or-parse-values-deferred)
   * [Unit Conversion](#unit-conversion)
     * [Output Values](#output-values)
     * [convertTo() Method](#convertto-method)
