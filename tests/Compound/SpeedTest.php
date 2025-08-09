@@ -7,6 +7,8 @@ namespace Asika\BetterUnits\Tests\Compound;
 use Asika\BetterUnits\Area;
 use Asika\BetterUnits\Compound\Speed;
 use Asika\BetterUnits\Duration;
+use Brick\Math\BigDecimal;
+use Brick\Math\RoundingMode;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
@@ -77,6 +79,46 @@ class SpeedTest extends TestCase
                     ->convertTo('mps', scale: 10),
                 [],
                 '0.44704m/s',
+            ],
+        ];
+    }
+
+    #[DataProvider('quickConvertProvider')]
+    public function testQuickConvert(
+        \Closure $converter,
+        string $formatted,
+    ): void {
+        /** @var BigDecimal $result */
+        $result = $converter();
+
+        self::assertEquals(
+            $formatted,
+            (string) $result
+        );
+    }
+
+    public static function quickConvertProvider(): array
+    {
+        return [
+            'km/h to mph' => [
+                fn () => new Speed(1, 'km/h')->toMph(scale: 4),
+                '0.6213',
+            ],
+            'km/h to toMetersPerSecond' => [
+                fn () => new Speed(1, 'km/h')->toMetersPerSecond(scale: 4),
+                '0.2777',
+            ],
+            'km/h to to' => [
+                fn () => new Speed(1, 'mps')->toKmPerHour(scale: 4),
+                '3.6',
+            ],
+            'km/h to knots' => [
+                fn () => new Speed(1, 'km/h')->toKnots(scale: 4),
+                '0.5399',
+            ],
+            'mph to kph' => [
+                fn () => new Speed(1, 'mph')->toKph(scale: 4),
+                '1.6093',
             ],
         ];
     }

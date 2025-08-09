@@ -1,59 +1,61 @@
 # Weight Measurement
 
-Weight 是一個用於計算重量的單位轉換工具，適合用於各種重量單位之間的轉換。
+`Weight` is an object for converting and calculating weight units. It is suitable for converting between various weight
+units.
 
 <!-- TOC -->
 * [Weight Measurement](#weight-measurement)
-  * [建立](#建立)
-  * [可用單位](#可用單位)
-    * [限縮單位](#限縮單位)
-  * [轉換](#轉換)
-  * [格式化](#格式化)
-  * [重力加速度](#重力加速度)
+  * [Creation](#creation)
+  * [Available Units](#available-units)
+    * [Restrict Units](#restrict-units)
+  * [Conversion](#conversion)
+  * [Formatting](#formatting)
+  * [Gravity Acceleration](#gravity-acceleration)
 <!-- TOC -->
 
-## 建立
+## Creation
 
-要建立一個 Weight 實例，可以使用以下方法：
+To create a Weight instance, you can use the following methods:
 
 ```php
 use Asika\BetterUnits\Weight;
 
-$weight = new Weight(100); // 100 公克
-$weight = new Weight(2, Weight::UNIT_KILOGRAMS); // 2 公斤
+$weight = new Weight(100); // 100 grams
+$weight = new Weight(2, Weight::UNIT_KILOGRAMS); // 2 kilograms
 
 $weight = Weight::from(300, 'mg');
 $weight = Weight::from('300 mg');
 ```
 
-## 可用單位
+## Available Units
 
 - Atom Unit: `fg`
 - Default Unit: `g`
 - Base Unit: `g`
 
-| 單位    | 常數                        | 別名                                        | 比率（相對 g）               | 說明       |
-|-------|---------------------------|-------------------------------------------|------------------------|----------|
-| `fg`  | `UNIT_FEMTOGRAMS`         | `femtogram`, `femtograms`                 | `1e-15`                | 飛克       |
-| `pg`  | `UNIT_PICOGRAMS`          | `picogram`, `picograms`                   | `1e-12`                | 皮克       |
-| `ng`  | `UNIT_NANOGRAMS`          | `nanogram`, `nanograms`                   | `1e-9`                 | 奈克       |
-| `μg`  | `UNIT_MICROGRAMS`         | `microgram`, `micrograms`, `mcg`          | `1e-6`                 | 微克       |
-| `mg`  | `UNIT_MILLIGRAMS`         | `milligram`, `milligrams`                 | `1e-3`                 | 毫克       |
-| `g`   | `UNIT_GRAMS`              | `gram`, `grams`                           | `1`                    | 公克       |
-| `dg`  | `UNIT_DECIGRAMS`          | `decigram`, `decigrams`                   | `0.1`                  | 分克       |
-| `cg`  | `UNIT_CENTIGRAMS`         | `centigram`, `centigrams`                 | `0.01`                 | 釐克       |
-| `kg`  | `UNIT_KILOGRAMS`          | `kilogram`, `kilograms`                   | `1000`                 | 公斤       |
-| `t`   | `UNIT_METRIC_TONS`        | `metric ton`, `metric tons`, `tonne`, `tonnes` | `1e6`             | 公噸       |
-| `oz`  | `UNIT_OUNCES`             | `ounce`, `ounces`                         | `28.349523125`         | 盎司       |
-| `lb`  | `UNIT_POUNDS`             | `pound`, `pounds`                         | `453.59237`            | 磅        |
-| `st`  | `UNIT_STONES`             | `stone`, `stones`                         | `6350.29318`           | 英石       |
-| `tn`  | `UNIT_TONS`               | `ton`, `tons`                             | `907184.74`            | 美噸       |
-| `ct`  | `UNIT_CARATS`             | `carat`, `carats`                         | `0.2`                  | 克拉       |
-| `N`   | `UNIT_NEWTONS`            | `newton`, `newtons`                       | `101.972`              | 牛頓 （可變動） |
+| Unit | Constant           | Alias                                          | Ratio (relative to g) | Description       |
+|------|--------------------|------------------------------------------------|-----------------------|-------------------|
+| `fg` | `UNIT_FEMTOGRAMS`  | `femtogram`, `femtograms`                      | `1e-15`               | Femtogram         |
+| `pg` | `UNIT_PICOGRAMS`   | `picogram`, `picograms`                        | `1e-12`               | Picogram          |
+| `ng` | `UNIT_NANOGRAMS`   | `nanogram`, `nanograms`                        | `1e-9`                | Nanogram          |
+| `μg` | `UNIT_MICROGRAMS`  | `microgram`, `micrograms`, `mcg`               | `1e-6`                | Microgram         |
+| `mg` | `UNIT_MILLIGRAMS`  | `milligram`, `milligrams`                      | `1e-3`                | Milligram         |
+| `g`  | `UNIT_GRAMS`       | `gram`, `grams`                                | `1`                   | Gram              |
+| `dg` | `UNIT_DECIGRAMS`   | `decigram`, `decigrams`                        | `0.1`                 | Decigram          |
+| `cg` | `UNIT_CENTIGRAMS`  | `centigram`, `centigrams`                      | `0.01`                | Centigram         |
+| `kg` | `UNIT_KILOGRAMS`   | `kilogram`, `kilograms`                        | `1000`                | Kilogram          |
+| `t`  | `UNIT_METRIC_TONS` | `metric ton`, `metric tons`, `tonne`, `tonnes` | `1e6`                 | Metric Ton        |
+| `oz` | `UNIT_OUNCES`      | `ounce`, `ounces`                              | `28.349523125`        | Ounce             |
+| `lb` | `UNIT_POUNDS`      | `pound`, `pounds`                              | `453.59237`           | Pound             |
+| `st` | `UNIT_STONES`      | `stone`, `stones`                              | `6350.29318`          | Stone             |
+| `tn` | `UNIT_TONS`        | `ton`, `tons`                                  | `907184.74`           | Ton               |
+| `ct` | `UNIT_CARATS`      | `carat`, `carats`                              | `0.2`                 | Carat             |
+| `N`  | `UNIT_NEWTONS`     | `newton`, `newtons`                            | `101.972`             | Newton (variable) |
 
-### 限縮單位
+### Restrict Units
 
-由於重量單位的多樣性，Weight 類別提供了 `withOnlyCommonWeights()` 方法來限制可用的單位，僅保留常用的公制重量單位：
+Due to the diversity of weight units, the Weight class provides the `withOnlyCommonWeights()` method to restrict the
+available units, keeping only the commonly used metric weight units:
 
 ```php
 $weight = $weight->withOnlyCommonWeights();
@@ -63,9 +65,9 @@ $weight = $weight->withOnlyCommonWeights();
 $weight = $weight->withAvailableUnits(Weight::UNITS_GROUP_COMMON_WEIGHTS);
 ```
 
-## 轉換
+## Conversion
 
-可使用 `to()` 或 `toXxx()` 方法將 Weight 轉換成其他單位的值：
+You can use the `to()` or `toXxx()` methods to convert Weight to other unit values:
 
 ```php
 $weight->toGrams();
@@ -73,7 +75,7 @@ $weight->toKilograms(scale: 4);
 $weight->to('lb');
 ```
 
-支援的函式
+Supported functions
 
 - `toFemtograms()`
 - `toPicograms()`
@@ -92,9 +94,9 @@ $weight->to('lb');
 - `toCarats()`
 - `toNewtons()`
 
-## 格式化
+## Formatting
 
-可以將重量數值格式化成人類可讀的方式：
+Weight values can be formatted in a human-readable way:
 
 ```php
 $weight = \Asika\BetterUnits\Weight::from(12345, 'g')
@@ -102,16 +104,18 @@ $weight = \Asika\BetterUnits\Weight::from(12345, 'g')
 echo $weight->humanize(divider: ' and '); // 12kg and 345g
 ```
 
-## 重力加速度
+## Gravity Acceleration
 
-由於牛頓 (`N`) 的數值建立在重力加速度上，我們可以替 Weight 實例設定重力加速度的值：
+Since the value of Newton (`N`) is based on gravity acceleration, we can set the gravity acceleration value for the
+`Weight` instance:
 
 ```php
 $weight = new \Asika\BetterUnits\Weight(100, 'N');
 
 echo $weight->format(unit: 'kg', scale: 4); // 0.0102kg
 
-$weight = $weight->withGravityAcceleration(1.62); // The gravity acceleration on the Moon
+// The gravity acceleration on the Moon
+$weight = $weight->withGravityAcceleration(1.62);
 
 echo $weight->format(unit: 'kg', scale: 4); // 0.0617kg
 ```

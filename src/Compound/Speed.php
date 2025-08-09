@@ -7,7 +7,15 @@ namespace Asika\BetterUnits\Compound;
 use Asika\BetterUnits\AbstractMeasurement;
 use Asika\BetterUnits\Duration;
 use Asika\BetterUnits\Length;
+use Brick\Math\BigDecimal;
+use Brick\Math\RoundingMode;
 
+/**
+ * @method BigDecimal toMph(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
+ * @method BigDecimal toKph(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
+ * @method BigDecimal toMps(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
+ * @method BigDecimal toKnots(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
+ */
 class Speed extends AbstractCompoundMeasurement
 {
     public const string UNIT_MPS = 'mps';
@@ -27,6 +35,7 @@ class Speed extends AbstractCompoundMeasurement
         'm/s' => 1,
         self::UNIT_MPH => 0.44704,
         self::UNIT_KNOTS => 0.514444444,
+        // self::UNIT_KPH => 3.6,
     ];
 
     public AbstractMeasurement $deno {

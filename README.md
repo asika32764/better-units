@@ -1,48 +1,56 @@
-# BetterUnits - PHP Measurement Converter
+# BetterUnits - A Better PHP Measurement Converter
 
 BetterUnits is a modern and intuitive unit conversion tool that allows you to convert between various
 units of measurement. It supports a wide range of categories including length, weight, temperature, volume, and more.
 
 <!-- TOC -->
-
-* [BetterUnits - PHP Measurement Converter](#betterunits---php-measurement-converter)
-    * [Installation](#installation)
-    * [Getting Started](#getting-started)
-        * [How to Use This Package](#how-to-use-this-package)
-        * [How to Create Measurement Object](#how-to-create-measurement-object)
-        * [Rounding Mode [!important]](#rounding-mode-important)
-        * [Create By Strings](#create-by-strings)
-    * [Unit Conversion](#unit-conversion)
-        * [Output Values](#output-values)
-        * [convertTo() Method](#convertto-method)
-        * [Precision Control](#precision-control)
-    * [Units](#units)
-    * [Formatting](#formatting)
-        * [`format()`](#format)
-        * [`humanize()`](#humanize)
-        * [Default Formatting Handler](#default-formatting-handler)
-        * [`serialize()`](#serialize)
-        * [`serializeCallback()`](#serializecallback)
-    * [Unit Management](#unit-management)
-        * [Restrict Available Units](#restrict-available-units)
-        * [Customizing or Adding Units](#customizing-or-adding-units)
-        * [Changing Conversion Rates](#changing-conversion-rates)
-        * [Other Unit Adjustments](#other-unit-adjustments)
-    * [Get the Unit Closest to 1](#get-the-unit-closest-to-1)
-    * [Modifying the Content of a Measurement](#modifying-the-content-of-a-measurement)
-        * [Operations](#operations)
-    * [Compound Measurement](#compound-measurement)
-        * [Predefined Units](#predefined-units)
-    * [Creating Your Own Measurement](#creating-your-own-measurement)
-        * [Dynamic Measurement](#dynamic-measurement)
-    * [Available Units And Documentations](#available-units-and-documentations)
-
+* [BetterUnits - A Better PHP Measurement Converter](#betterunits---a-better-php-measurement-converter)
+  * [Installation](#installation)
+    * [Requirements](#requirements)
+    * [Install via Composer](#install-via-composer)
+  * [Getting Started](#getting-started)
+    * [How to Use This Package](#how-to-use-this-package)
+    * [How to Create Measurement Object](#how-to-create-measurement-object)
+    * [Rounding Mode [!important]](#rounding-mode-important)
+    * [Create By Strings](#create-by-strings)
+  * [Unit Conversion](#unit-conversion)
+    * [Output Values](#output-values)
+    * [convertTo() Method](#convertto-method)
+    * [Precision Control](#precision-control)
+  * [Units](#units)
+  * [Formatting](#formatting)
+    * [`format()`](#format)
+    * [`humanize()`](#humanize)
+    * [Default Formatting Handler](#default-formatting-handler)
+    * [`serialize()`](#serialize)
+    * [`serializeCallback()`](#serializecallback)
+  * [Unit Management](#unit-management)
+    * [Restrict Available Units](#restrict-available-units)
+    * [Customizing or Adding Units](#customizing-or-adding-units)
+    * [Changing Conversion Rates](#changing-conversion-rates)
+    * [Other Unit Adjustments](#other-unit-adjustments)
+  * [Get the Unit Closest to 1](#get-the-unit-closest-to-1)
+  * [Modifying the Content of a Measurement](#modifying-the-content-of-a-measurement)
+    * [Operations](#operations)
+  * [Compound Measurement](#compound-measurement)
+    * [Indeterminate Scales](#indeterminate-scales)
+    * [Predefined Units](#predefined-units)
+  * [Creating Your Own Measurement](#creating-your-own-measurement)
+    * [Dynamic Measurement](#dynamic-measurement)
+  * [Available Units And Documentations](#available-units-and-documentations)
+  * [Contribution](#contribution)
 <!-- TOC -->
 
 ## Installation
 
+### Requirements
+
+This package requires PHP `8.4.1` up.
+
+### Install via Composer
+
 ```bash
-composer require asika/unit-converter
+composer require asika/better-units
 ```
 
 ## Getting Started
@@ -429,7 +437,8 @@ $totalPlaySeconds->humanize(
 // 5 DAYS / 9 HOURS / 21 MINUTES / 58 SECONDS
 ```
 
-但我們通常只需要顯示到小時，不需要將小時轉換成 days，我們可以提供單位陣列給第一個參數 `formats` 控制想要顯示的單位，
+But we usually only need to display up to hours and do not need to convert hours into days. We can provide a unit array
+to the first parameter `formats` to control the units we want to display.
 
 ```php
 echo $totalPlaySeconds->humanize(
@@ -910,6 +919,49 @@ $speed = Speed::from('100 km/h'); // 100 kilometers per hour
 $speed->convertTo('m/s', scale: 4); // 27.7777m/s
 ```
 
+### Indeterminate Scales
+
+Since this library always converts to the smallest atom unit first before converting to the target unit, and the
+Compound Measurement object may perform multiple conversions in 2-3 steps internally, there might be cases where the
+number of decimal places cannot be determined, leading to unexpected precision loss.
+
+To prevent such issues, Compound Measurement uses a default scale of `99` decimal places for internal conversions. If
+your unit conversion process exceeds this decimal scale, you can try increasing the `intermediateScale` to ensure
+accurate calculations, or decreasing the `intermediateScale` value to improve calculation speed.
+
+```php
+// Set higher
+$compoundMeasurement = $compoundMeasurement->withIntermediateScale(299);
+
+// Set lower
+$compoundMeasurement = $compoundMeasurement->withIntermediateScale(20);
+```
+
+Here we demonstrate a case with `Speed` object, where an insufficient `intermediateScale` causes unexpected errors:
+
+```php
+$mps = new Speed()
+    ->withIntermediateScale(20)
+    ->withParse('1kph')
+    ->toMps(scale: 10);
+
+echo $mps;
+// Expect: 0.2777777777
+// Actual: 0.27777
+```
+
+Now we set intermediateScale to a higher value to ensure precision
+
+```php
+$mps = new Speed()
+    ->withIntermediateScale(99)
+    ->withParse('1kph')
+    ->toMps(scale: 10);
+
+show((string) $mps);
+// Good: 0.2777777777
+```
+
 ### Predefined Units
 
 Each Compound Measurement has some predefined units, which are commonly used international standard unit names, such as:
@@ -1016,14 +1068,23 @@ echo $currency->format(); // 90.9EUR
 
 ## Available Units And Documentations
 
-- Basic Measurement
-    - [Area](./docs/area.md)
-    - [Duration](./docs/duration.md)
-    - [Energy](./docs/energy.md)
-    - [FileSize](./docs/filesize.md)
-    - [Length](./docs/length.md)
-    - [Volume](./docs/volume.md)
-    - [Weight](./docs/weight.md)
-- Compound Measurement
-    - [Speed](#)
-    - [Bitrate](#)
+- [Measurements List](./docs)
+    - Basic Measurement
+        - [Area](./docs/area.md)
+        - [Duration](./docs/duration.md)
+        - [Energy](./docs/energy.md)
+        - [FileSize](./docs/filesize.md)
+        - [Length](./docs/length.md)
+        - [Volume](./docs/volume.md)
+        - [Weight](./docs/weight.md)
+    - Compound Measurement
+        - [Speed](./docs/speed.md)
+        - [Bitrate](./docs/bitrate.md)
+
+## Contribution
+
+If you find any errors and know how to fix them, feel free to open a Pull Request. This will help us improve the fixing
+faster.
+
+Since I cannot precisely verify all unit conversion rates, if you find any incorrect conversion rates in code or 
+documentation, please make sure to include reference sources in the Issue or Pull Request.

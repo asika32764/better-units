@@ -25,7 +25,7 @@ abstract class AbstractCompoundMeasurement extends AbstractMeasurement
         get;
     }
 
-    public string $unit {
+    public protected(set) string $unit {
         set {
             [$numUnit, $denoUnit] = $this->normalizeAndSplitUnit($value);
 
@@ -45,7 +45,7 @@ abstract class AbstractCompoundMeasurement extends AbstractMeasurement
      *
      * @var int
      */
-    public int $intermediateScale = 20;
+    public protected(set) int $intermediateScale = 99;
 
     #[\Override]
     public function withParse(
@@ -59,6 +59,7 @@ abstract class AbstractCompoundMeasurement extends AbstractMeasurement
         $atomValue = BigDecimal::zero();
         $atomUnit = $this->num->atomUnit . '/' . $this->deno->atomUnit;
         $new = $this->with(0, $atomUnit);
+        $calculatingScale = max($this->intermediateScale, $scale);
 
         foreach ($values as [$val, $unit]) {
             [, $denoUnit] = $new->normalizeAndSplitUnit($unit);
@@ -73,7 +74,7 @@ abstract class AbstractCompoundMeasurement extends AbstractMeasurement
             if (!$denoUnit) {
                 $new = $new->convertTo(
                     $this->atomUnit,
-                    $this->intermediateScale,
+                    $calculatingScale,
                     $roundingMode
                 );
             }
@@ -108,10 +109,12 @@ abstract class AbstractCompoundMeasurement extends AbstractMeasurement
         $toUnit = $this->normalizeCompoundUnit($toUnit);
         $new = clone $this;
 
+        $calculatingScale = max($this->intermediateScale, $scale);
+
         // Direct exchange. For example, k/m to kph.
         // Directly use the exchange rate if available.
         if ($toUnit !== $this->atomUnit && $this->getUnitExchangeRate($toUnit) !== null) {
-            $new = $new->convertTo($this->atomUnit, $this->intermediateScale, $roundingMode);
+            $new = $new->convertTo($this->atomUnit, $calculatingScale, $roundingMode);
             $newValue = $new->convertValue(
                 $new->value,
                 $new->atomUnit,
@@ -133,7 +136,7 @@ abstract class AbstractCompoundMeasurement extends AbstractMeasurement
                 $new->value,
                 $fromUnit,
                 $new->atomUnit,
-                $this->intermediateScale,
+                $calculatingScale,
                 $roundingMode
             );
 
@@ -162,10 +165,12 @@ abstract class AbstractCompoundMeasurement extends AbstractMeasurement
     ): static {
         $new = $this;
 
+        $calculatingScale = max($this->intermediateScale, $scale);
+
         // If we have a num unit, we need to convert the value accordingly.
         if ($numUnit) {
-            $this->num = $this->num->with($this->value)
-                ->convertTo($numUnit, $scale, $roundingMode);
+            $this->num = $this->num->with($new->value)
+                ->convertTo($numUnit, $calculatingScale, $roundingMode);
 
             $new = $this->withValue($this->num->value);
             $new->unit = $numUnit;
@@ -178,7 +183,7 @@ abstract class AbstractCompoundMeasurement extends AbstractMeasurement
 
             // Convert the value to the base unit of the deno.
             $new->value = $new->deno->withValue($new->value)
-                ->convertTo($this->deno->unit, $scale, $roundingMode)
+                ->convertTo($this->deno->unit, $calculatingScale, $roundingMode)
                 ->value;
         }
 
@@ -242,5 +247,29 @@ abstract class AbstractCompoundMeasurement extends AbstractMeasurement
         }
 
         return $text;
+    }
+
+    public function withIntermediateScale(int $intermediateScale): static
+    {
+        $new = clone $this;
+        $new->intermediateScale = $intermediateScale;
+
+        return $new;
+    }
+
+    public function __call(string $name, array $args)
+    {
+        if (str_starts_with($name, 'to')) {
+            $unit = strtolower(substr($name, 2));
+            $unit = str_replace(['per', '_'], ['/', ''], $unit);
+
+            [$numUnit, $denoUnit] = $this->normalizeAndSplitUnit($unit);
+
+            if ($this->num->getUnitExchangeRate($numUnit) && $this->deno->getUnitExchangeRate($denoUnit)) {
+                return $this->to($unit, ...$args);
+            }
+        }
+
+        return parent::__call($name, $args);
     }
 }
