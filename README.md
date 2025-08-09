@@ -1,13 +1,16 @@
 # BetterUnits - A Better PHP Measurement Converter
 
+![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/asika32764/better-units/ci.yml?style=for-the-badge)
+[![Packagist Version](https://img.shields.io/packagist/v/asika/better-units?style=for-the-badge)
+](https://packagist.org/packages/asika/better-units)
+[![Packagist Downloads](https://img.shields.io/packagist/dt/asika/better-units?style=for-the-badge)](https://packagist.org/packages/asika/better-units)
+
 BetterUnits is a modern and intuitive unit conversion tool that allows you to convert between various
 units of measurement. It supports a wide range of categories including length, weight, temperature, volume, and more.
 
 <!-- TOC -->
 * [BetterUnits - A Better PHP Measurement Converter](#betterunits---a-better-php-measurement-converter)
   * [Installation](#installation)
-    * [Requirements](#requirements)
-    * [Install via Composer](#install-via-composer)
   * [Getting Started](#getting-started)
     * [How to Use This Package](#how-to-use-this-package)
     * [How to Create Measurement Object](#how-to-create-measurement-object)
@@ -44,11 +47,7 @@ units of measurement. It supports a wide range of categories including length, w
 
 ## Installation
 
-### Requirements
-
 This package requires PHP `8.4.1` up.
-
-### Install via Composer
 
 ```bash
 composer require asika/better-units
