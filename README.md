@@ -200,6 +200,28 @@ $duration = Duration::from(1200); // 1200 seconds
 $duration = Duration::from(500, Duration::UNIT_MINUTES);
 ```
 
+The `parseToValue()` method is a more convenient way to parse a string and immediately get the value in the default unit.
+
+```php
+$value = Duration::parseToValue(
+    '10hours 5minutes 30seconds 50ms 100ns 300fs',
+    asUnit: Duration::UNIT_MINUTES,
+    scale: 3,
+    roundingMode: \Brick\Math\RoundingMode::HALF_UP
+); // BigDecimal(605.501)
+```
+
+There are also `tryParse()`, `tryFrom()` and `tryParseToValue()` methods that return `null` if value is `null`, 
+instead of throwing an TypeError.
+
+```php
+$value: string|null = ...;
+
+Duration::tryFrom($value); // NULL or Duration
+Duration::tryParse($value); // NULL or Duration
+Duration::tryParseToValue($value); // NULL or Duration
+```
+
 ### Set or Parse Values deferred
 
 Sometimes, you may want to configure the Measurement object first and then parse the value later. 

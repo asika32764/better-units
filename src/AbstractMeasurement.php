@@ -75,6 +75,15 @@ abstract class AbstractMeasurement implements SerializableMeasurementInterface, 
 
     public mixed $suffixFormatter = null;
 
+    public static function tryFrom(mixed $value, ?string $asUnit = null): ?static
+    {
+        if ($value === null) {
+            return null;
+        }
+
+        return static::from($value, $asUnit);
+    }
+
     public static function from(mixed $value, ?string $asUnit = null): static
     {
         return new static()->withFrom($value, $asUnit);
@@ -93,6 +102,19 @@ abstract class AbstractMeasurement implements SerializableMeasurementInterface, 
         return $this->with($value, $asUnit);
     }
 
+    public static function tryParse(
+        ?string $value,
+        ?string $asUnit = null,
+        ?int $scale = null,
+        RoundingMode $roundingMode = RoundingMode::DOWN
+    ): ?static {
+        if ($value === null) {
+            return null;
+        }
+
+        return static::parse($value, $asUnit, $scale, $roundingMode);
+    }
+
     public static function parse(
         string $value,
         ?string $asUnit = null,
@@ -100,6 +122,19 @@ abstract class AbstractMeasurement implements SerializableMeasurementInterface, 
         RoundingMode $roundingMode = RoundingMode::DOWN
     ): static {
         return new static()->withParse($value, $asUnit, $scale, $roundingMode);
+    }
+
+    public static function tryParseToValue(
+        ?string $value,
+        ?string $asUnit = null,
+        ?int $scale = null,
+        RoundingMode $roundingMode = RoundingMode::DOWN
+    ): ?BigDecimal {
+        if ($value === null) {
+            return null;
+        }
+
+        return static::parse($value, $asUnit, $scale, $roundingMode)->value->toBigDecimal();
     }
 
     public static function parseToValue(
