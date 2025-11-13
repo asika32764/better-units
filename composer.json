@@ -28,5 +28,15 @@
             "email": "asika32764@gmail.com"
         }
     ],
-    "minimum-stability": "beta"
+    "minimum-stability": "beta",
+    "keywords": [
+        "unit",
+        "unit-conversion",
+        "measurement",
+        "converter",
+        "units",
+        "php units",
+        "conversion",
+        "measure"
+    ]
 }
