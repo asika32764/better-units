@@ -508,7 +508,23 @@ echo $totalPlaySeconds->humanize(
 // 129hours, 21minutes, 58seconds
 ```
 
-If `formats` is an array, you can also provide a Closure for formatting. Below is an example of using a simplified time
+If `formats` is an array, you can also provide string or Closure for formatting. Below is string text example, also, 
+you can use `%s` as template for the value:
+
+```php
+$format = fn(\Brick\Math\BigDecimal $value) => str_pad((string) $value, 2, '0', STR_PAD_LEFT);
+echo $totalPlaySeconds->humanize(
+    formats: [
+        Duration::UNIT_HOURS => '시간', // OR '%s시간' 
+        Duration::UNIT_MINUTES => '분', // OR '%s분'
+        Duration::UNIT_SECONDS => '초', // OR '%s초'
+    ],
+    divider: ':'
+);
+// 129시간:21분:58초
+```
+
+Below is an `Closure` example of using a simplified time
 expression, which is suitable for displaying durations in media players:
 
 ```php
