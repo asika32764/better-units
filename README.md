@@ -54,6 +54,16 @@ This package requires PHP `8.4.1` up.
 composer require asika/better-units
 ```
 
+Compatibility with `brick/math` is as follows:
+
+| Version | `brick/math` version |
+|---------|----------------------|
+| 0.2.x   | `>=0.14.2`           |
+| 0.1.2   | `0.9 ~ 0.14`         |
+| 0.1.x   | `*`                  |
+
+
+
 ## Available Measurements
 
 - [Measurements List](./docs)
