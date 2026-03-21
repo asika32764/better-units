@@ -46,8 +46,8 @@ class DurationTest extends TestCase
         $tm = $microSeconds->intervalToMicroseconds($interval);
 
         self::assertEquals(
-            (string) $tm->toBigDecimal()->stripTrailingZeros(),
-            (string) $microSeconds->value->toBigDecimal()->stripTrailingZeros(),
+            (string) $tm->toBigDecimal()->strippedOfTrailingZeros(),
+            (string) $microSeconds->value->toBigDecimal()->strippedOfTrailingZeros(),
         );
     }
 

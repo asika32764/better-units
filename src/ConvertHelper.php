@@ -20,7 +20,7 @@ class ConvertHelper
             ->plus(BigDecimal::of($interval->h)->multipliedBy('3600'))
             ->plus(BigDecimal::of($interval->i)->multipliedBy('60'))
             ->plus(BigDecimal::of($interval->s))
-            ->stripTrailingZeros();
+            ->strippedOfTrailingZeros();
     }
 
     public static function dateIntervalToMicroseconds(
@@ -30,7 +30,16 @@ class ConvertHelper
     ): BigDecimal {
         return static::dateIntervalToSeconds($interval, $yearSeconds, $monthSeconds)
             ->multipliedBy('1000000')
-            ->plus(BigDecimal::of($interval->f)->multipliedBy('1000000'))
-            ->stripTrailingZeros();
+            ->plus(ConvertHelper::toBigDecimal($interval->f)->multipliedBy('1000000'))
+            ->strippedOfTrailingZeros();
+    }
+
+    public static function toBigDecimal(mixed $value): BigDecimal
+    {
+        if (is_float($value)) {
+            $value = (string) $value;
+        }
+
+        return BigDecimal::of($value);
     }
 }

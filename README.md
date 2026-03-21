@@ -21,6 +21,7 @@ units of measurement. It supports a wide range of categories including length, w
   * [Unit Conversion](#unit-conversion)
     * [Output Values](#output-values)
     * [convertTo() Method](#convertto-method)
+    * [convertToExact() Method](#converttoexact-method)
     * [Precision Control](#precision-control)
   * [Units](#units)
   * [Formatting](#formatting)
@@ -161,7 +162,7 @@ You can add the precision parameter `scale: int` to specify the number of decima
 $duration->toHours(); // BigDecimal(0)
 $duration->toHours(scale: 5); // BigDecimal(0.16666)
 
-$duration->toHours(scale: 1, roundingMode: \Brick\Math\RoundingMode::HALF_UP); // BigDecimal(0.17)
+$duration->toHours(scale: 1, roundingMode: \Brick\Math\RoundingMode::HalfUp); // BigDecimal(0.17)
 ```
 
 ### Create By Strings
@@ -289,6 +290,15 @@ The `convertTo()` method allows you to convert units while maintaining the `Meas
 chaining operations. All modifications to the `Measurement` object are **immutable**, so you must assign the result to a
 new variable.
 
+```php
+// Signatures
+public function convertTo(
+    string $toUnit,
+    int|null|false $scale = null,
+    RoundingMode $roundingMode = RoundingMode::Down
+): static {
+```
+
 > [!important]
 > Additionally, when converting smaller units to larger ones, precision may be lost. Be sure to manually set
 > the `scale` and `roundingMode` parameters as needed for the conversion.
@@ -308,6 +318,12 @@ $hours = $seconds->convertTo(Duration::UNIT_HOURS, scale: 2, roundingMode: Round
 
 $hours->value; // BigDecimal(0.17)
 ```
+
+### convertToExact() Method
+
+`convertToExact()` is similar to `convertTo()`, but has no `scale` and `roundingMode` arguments. 
+It will keep all decimal places and remove trailing zeros during conversion. 
+This is useful when you want to maintain the highest precision during unit conversion.
 
 ### Precision Control
 

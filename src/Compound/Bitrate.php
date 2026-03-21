@@ -11,16 +11,16 @@ use Brick\Math\BigDecimal;
 use Brick\Math\RoundingMode;
 
 /**
- * @method BigDecimal toKbps(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
- * @method BigDecimal toMbps(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
- * @method BigDecimal toGbps(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
- * @method BigDecimal toTbps(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
- * @method BigDecimal toKibps(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
- * @method BigDecimal toMibps(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
- * @method BigDecimal toGibps(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
- * @method BigDecimal toTibps(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
- * @method BigDecimal toBitsPerSecond(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
- * @method BigDecimal toBytesPerSecond(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
+ * @method BigDecimal toKbps(?int $scale = null, RoundingMode $roundingMode = RoundingMode::Down)
+ * @method BigDecimal toMbps(?int $scale = null, RoundingMode $roundingMode = RoundingMode::Down)
+ * @method BigDecimal toGbps(?int $scale = null, RoundingMode $roundingMode = RoundingMode::Down)
+ * @method BigDecimal toTbps(?int $scale = null, RoundingMode $roundingMode = RoundingMode::Down)
+ * @method BigDecimal toKibps(?int $scale = null, RoundingMode $roundingMode = RoundingMode::Down)
+ * @method BigDecimal toMibps(?int $scale = null, RoundingMode $roundingMode = RoundingMode::Down)
+ * @method BigDecimal toGibps(?int $scale = null, RoundingMode $roundingMode = RoundingMode::Down)
+ * @method BigDecimal toTibps(?int $scale = null, RoundingMode $roundingMode = RoundingMode::Down)
+ * @method BigDecimal toBitsPerSecond(?int $scale = null, RoundingMode $roundingMode = RoundingMode::Down)
+ * @method BigDecimal toBytesPerSecond(?int $scale = null, RoundingMode $roundingMode = RoundingMode::Down)
  */
 class Bitrate extends AbstractCompoundMeasurement
 {

@@ -52,7 +52,7 @@ abstract class AbstractCompoundMeasurement extends AbstractMeasurement
         string $value,
         ?string $asUnit = null,
         ?int $scale = null,
-        RoundingMode $roundingMode = RoundingMode::DOWN
+        RoundingMode $roundingMode = RoundingMode::Down
     ): static {
         $values = static::parseValue($value);
 
@@ -103,8 +103,8 @@ abstract class AbstractCompoundMeasurement extends AbstractMeasurement
     #[\Override]
     public function convertTo(
         string $toUnit,
-        ?int $scale = null,
-        RoundingMode $roundingMode = RoundingMode::DOWN
+        int|null|false $scale = null,
+        RoundingMode $roundingMode = RoundingMode::Down
     ): static {
         $toUnit = $this->normalizeCompoundUnit($toUnit);
         $new = clone $this;
@@ -161,7 +161,7 @@ abstract class AbstractCompoundMeasurement extends AbstractMeasurement
         string $numUnit,
         string $denoUnit = '',
         ?int $scale = null,
-        RoundingMode $roundingMode = RoundingMode::DOWN
+        RoundingMode $roundingMode = RoundingMode::Down
     ): static {
         $new = $this;
 
@@ -190,7 +190,7 @@ abstract class AbstractCompoundMeasurement extends AbstractMeasurement
         if ($scale !== null) {
             $new->value = $new->value->toScale($scale, $roundingMode);
         } else {
-            $new->value = $new->value->stripTrailingZeros();
+            $new->value = $new->value->strippedOfTrailingZeros();
         }
 
         return $new;
@@ -228,7 +228,7 @@ abstract class AbstractCompoundMeasurement extends AbstractMeasurement
         string|\Closure|null $suffix = null,
         ?string $unit = null,
         ?int $scale = null,
-        RoundingMode $roundingMode = RoundingMode::DOWN
+        RoundingMode $roundingMode = RoundingMode::Down
     ): string {
         $addDenoSuffix = $suffix === null;
 

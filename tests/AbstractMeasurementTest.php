@@ -173,7 +173,7 @@ class AbstractMeasurementTest extends TestCase
 
         assertEquals(
             '1689531.8minutes',
-            $d->format(unit: Duration::UNIT_MINUTES, scale: 1, roundingMode: RoundingMode::HALF_UP)
+            $d->format(unit: Duration::UNIT_MINUTES, scale: 1, roundingMode: RoundingMode::HalfUp)
         );
 
         assertEquals(
@@ -190,7 +190,7 @@ class AbstractMeasurementTest extends TestCase
             '101371.9K Seconds',
             $d->format(
                 fn (BigDecimal $value, string $unit, Duration $d) =>
-                    $value->dividedBy(1000, 1, RoundingMode::HALF_UP) . 'K Seconds'
+                    $value->dividedBy(1000, 1, RoundingMode::HalfUp) . 'K Seconds'
             )
         );
     }

@@ -16,18 +16,18 @@ use Brick\Math\RoundingMode;
 /**
  * The Duration class.
  *
- * @method BigDecimal toFemtoseconds(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
- * @method BigDecimal toPicoseconds(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
- * @method BigDecimal toNanoseconds(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
- * @method BigDecimal toMicroseconds(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
- * @method BigDecimal toMilliseconds(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
- * @method BigDecimal toSeconds(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
- * @method BigDecimal toMinutes(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
- * @method BigDecimal toHours(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
- * @method BigDecimal toDays(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
- * @method BigDecimal toWeeks(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
- * @method BigDecimal toMonths(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
- * @method BigDecimal toYears(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
+ * @method BigDecimal toFemtoseconds(?int $scale = null, RoundingMode $roundingMode = RoundingMode::Down)
+ * @method BigDecimal toPicoseconds(?int $scale = null, RoundingMode $roundingMode = RoundingMode::Down)
+ * @method BigDecimal toNanoseconds(?int $scale = null, RoundingMode $roundingMode = RoundingMode::Down)
+ * @method BigDecimal toMicroseconds(?int $scale = null, RoundingMode $roundingMode = RoundingMode::Down)
+ * @method BigDecimal toMilliseconds(?int $scale = null, RoundingMode $roundingMode = RoundingMode::Down)
+ * @method BigDecimal toSeconds(?int $scale = null, RoundingMode $roundingMode = RoundingMode::Down)
+ * @method BigDecimal toMinutes(?int $scale = null, RoundingMode $roundingMode = RoundingMode::Down)
+ * @method BigDecimal toHours(?int $scale = null, RoundingMode $roundingMode = RoundingMode::Down)
+ * @method BigDecimal toDays(?int $scale = null, RoundingMode $roundingMode = RoundingMode::Down)
+ * @method BigDecimal toWeeks(?int $scale = null, RoundingMode $roundingMode = RoundingMode::Down)
+ * @method BigDecimal toMonths(?int $scale = null, RoundingMode $roundingMode = RoundingMode::Down)
+ * @method BigDecimal toYears(?int $scale = null, RoundingMode $roundingMode = RoundingMode::Down)
  */
 // phpcs:disable
 class Duration extends AbstractBasicMeasurement
@@ -92,12 +92,12 @@ class Duration extends AbstractBasicMeasurement
     }
 
     public protected(set) BigNumber $yearSeconds {
-        set(mixed $value) => $this->yearSeconds = BigNumber::of($value);
+        set(mixed $value) => $this->yearSeconds = ConvertHelper::toBigDecimal($value);
         get => $this->yearSeconds ??= BigNumber::of(self::YEAR_SECONDS_COMMON);
     }
 
     public protected(set) BigNumber $monthSeconds {
-        set(mixed $value) => $this->monthSeconds = BigNumber::of($value);
+        set(mixed $value) => $this->monthSeconds = ConvertHelper::toBigDecimal($value);
         get => $this->monthSeconds ??= BigNumber::of(self::MONTH_SECONDS_COMMON);
     }
 
@@ -113,7 +113,7 @@ class Duration extends AbstractBasicMeasurement
         string $value,
         ?string $asUnit = null,
         ?int $scale = null,
-        RoundingMode $roundingMode = RoundingMode::HALF_UP
+        RoundingMode $roundingMode = RoundingMode::HalfUp
     ): static {
         return new static()->withParseDateString($value, $asUnit, $scale, $roundingMode);
     }
@@ -122,7 +122,7 @@ class Duration extends AbstractBasicMeasurement
         \DateInterval $interval,
         ?string $asUnit = null,
         ?int $scale = null,
-        RoundingMode $roundingMode = RoundingMode::HALF_UP
+        RoundingMode $roundingMode = RoundingMode::HalfUp
     ): static {
         return new static()->withFromDateInterval($interval, $asUnit, $scale, $roundingMode);
     }
@@ -137,7 +137,7 @@ class Duration extends AbstractBasicMeasurement
         string $value,
         ?string $asUnit = null,
         ?int $scale = null,
-        RoundingMode $roundingMode = RoundingMode::HALF_UP
+        RoundingMode $roundingMode = RoundingMode::HalfUp
     ): static {
         $interval = \DateInterval::createFromDateString($value);
 
@@ -148,7 +148,7 @@ class Duration extends AbstractBasicMeasurement
         \DateInterval $interval,
         ?string $asUnit = null,
         ?int $scale = null,
-        RoundingMode $roundingMode = RoundingMode::HALF_UP
+        RoundingMode $roundingMode = RoundingMode::HalfUp
     ): static {
         $microseconds = $this->intervalToMicroseconds($interval);
 
@@ -158,13 +158,22 @@ class Duration extends AbstractBasicMeasurement
 
         if ($asUnit && $asUnit !== $instance->unit) {
             $asUnit = $this->normalizeUnit($asUnit);
-            $instance = $instance->convertTo($asUnit, $scale, $roundingMode);
+
+            if ($scale === null) {
+                $instance = $instance->convertToExact($asUnit);
+            } else {
+                $instance = $instance->convertTo(
+                    $asUnit,
+                    $scale,
+                    $roundingMode
+                );
+            }
         }
 
         return $instance;
     }
 
-    public function toDateInterval(RoundingMode $roundingMode = RoundingMode::HALF_UP): \DateInterval
+    public function toDateInterval(RoundingMode $roundingMode = RoundingMode::HalfUp): \DateInterval
     {
         $instance = $this->convertTo(static::UNIT_MICROSECONDS, 0, $roundingMode);
 

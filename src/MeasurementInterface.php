@@ -13,6 +13,10 @@ interface MeasurementInterface
         get;
     }
 
+    public int $scale {
+        get;
+    }
+
     public string $unit {
         get;
     }
@@ -32,16 +36,16 @@ interface MeasurementInterface
     #[\NoDiscard]
     public function convertTo(
         string $toUnit,
-        ?int $scale = null,
-        RoundingMode $roundingMode = RoundingMode::DOWN
+        int|null|false $scale = null,
+        RoundingMode $roundingMode = RoundingMode::Down
     ): static;
 
-    public function to(string $unit, ?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN): BigDecimal;
+    public function to(string $unit, ?int $scale = null, RoundingMode $roundingMode = RoundingMode::Down): BigDecimal;
 
     public function format(
         \Closure|string|null $suffix = null,
         ?string $unit = null,
         ?int $scale = null,
-        RoundingMode $roundingMode = RoundingMode::DOWN
+        RoundingMode $roundingMode = RoundingMode::Down
     ): string;
 }

@@ -12,7 +12,7 @@ interface SerializableMeasurementInterface extends MeasurementInterface
         string $value,
         ?string $asUnit = null,
         ?int $scale = null,
-        RoundingMode $roundingMode = RoundingMode::DOWN
+        RoundingMode $roundingMode = RoundingMode::Down
     ): static;
 
     /**

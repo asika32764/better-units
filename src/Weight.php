@@ -8,22 +8,22 @@ use Brick\Math\BigDecimal;
 use Brick\Math\RoundingMode;
 
 /**
- * @method BigDecimal toFemtograms(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
- * @method BigDecimal toPicograms(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
- * @method BigDecimal toNanograms(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
- * @method BigDecimal toMicrograms(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
- * @method BigDecimal toMilligrams(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
- * @method BigDecimal toGrams(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
- * @method BigDecimal toDecigrams(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
- * @method BigDecimal toCentigrams(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
- * @method BigDecimal toKilograms(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
- * @method BigDecimal toMetricTons(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
- * @method BigDecimal toOunces(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
- * @method BigDecimal toPounds(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
- * @method BigDecimal toStones(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
- * @method BigDecimal toTons(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
- * @method BigDecimal toCarats(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
- * @method BigDecimal toNewtons(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
+ * @method BigDecimal toFemtograms(?int $scale = null, RoundingMode $roundingMode = RoundingMode::Down)
+ * @method BigDecimal toPicograms(?int $scale = null, RoundingMode $roundingMode = RoundingMode::Down)
+ * @method BigDecimal toNanograms(?int $scale = null, RoundingMode $roundingMode = RoundingMode::Down)
+ * @method BigDecimal toMicrograms(?int $scale = null, RoundingMode $roundingMode = RoundingMode::Down)
+ * @method BigDecimal toMilligrams(?int $scale = null, RoundingMode $roundingMode = RoundingMode::Down)
+ * @method BigDecimal toGrams(?int $scale = null, RoundingMode $roundingMode = RoundingMode::Down)
+ * @method BigDecimal toDecigrams(?int $scale = null, RoundingMode $roundingMode = RoundingMode::Down)
+ * @method BigDecimal toCentigrams(?int $scale = null, RoundingMode $roundingMode = RoundingMode::Down)
+ * @method BigDecimal toKilograms(?int $scale = null, RoundingMode $roundingMode = RoundingMode::Down)
+ * @method BigDecimal toMetricTons(?int $scale = null, RoundingMode $roundingMode = RoundingMode::Down)
+ * @method BigDecimal toOunces(?int $scale = null, RoundingMode $roundingMode = RoundingMode::Down)
+ * @method BigDecimal toPounds(?int $scale = null, RoundingMode $roundingMode = RoundingMode::Down)
+ * @method BigDecimal toStones(?int $scale = null, RoundingMode $roundingMode = RoundingMode::Down)
+ * @method BigDecimal toTons(?int $scale = null, RoundingMode $roundingMode = RoundingMode::Down)
+ * @method BigDecimal toCarats(?int $scale = null, RoundingMode $roundingMode = RoundingMode::Down)
+ * @method BigDecimal toNewtons(?int $scale = null, RoundingMode $roundingMode = RoundingMode::Down)
  */
 class Weight extends AbstractBasicMeasurement
 {
@@ -96,7 +96,7 @@ class Weight extends AbstractBasicMeasurement
         get {
             $units = $this->unitExchanges;
             $units[self::UNIT_NEWTONS] = BigDecimal::of(1)
-                ->dividedBy($this->gravityAcceleration, 3, RoundingMode::HALF_UP)
+                ->dividedBy($this->gravityAcceleration, 3, RoundingMode::HalfUp)
                 ->toFloat();
 
             return $units;
@@ -105,7 +105,7 @@ class Weight extends AbstractBasicMeasurement
 
     // Standard gravity in m/s²
     public protected(set) BigDecimal $gravityAcceleration {
-        get => $this->gravityAcceleration ??= BigDecimal::of(9.80665);
+        get => $this->gravityAcceleration ??= ConvertHelper::toBigDecimal(9.80665);
     }
 
     protected function normalizeUnit(string $unit): string
@@ -140,7 +140,7 @@ class Weight extends AbstractBasicMeasurement
 
     public function withGravityAcceleration(BigDecimal|float|int|string $gAcceleration): Weight
     {
-        $this->gravityAcceleration = BigDecimal::of($gAcceleration);
+        $this->gravityAcceleration = ConvertHelper::toBigDecimal($gAcceleration);
 
         return $this;
     }

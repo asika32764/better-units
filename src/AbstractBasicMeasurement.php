@@ -89,7 +89,7 @@ abstract class AbstractBasicMeasurement extends AbstractMeasurement
 
     public function nearest(
         ?int $scale = null,
-        RoundingMode $roundingMode = RoundingMode::DOWN,
+        RoundingMode $roundingMode = RoundingMode::Down,
         ?array $units = null,
     ): static {
         $sortedUnits = $this->getSortedUnitRates();
@@ -112,9 +112,9 @@ abstract class AbstractBasicMeasurement extends AbstractMeasurement
             $abs = $converted->abs();
 
             if ($abs->isLessThan(1)) {
-                $distance = BigDecimal::of(1)->dividedBy($abs, $scale, RoundingMode::HALF_UP);
+                $distance = BigDecimal::of(1)->dividedBy($abs, $scale, RoundingMode::HalfUp);
             } else {
-                $distance = $abs->dividedBy(1, $scale, RoundingMode::HALF_UP);
+                $distance = $abs->dividedBy(1, $scale, RoundingMode::HalfUp);
             }
 
             if ($minDistance === null || $distance->isLessThan($minDistance)) {

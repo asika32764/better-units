@@ -11,10 +11,10 @@ use Brick\Math\BigDecimal;
 use Brick\Math\RoundingMode;
 
 /**
- * @method BigDecimal toMph(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
- * @method BigDecimal toKph(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
- * @method BigDecimal toMps(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
- * @method BigDecimal toKnots(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
+ * @method BigDecimal toMph(?int $scale = null, RoundingMode $roundingMode = RoundingMode::Down)
+ * @method BigDecimal toKph(?int $scale = null, RoundingMode $roundingMode = RoundingMode::Down)
+ * @method BigDecimal toMps(?int $scale = null, RoundingMode $roundingMode = RoundingMode::Down)
+ * @method BigDecimal toKnots(?int $scale = null, RoundingMode $roundingMode = RoundingMode::Down)
  */
 class Speed extends AbstractCompoundMeasurement
 {

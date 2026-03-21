@@ -7,6 +7,7 @@ namespace Asika\BetterUnits;
 use Asika\BetterUnits\Concerns\CalculationTrait;
 use Brick\Math\BigDecimal;
 use Brick\Math\BigNumber;
+use Brick\Math\Exception\MathException;
 use Brick\Math\Exception\RoundingNecessaryException;
 use Brick\Math\RoundingMode;
 
@@ -25,7 +26,11 @@ abstract class AbstractMeasurement implements SerializableMeasurementInterface, 
 
     public protected(set) BigDecimal $value {
         get => $this->value;
-        set(BigNumber|int|float|string $value) => $this->value = BigDecimal::of($value);
+        set(BigNumber|int|float|string $value) => $this->value = ConvertHelper::toBigDecimal($value);
+    }
+
+    public int $scale {
+        get => $this->value->getScale();
     }
 
     public protected(set) string $unit;
@@ -60,7 +65,7 @@ abstract class AbstractMeasurement implements SerializableMeasurementInterface, 
     public string $baseUnit {
         get {
             foreach ($this->availableUnitExchanges as $unit => $rate) {
-                if (BigDecimal::of($rate)->isEqualTo(1)) {
+                if (ConvertHelper::toBigDecimal($rate)->isEqualTo(1)) {
                     return $unit;
                 }
             }
@@ -93,7 +98,7 @@ abstract class AbstractMeasurement implements SerializableMeasurementInterface, 
         mixed $value,
         ?string $asUnit = null,
         ?int $scale = null,
-        RoundingMode $roundingMode = RoundingMode::DOWN,
+        RoundingMode $roundingMode = RoundingMode::Down,
     ): static {
         if (is_string($value) && !is_numeric($value)) {
             return $this->withParse($value, $asUnit, $scale, $roundingMode);
@@ -106,7 +111,7 @@ abstract class AbstractMeasurement implements SerializableMeasurementInterface, 
         ?string $value,
         ?string $asUnit = null,
         ?int $scale = null,
-        RoundingMode $roundingMode = RoundingMode::DOWN
+        RoundingMode $roundingMode = RoundingMode::Down
     ): ?static {
         if ($value === null) {
             return null;
@@ -119,7 +124,7 @@ abstract class AbstractMeasurement implements SerializableMeasurementInterface, 
         string $value,
         ?string $asUnit = null,
         ?int $scale = null,
-        RoundingMode $roundingMode = RoundingMode::DOWN
+        RoundingMode $roundingMode = RoundingMode::Down
     ): static {
         return new static()->withParse($value, $asUnit, $scale, $roundingMode);
     }
@@ -128,7 +133,7 @@ abstract class AbstractMeasurement implements SerializableMeasurementInterface, 
         ?string $value,
         ?string $asUnit = null,
         ?int $scale = null,
-        RoundingMode $roundingMode = RoundingMode::DOWN
+        RoundingMode $roundingMode = RoundingMode::Down
     ): ?BigDecimal {
         if ($value === null) {
             return null;
@@ -141,7 +146,7 @@ abstract class AbstractMeasurement implements SerializableMeasurementInterface, 
         string $value,
         ?string $asUnit = null,
         ?int $scale = null,
-        RoundingMode $roundingMode = RoundingMode::DOWN
+        RoundingMode $roundingMode = RoundingMode::Down
     ): BigDecimal {
         return static::parse($value, $asUnit, $scale, $roundingMode)->value->toBigDecimal();
     }
@@ -150,7 +155,7 @@ abstract class AbstractMeasurement implements SerializableMeasurementInterface, 
         string $value,
         ?string $asUnit = null,
         ?int $scale = null,
-        RoundingMode $roundingMode = RoundingMode::DOWN
+        RoundingMode $roundingMode = RoundingMode::Down
     ): static {
         $new = $this->with(0, $this->atomUnit);
 
@@ -171,7 +176,12 @@ abstract class AbstractMeasurement implements SerializableMeasurementInterface, 
 
         if ($asUnit && $asUnit !== $new->unit) {
             $asUnit = $this->normalizeUnit($asUnit);
-            $new = $new->convertTo($asUnit, $scale, $roundingMode);
+
+            if ($scale === null) {
+                $new = $new->convertToExact($asUnit);
+            } else {
+                $new = $new->convertTo($asUnit, $scale, $roundingMode);
+            }
         }
 
         return $new;
@@ -212,7 +222,7 @@ abstract class AbstractMeasurement implements SerializableMeasurementInterface, 
         string $fromUnit,
         string $toUnit,
         ?int $scale = null,
-        RoundingMode $roundingMode = RoundingMode::DOWN
+        RoundingMode $roundingMode = RoundingMode::Down
     ): BigNumber {
         return new static($value, $fromUnit)
             ->convertTo(
@@ -225,8 +235,8 @@ abstract class AbstractMeasurement implements SerializableMeasurementInterface, 
     #[\NoDiscard]
     public function convertTo(
         string $toUnit,
-        ?int $scale = null,
-        RoundingMode $roundingMode = RoundingMode::DOWN
+        int|null|false $scale = null,
+        RoundingMode $roundingMode = RoundingMode::Down
     ): static {
         $toUnit = $this->normalizeUnit($toUnit);
 
@@ -237,7 +247,13 @@ abstract class AbstractMeasurement implements SerializableMeasurementInterface, 
         $new = clone $this;
 
         if (!$new->value->isZero()) {
-            $new->value = $this->convertValue($new->value, $new->unit, $toUnit, $scale, $roundingMode);
+            $new->value = $this->convertValue(
+                $new->value,
+                $new->unit,
+                $toUnit,
+                $scale,
+                $roundingMode
+            );
         }
 
         $new->unit = $toUnit;
@@ -245,11 +261,27 @@ abstract class AbstractMeasurement implements SerializableMeasurementInterface, 
         return $new;
     }
 
+    /**
+     * Convert unit but keep the scale as what exactly calculated and stripping trailing zeros.
+     * This is useful that if you want to keep all precision without worrying about the scale.
+     */
+    #[\NoDiscard]
+    public function convertToExact(string $toUnit): static
+    {
+        return $this->convertTo($toUnit, false);
+    }
+
+    /**
+     * @param  int|false|null  $scale  If false, it will keep the scale as what exactly calculated and stripping
+     *                                 trailing zeros.
+     *
+     * @throws MathException
+     */
     protected function convertValue(
         BigDecimal $value,
         string $fromUnit,
         string $toUnit,
-        ?int $scale,
+        int|null|false $scale,
         RoundingMode $roundingMode
     ): BigDecimal {
         $fromUnitRate = $this->getUnitExchangeRate($fromUnit)
@@ -259,11 +291,12 @@ abstract class AbstractMeasurement implements SerializableMeasurementInterface, 
             ?? throw new \InvalidArgumentException("Unknown target unit: {$toUnit}");
 
         $newValue = BigDecimal::of($value)
-            ->multipliedBy($fromUnitRate)
-            ->dividedBy($toUnitRate, $scale, $roundingMode);
+            ->multipliedBy($fromUnitRate);
 
-        if ($scale === null) {
-            $newValue = $newValue->stripTrailingZeros();
+        if ($scale === false) {
+            $newValue = $newValue->dividedByExact($toUnitRate)->strippedOfTrailingZeros();
+        } else {
+            $newValue = $newValue->dividedBy($toUnitRate, $scale ?? $value->getScale(), $roundingMode);
         }
 
         return $newValue;
@@ -271,15 +304,15 @@ abstract class AbstractMeasurement implements SerializableMeasurementInterface, 
 
     public function convertToAtomUnit(): static
     {
-        return $this->convertTo($this->atomUnit, 0, RoundingMode::DOWN);
+        return $this->convertTo($this->atomUnit, 0, RoundingMode::Down);
     }
 
-    public function convertToBaseUnit(?int $scale, RoundingMode $roundingMode = RoundingMode::DOWN): static
+    public function convertToBaseUnit(?int $scale, RoundingMode $roundingMode = RoundingMode::Down): static
     {
         return $this->convertTo($this->baseUnit, $scale, $roundingMode);
     }
 
-    public function convertToDefaultUnit(?int $scale, RoundingMode $roundingMode = RoundingMode::DOWN): static
+    public function convertToDefaultUnit(?int $scale, RoundingMode $roundingMode = RoundingMode::Down): static
     {
         return $this->convertTo($this->defaultUnit, $scale, $roundingMode);
     }
@@ -288,7 +321,7 @@ abstract class AbstractMeasurement implements SerializableMeasurementInterface, 
         \Closure|BigNumber|int|float|string $value,
         ?string $fromUnit = null,
         ?int $scale = null,
-        RoundingMode $roundingMode = RoundingMode::DOWN
+        RoundingMode $roundingMode = RoundingMode::Down
     ): static {
         $new = $this->with($value, $fromUnit);
 
@@ -335,7 +368,7 @@ abstract class AbstractMeasurement implements SerializableMeasurementInterface, 
         \Closure|string|null $suffix = null,
         ?string $unit = null,
         ?int $scale = null,
-        RoundingMode $roundingMode = RoundingMode::DOWN
+        RoundingMode $roundingMode = RoundingMode::Down
     ): string {
         if ($unit !== null) {
             $unit = $this->normalizeUnit($unit);
@@ -349,7 +382,7 @@ abstract class AbstractMeasurement implements SerializableMeasurementInterface, 
         if ($scale !== null) {
             $value = $value->toScale($scale, $roundingMode);
         } else {
-            $value = $value->stripTrailingZeros();
+            $value = $value->strippedOfTrailingZeros();
         }
 
         $unit ??= $this->unit;
@@ -395,7 +428,7 @@ abstract class AbstractMeasurement implements SerializableMeasurementInterface, 
         $rate = $this->with(1, $unit)->convertTo($this->unit)->value;
 
         /** @var BigDecimal $part */
-        $part = $this->value->dividedBy($rate, 0, RoundingMode::DOWN);
+        $part = $this->value->dividedBy($rate, 0, RoundingMode::Down);
 
         $this->value = $this->value->minus($part->multipliedBy($rate));
 
@@ -475,7 +508,7 @@ abstract class AbstractMeasurement implements SerializableMeasurementInterface, 
         $unit = $this->normalizeUnit($unit);
 
         if (isset($this->availableUnitExchanges[$unit])) {
-            return BigDecimal::of($this->availableUnitExchanges[$unit]);
+            return ConvertHelper::toBigDecimal($this->availableUnitExchanges[$unit]);
         }
 
         return null;
@@ -498,12 +531,12 @@ abstract class AbstractMeasurement implements SerializableMeasurementInterface, 
         return $new;
     }
 
-    public function to(string $unit, ?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN): BigDecimal
+    public function to(string $unit, ?int $scale = null, RoundingMode $roundingMode = RoundingMode::Down): BigDecimal
     {
         return $this->convertTo($unit, $scale, $roundingMode)
             ->value
             ->toBigDecimal()
-            ->stripTrailingZeros();
+            ->strippedOfTrailingZeros();
     }
 
     /**
@@ -593,7 +626,7 @@ abstract class AbstractMeasurement implements SerializableMeasurementInterface, 
      */
     protected function getSortedUnitRates(): array
     {
-        $units = array_map(BigDecimal::of(...), $this->availableUnitExchanges);
+        $units = array_map(ConvertHelper::toBigDecimal(...), $this->availableUnitExchanges);
 
         uasort(
             $units,
@@ -660,7 +693,7 @@ abstract class AbstractMeasurement implements SerializableMeasurementInterface, 
 
     public function __toString(): string
     {
-        return (string) $this->value->toBigDecimal()->stripTrailingZeros();
+        return (string) $this->value->toBigDecimal()->strippedOfTrailingZeros();
     }
 
     public function __call(string $name, array $args)

@@ -8,22 +8,22 @@ use Brick\Math\BigDecimal;
 use Brick\Math\RoundingMode;
 
 /**
- * @method BigDecimal toJoules(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
- * @method BigDecimal toKilojoules(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
- * @method BigDecimal toMegajoules(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
- * @method BigDecimal toGigajoules(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
- * @method BigDecimal toTerajoules(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
- * @method BigDecimal toCalories(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
- * @method BigDecimal toKilocalories(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
- * @method BigDecimal toNewtonMeters(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
- * @method BigDecimal toVolts(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
- * @method BigDecimal toMegavolts(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
- * @method BigDecimal toFootPounds(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
- * @method BigDecimal toWattHours(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
- * @method BigDecimal toKilowattHours(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
- * @method BigDecimal toMegawattHours(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
- * @method BigDecimal toGigawattHours(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
- * @method BigDecimal toTerawattHours(?int $scale = null, RoundingMode $roundingMode = RoundingMode::DOWN)
+ * @method BigDecimal toJoules(?int $scale = null, RoundingMode $roundingMode = RoundingMode::Down)
+ * @method BigDecimal toKilojoules(?int $scale = null, RoundingMode $roundingMode = RoundingMode::Down)
+ * @method BigDecimal toMegajoules(?int $scale = null, RoundingMode $roundingMode = RoundingMode::Down)
+ * @method BigDecimal toGigajoules(?int $scale = null, RoundingMode $roundingMode = RoundingMode::Down)
+ * @method BigDecimal toTerajoules(?int $scale = null, RoundingMode $roundingMode = RoundingMode::Down)
+ * @method BigDecimal toCalories(?int $scale = null, RoundingMode $roundingMode = RoundingMode::Down)
+ * @method BigDecimal toKilocalories(?int $scale = null, RoundingMode $roundingMode = RoundingMode::Down)
+ * @method BigDecimal toNewtonMeters(?int $scale = null, RoundingMode $roundingMode = RoundingMode::Down)
+ * @method BigDecimal toVolts(?int $scale = null, RoundingMode $roundingMode = RoundingMode::Down)
+ * @method BigDecimal toMegavolts(?int $scale = null, RoundingMode $roundingMode = RoundingMode::Down)
+ * @method BigDecimal toFootPounds(?int $scale = null, RoundingMode $roundingMode = RoundingMode::Down)
+ * @method BigDecimal toWattHours(?int $scale = null, RoundingMode $roundingMode = RoundingMode::Down)
+ * @method BigDecimal toKilowattHours(?int $scale = null, RoundingMode $roundingMode = RoundingMode::Down)
+ * @method BigDecimal toMegawattHours(?int $scale = null, RoundingMode $roundingMode = RoundingMode::Down)
+ * @method BigDecimal toGigawattHours(?int $scale = null, RoundingMode $roundingMode = RoundingMode::Down)
+ * @method BigDecimal toTerawattHours(?int $scale = null, RoundingMode $roundingMode = RoundingMode::Down)
  */
 class Energy extends AbstractBasicMeasurement
 {
