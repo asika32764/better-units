@@ -62,8 +62,6 @@ Compatibility with `brick/math` is as follows:
 | 0.1.2   | `0.9 ~ 0.14`         |
 | 0.1.x   | `*`                  |
 
-
-
 ## Available Measurements
 
 - [Measurements List](./docs)
@@ -226,7 +224,8 @@ $duration = Duration::from(1200); // 1200 seconds
 $duration = Duration::from(500, Duration::UNIT_MINUTES);
 ```
 
-The `parseToValue()` method is a more convenient way to parse a string and immediately get the value in the default unit.
+The `parseToValue()` method is a more convenient way to parse a string and immediately get the value in the default
+unit.
 
 ```php
 $value = Duration::parseToValue(
@@ -237,7 +236,7 @@ $value = Duration::parseToValue(
 ); // BigDecimal(605.501)
 ```
 
-There are also `tryParse()`, `tryFrom()` and `tryParseToValue()` methods that return `null` if value is `null`, 
+There are also `tryParse()`, `tryFrom()` and `tryParseToValue()` methods that return `null` if value is `null`,
 instead of throwing an TypeError.
 
 ```php
@@ -250,7 +249,7 @@ Duration::tryParseToValue($value); // NULL or Duration
 
 ### Set or Parse Values deferred
 
-Sometimes, you may want to configure the Measurement object first and then parse the value later. 
+Sometimes, you may want to configure the Measurement object first and then parse the value later.
 You can create an empty Measurement object and set value or parse value later, all Measurement objects
 are **immutable**, so you must assign the result to a new variable.
 
@@ -331,9 +330,14 @@ $hours->value; // BigDecimal(0.17)
 
 ### convertToExact() Method
 
-`convertToExact()` is similar to `convertTo()`, but has no `scale` and `roundingMode` arguments. 
-It will keep all decimal places and remove trailing zeros during conversion. 
+`convertToExact()` is similar to `convertTo()`, but has no `scale` and `roundingMode` arguments.
+It will keep all decimal places and remove trailing zeros during conversion.
 This is useful when you want to maintain the highest precision during unit conversion.
+
+> [!important]
+> But be cautious when using this method, for example, converting `1` second to minutes will 
+yield `0.016666666666666666...`. In such cases, the `convertToExact()` may throw an exception due to 
+precision loss. Therefore, it is not recommended to use thie method for general unit conversions.
 
 ### Precision Control
 
@@ -534,7 +538,7 @@ echo $totalPlaySeconds->humanize(
 // 129hours, 21minutes, 58seconds
 ```
 
-If `formats` is an array, you can also provide string or Closure for formatting. Below is string text example, also, 
+If `formats` is an array, you can also provide string or Closure for formatting. Below is string text example, also,
 you can use `%s` as template for the value:
 
 ```php
@@ -1171,5 +1175,5 @@ echo $currency->format(); // 90.9EUR
 If you find any errors and know how to fix them, feel free to open a Pull Request. This will help us improve the fixing
 faster.
 
-Since I cannot precisely verify all unit conversion rates, if you find any incorrect conversion rates in code or 
+Since I cannot precisely verify all unit conversion rates, if you find any incorrect conversion rates in code or
 documentation, please make sure to include reference sources in the Issue or Pull Request.
