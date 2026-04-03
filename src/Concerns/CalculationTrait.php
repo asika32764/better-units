@@ -53,11 +53,57 @@ trait CalculationTrait
         return $new;
     }
 
+    public function isEquals(
+        BigNumber|int|float|string|self $that,
+        int|string|null $scaleOrUnit = null,
+        RoundingMode $roundingMode = RoundingMode::Unnecessary,
+    ): bool {
+        return $this->value->isEqualTo($this->preprocessThat($that, $scaleOrUnit, $roundingMode));
+    }
+
+    public function isGreaterThan(
+        BigNumber|int|float|string|self $that,
+        int|string|null $scaleOrUnit = null,
+        RoundingMode $roundingMode = RoundingMode::Unnecessary,
+    ): bool {
+        return $this->value->isGreaterThan($this->preprocessThat($that, $scaleOrUnit, $roundingMode));
+    }
+
+    public function isGreaterThanOrEqualTo(
+        BigNumber|int|float|string|self $that,
+        int|string|null $scaleOrUnit = null,
+        RoundingMode $roundingMode = RoundingMode::Unnecessary,
+    ): bool {
+        return $this->value->isGreaterThanOrEqualTo($this->preprocessThat($that, $scaleOrUnit, $roundingMode));
+    }
+
+    public function isLessThan(
+        BigNumber|int|float|string|self $that,
+        int|string|null $scaleOrUnit = null,
+        RoundingMode $roundingMode = RoundingMode::Unnecessary,
+    ): bool {
+        return $this->value->isLessThan($this->preprocessThat($that, $scaleOrUnit, $roundingMode));
+    }
+
+    public function isLessThanOrEqualTo(
+        BigNumber|int|float|string|self $that,
+        int|string|null $scaleOrUnit = null,
+        RoundingMode $roundingMode = RoundingMode::Unnecessary,
+    ): bool {
+        return $this->value->isLessThanOrEqualTo($this->preprocessThat($that, $scaleOrUnit, $roundingMode));
+    }
+
     private function preprocessThat(
         BigNumber|int|float|string|self $that,
-        ?int $scale = null,
+        int|string|null $scale = null,
         RoundingMode $roundingMode = RoundingMode::Unnecessary,
     ): BigDecimal {
+        if (!($that instanceof self) && is_string($scale)) {
+            $that = static::from($that, $scale);
+
+            $scale = null;
+        }
+
         if ($that instanceof self) {
             return $that->convertTo($this->unit, $scale, $roundingMode)->value;
         }

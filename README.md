@@ -37,7 +37,8 @@ units of measurement. It supports a wide range of categories including length, w
     * [Other Unit Adjustments](#other-unit-adjustments)
   * [Get the Unit Closest to 1](#get-the-unit-closest-to-1)
   * [Modifying the Content of a Measurement](#modifying-the-content-of-a-measurement)
-    * [Operations](#operations)
+    * [Calculations](#calculations)
+    * [Comparison](#comparison)
   * [Compound Measurement](#compound-measurement)
     * [Indeterminate Scales](#indeterminate-scales)
     * [Predefined Units](#predefined-units)
@@ -335,9 +336,9 @@ It will keep all decimal places and remove trailing zeros during conversion.
 This is useful when you want to maintain the highest precision during unit conversion.
 
 > [!important]
-> But be cautious when using this method, for example, converting `1` second to minutes will 
-yield `0.016666666666666666...`. In such cases, the `convertToExact()` may throw an exception due to 
-precision loss. Therefore, it is not recommended to use thie method for general unit conversions.
+> But be cautious when using this method, for example, converting `1` second to minutes will
+> yield `0.016666666666666666...`. In such cases, the `convertToExact()` may throw an exception due to
+> precision loss. Therefore, it is not recommended to use thie method for general unit conversions.
 
 ### Precision Control
 
@@ -970,7 +971,7 @@ $measurement->withValue(300); // Returns a new Duration with 300 seconds, keep u
 $measurement->withUnit(Duration::UNIT_HOURS); // Returns a new Duration with unit hours, keep value as 300
 ```
 
-### Operations
+### Calculations
 
 Measurement objects support basic arithmetic operations such as addition, subtraction, multiplication, and division. The
 values used in these operations can be `BigNumber`, numbers, or strings.
@@ -1008,6 +1009,41 @@ $measurement = $measurement->with(
     fn (BigDecimal $value, string $unit, $measurementObject) => $measurement->value->power()
 );
 ```
+
+### Comparison
+
+Measurement objects can be compared by value. The comparison target can be a number, a string, or another Measurement
+object of the same type. When the comparison target is another Measurement object, it will be automatically converted to
+the same unit as the Measurement being compared before the comparison is performed.
+
+```php
+$measurement = new Duration(120, 'seconds'); // 120 seconds
+$measurement->isGreaterThan(100); // true
+$measurement->isLessThan(150); // true
+$measurement->isEqualTo(new Duration(2, 'minutes')); // true
+
+// Can also use unit as second argument.
+$measurement->isEqualTo(2, 'minutes'); // true
+```
+
+When comparing against another Measurement object, it is recommended to explicitly specify the precision and rounding
+mode to av`oid precision loss during the conversion process.
+
+```php
+$measurement = new Duration(10, 'minutes'); // 10 minutes
+$measurement->isGreaterThan(new Duration(600, 'seconds'), 2, RoundingMode::HelfUp); // true
+$measurement->isLessThan(new Duration(0.2, 'hours'), 2, RoundingMode::HelfUp); // true
+
+$measurement->isEqualTo(new Duration(605, 'seconds'), 2, RoundingMode::Down); // True because we remove the decimal part.
+```
+
+Available comparison methods include:
+
+- `isGreaterThan()`
+- `isGreaterThanOrEqualTo()`
+- `isLessThan()`
+- `isLessThanOrEqualTo()`
+- `isEqualTo()`
 
 ## Compound Measurement
 
