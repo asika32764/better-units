@@ -58,16 +58,16 @@ class Bitrate extends AbstractCompoundMeasurement
     public string $defaultUnit = self::UNIT_BYTES_PER_SECOND;
 
     protected array $compoundUnitExchanges = [
-        self::UNIT_BITS_PER_SECOND => 1.0,
-        self::UNIT_BYTES_PER_SECOND => 8.0,
-        self::UNIT_KBPS => 1000.0,
-        self::UNIT_MBPS => 1000_000.0,
-        self::UNIT_GBPS => 1_000_000_000.0,
-        self::UNIT_TBPS => 1_000_000_000_000.0,
-        self::UNIT_KIBPS => 1024.0,
-        self::UNIT_MIBPS => 1_048_576.0,
-        self::UNIT_GIBPS => 1_073_741_824.0,
-        self::UNIT_TIBPS => 1_099_511_627_776.0,
+        self::UNIT_BITS_PER_SECOND => '1',
+        self::UNIT_BYTES_PER_SECOND => '8',
+        self::UNIT_KBPS => '1000',
+        self::UNIT_MBPS => '1000000',
+        self::UNIT_GBPS => '1000000000',
+        self::UNIT_TBPS => '1000000000000',
+        self::UNIT_KIBPS => '1024',
+        self::UNIT_MIBPS => '1048576',
+        self::UNIT_GIBPS => '1073741824',
+        self::UNIT_TIBPS => '1099511627776',
     ];
 
     protected function normalizeCompoundUnit(string $unit): string
